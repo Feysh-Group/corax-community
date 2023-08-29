@@ -1,0 +1,371 @@
+[
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2].MapValue","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char,java.lang.String)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2]","provenance":"manual","ext":""},
+
+  {"signature":"<org.apache.commons.lang3.text.StrSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.text.StrSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2].MapValue","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.text.StrSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char,java.lang.String)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2]","provenance":"manual","ext":""},
+
+  "`return`.taint -= taintOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL)",
+  {"signature":"org.apache.commons.io.FilenameUtils: * getName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"df-generated","ext":""},
+  {"signature":"org.apache.commons.io.FilenameUtils: * getExtension(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"df-generated","ext":""},
+  {"signature":"org.apache.commons.io.FilenameUtils: * getBaseName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+  "`return`.taint -= taintOf(GeneralTaintTypes.ANY_FILE_EXTENSION)",
+  {"signature":"org.apache.commons.io.FilenameUtils: * getBaseName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+  "un/escape TODO",
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeHtml3(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeHtml4(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeEcmaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeXml10(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeXml11(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String unescapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String unescapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String unescapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String unescapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeSql(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String escapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: java.lang.String unescapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeHtml3(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeHtml4(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeEcmaScript(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeXml10(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeXml11(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeCsv(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void unescapeCsv(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeHtml(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void unescapeHtml(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeJava(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void unescapeJava(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeJavaScript(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void unescapeJavaScript(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeSql(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void escapeXml(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.text.StringSubstitutor: void unescapeXml(java.io.Writer,java.lang.String)>","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+
+  {"signature":"android.database.DatabaseUtils: * appendEscapedSQLString(StringBuilder,String)","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"android.database.DatabaseUtils: * sqlEscapeString(String)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"android.database.DatabaseUtils: * appendValueToSql(StringBuilder,Object)","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"android.database.sqlite.SQLiteQueryBuilder: * appendWhereEscapeString(String)","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<org.apache.commons.codec.binary.Base64: byte[] encodeBase64(byte[])>","subtypes":true,"to":"ReturnValue.ArrayElement","propagate":"taint","from":"Argument[0].ArrayElement","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.codec.binary.Base64: byte[] decodeBase64(byte[])>","subtypes":true,"to":"ReturnValue.ArrayElement","propagate":"taint","from":"Argument[0].ArrayElement","provenance":"manual","ext":""},
+  {"signature":"sun.misc.BASE64Encoder: * encode(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"sun.misc.BASE64Encoder: * decodeBuffer(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"flexjson.JSONSerializer: * deepSerialize(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"flexjson.JSONSerializer: * serialize(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+
+
+  "lang3 no Writer",
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeHtml3(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeHtml4(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeEcmaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeXml10(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeXml11(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeSql(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String escapeJson(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang3.StringEscapeUtils: java.lang.String unescapeJson(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeHtml3(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeHtml4(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeEcmaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeXml10(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeXml11(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeCsv(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeSql(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeXml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJson(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeJson(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+
+  {"signature":"java.sql.ResultSet: * getNString(int)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"java.sql.ResultSet: * getNString(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"java.sql.ResultSet: * getString(int)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"java.sql.ResultSet: * getString(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+
+
+  "digest",
+  {"signature":"<java.security.MessageDigest: void update(byte[])>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0].Element","provenance":"manual","ext":""},
+
+
+
+  "encoder",
+  {"signature":"<org.apache.commons.codec.binary.Base64: byte[] encodeBase64(byte[])>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.codec.binary.Base64: byte[] decodeBase64(byte[])>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"sun.misc.BASE64Encoder: * encode(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"sun.misc.BASE64Encoder: * decodeBuffer(**)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+  "file source",
+  {"signature":"<java.io.DataInputStream: java.lang.String readLine()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.LineNumberReader: java.lang.String readLine()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.DataInputStream: java.lang.String readUTF()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.DataInputStream: java.lang.String readUTF(java.io.DataInput)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+  "user input: fixme",
+  {"signature":"<java.io.Console: java.lang.String readLine(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: java.lang.String readLine(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: java.lang.String readLine(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[1].Element","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: java.lang.String readLine()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: char[] readPassword(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: char[] readPassword(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: char[] readPassword(java.lang.String,java.lang.Object[])>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[1].Element","provenance":"manual","ext":""},
+  {"signature":"<java.io.Console: char[] readPassword()>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+
+
+
+  {"signature":"<java.util.concurrent.ConcurrentSkipListSet: void <init>(java.util.Collection)>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"<java.util.concurrent.ConcurrentSkipListSet: void <init>(java.util.SortedSet)>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"<java.util.concurrent.CopyOnWriteArraySet: void <init>(java.util.Collection)>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"Argument[0].Element","provenance":"manual","ext":""},
+
+
+  "java collection",
+  " fixme",
+  {"signature":"<java.util.Map: java.lang.Object compute(java.lang.Object,java.util.function.BiFunction)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"value","from":"Argument[0].MapKey","provenance":"manual","ext":""},
+  {"signature":"<java.util.Map: java.lang.Object compute(java.lang.Object,java.util.function.BiFunction)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"value","from":"Argument[0].MapValue","provenance":"manual","ext":""},
+
+ "java ee",
+  {"signature":"javax.servlet.http.Cookie: * getComment()","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"javax.servlet.http.Cookie: * getDomain()","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"javax.servlet.http.Cookie: * getName()","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"javax.servlet.http.Cookie: * getPath()","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"javax.servlet.http.Cookie: * getValue()","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+
+  {"signature":"<javax.servlet.ServletContext: java.lang.String getRealPath(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<javax.servlet.ServletContext: javax.servlet.RequestDispatcher getNamedDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<javax.servlet.ServletContext: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<javax.servlet.ServletRequest: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<javax.servlet.http.HttpServletRequestWrapper: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<javax.servlet.ServletRequestWrapper: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<javax.servlet.http.HttpServletRequest: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<javax.servlet.ServletContext: java.util.Set getResourcePaths(java.lang.String)>","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"javax.servlet.http.HttpSession: void setAttribute(String name, Object value)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"javax.servlet.http.HttpSession: void putValue(String name, Object value)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+
+  {"signature":"java.io.FileInputStream: void <init>(String)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.io.FileInputStream: void <init>(File)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.io.FileInputStream: void <init>(FileDescriptor)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.text.MessageFormat: java.lang.String format(java.lang.String,java.lang.Object[])>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[1].Element","provenance":"manual","ext":""},
+
+
+  {"signature":"<org.apache.struts2.util.StrutsUtil: java.lang.String buildUrl(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<org.springframework.web.util.JavaScriptUtils: java.lang.String javaScriptEscape(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<java.util.NavigableSet: java.util.SortedSet headSet(java.lang.Object)>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.NavigableSet: java.util.SortedSet headSet(java.lang.Object)>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[this].Element","provenance":"manual","ext":""},
+  {"signature":"<java.util.NavigableSet: java.util.SortedSet subSet(java.lang.Object,java.lang.Object)>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.util.NavigableSet: java.util.SortedSet tailSet(java.lang.Object)>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+
+
+  {"signature":"<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..2]","provenance":"manual","ext":""},
+  {"signature":"java.net.URI: * <init>(String,String,String,int,String,String,String)","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..4]","provenance":"ai-manual","ext":""},
+  {"signature":"java.net.URI: * <init>(String,String,String,int,String,String,String)","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[5..6]","provenance":"ai-manual","ext":""},
+  {"signature":"<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..3]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..4]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getAuthority()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getFragment()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getHost()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getPath()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getQuery()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawAuthority()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawFragment()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawPath()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawQuery()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawSchemeSpecificPart()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getRawUserInfo()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getScheme()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getSchemeSpecificPart()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.lang.String getUserInfo()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.net.URI normalize()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.net.URI parseServerAuthority()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.net.URI relativize(java.net.URI)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URI: java.net.URI relativize(java.net.URI)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.net.URI: URI resolve(String)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[this,0]","provenance":"manual","ext":""},
+  {"signature":"java.net.URI: URI resolve(String,String)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[this,0]","provenance":"manual","ext":""},
+  {"signature":"java.net.URI: URI resolve(URI)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this,0]","provenance":"manual","ext":""},
+  {"signature":"java.net.URI: URI resolve(URI,URI)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[3]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String,java.net.URLStreamHandler)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String,java.net.URLStreamHandler)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[3]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.lang.String,java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..2]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: void <init>(java.net.URL,java.lang.String,java.net.URLStreamHandler)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getAuthority()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getFile()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getHost()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getPath()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getProtocol()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getQuery()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getRef()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String getUserInfo()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URL: java.lang.String toString()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<java.io.File: java.io.File createTempFile(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"java.io.File: * createTempFile(String,String,File)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0..2]","provenance":"manual","ext":""},
+
+  {"signature":"<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer(javax.xml.transform.Source)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<javax.portlet.BaseURL: void setParameter(java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: void setParameter(java.lang.String,java.lang.String[])>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: void setParameters(java.util.Map)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0].MapKey","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: void setParameters(java.util.Map)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0].MapValue","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: void addProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: void setProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<javax.portlet.BaseURL: java.lang.String toString()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+
+
+  {"signature":"<scala.Predef$: scala.collection.mutable.WrappedArray wrapRefArray(java.lang.Object[])>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.Seq$: scala.collection.GenTraversable apply(scala.collection.Seq)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.immutable.Vector$: scala.collection.GenTraversable apply(scala.collection.Seq)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.StringContext: void <init>(scala.collection.Seq)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.StringContext: java.lang.String s(scala.collection.Seq)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.Tuple2: void <init>(java.lang.Object,java.lang.Object)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"<scala.Option: java.lang.Object get()>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: void <init>(java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * append(**)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * append(**)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * appendAll(**)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * appendAll(**)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"scala.collection.mutable.StringBuilder: java.lang.StringBuilder insert(int,*)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"scala.collection.mutable.StringBuilder: java.lang.StringBuilder insert(int,*)","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: scala.collection.mutable.StringBuilder delete(int,int)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: scala.collection.mutable.StringBuilder deleteCharAt(int)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: void setCharAt(int,char)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: scala.collection.mutable.StringBuilder replace(int,int,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[2]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: scala.collection.mutable.StringBuilder replace(int,int,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: java.lang.String replaceAllLiterally(java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: java.lang.String replaceAllLiterally(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: scala.collection.mutable.StringBuilder reverseContents()>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * substring(**)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * subSequence(**)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.collection.mutable.StringBuilder: * toString()>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<scala.reflect.io.Path$: scala.reflect.io.Path string2path(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.mvc.Results$Status: play.api.mvc.Result apply(java.lang.Object,play.api.http.Writeable)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.mvc.Cookie: void <init>(java.lang.String,java.lang.String,scala.Option,java.lang.String,scala.Option,boolean,boolean)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.mvc.Cookie: void <init>(java.lang.String,java.lang.String,scala.Option,java.lang.String,scala.Option,boolean,boolean)>","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<anorm.package$: anorm.SqlQuery SQL(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<anorm.package$: anorm.SimpleSql sqlToSimple(anorm.SqlQuery)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<anorm.package$: scala.StringContext SqlStringInterpolation(scala.StringContext)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<anorm.package$SqlStringInterpolation$: anorm.SimpleSql SQL$extension(scala.StringContext,scala.collection.Seq)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSClient: play.api.libs.ws.WSRequest url(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WS$: play.api.libs.ws.WSRequest url(java.lang.String,play.api.Application)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withAuth(java.lang.String,java.lang.String,play.api.libs.ws.WSAuthScheme)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withBody(play.api.libs.ws.WSBody)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withFollowRedirects(boolean)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withHeaders(scala.collection.Seq)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withMethod(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withQueryString(scala.collection.Seq)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withRequestFilter(play.api.libs.ws.WSRequestFilter)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withRequestTimeout(scala.concurrent.duration.Duration)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"<play.api.libs.ws.WSRequest: play.api.libs.ws.WSRequest withVirtualHost(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this]","provenance":"manual","ext":""},
+
+
+  {"signature":"<java.lang.System: java.util.Map getenv()>","subtypes":true,"to":"ReturnValue.MapKey","propagate":"value","from":"Argument[global].MapKey","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.util.Map getenv()>","subtypes":true,"to":"ReturnValue.MapValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.lang.String getenv(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+
+  {"signature":"<java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[1]","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.lang.String setProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"Argument[global].MapValue","propagate":"value","from":"Argument[1]","provenance":"manual","ext":""},
+
+  {"signature":"<java.lang.System: java.lang.String getProperty(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+  {"signature":"<java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[1]","provenance":"manual","ext":""},
+
+  {"signature":"<java.lang.System: java.lang.String clearProperty(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[global].MapValue","provenance":"manual","ext":""},
+
+  {"signature":"<java.util.Properties: void load(java.io.InputStream)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void load(java.io.InputStream)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void load(java.io.Reader)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void load(java.io.Reader)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void loadFromXML(java.io.InputStream)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void loadFromXML(java.io.InputStream)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void loadFromXML(java.io.Reader)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void loadFromXML(java.io.Reader)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+
+  {"signature":"<java.util.Properties: void <init>(java.util.Properties)>","subtypes":true,"to":"Argument[this].MapKey","propagate":"value","from":"Argument[0].MapKey","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: void <init>(java.util.Properties)>","subtypes":true,"to":"Argument[this].MapValue","propagate":"value","from":"Argument[0].MapValue","provenance":"manual","ext":""},
+
+  {"signature":"<java.util.Properties: java.util.Set stringPropertyNames(java.io.InputStream)>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[0].MapKey","provenance":"manual","ext":""},
+  {"signature":"<java.util.Properties: java.util.Enumeration propertyNames()>","subtypes":true,"to":"ReturnValue.Element","propagate":"value","from":"Argument[0].MapValue","provenance":"manual","ext":""},
+
+
+
+
+  {"signature":"<com.typesafe.config.Config: java.lang.String getString(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this].MapValue","provenance":"manual","ext":""},
+  {"signature":"<play.api.Configuration: scala.Option getString(java.lang.String,scala.Option)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[this].MapValue","provenance":"manual","ext":""},
+  {"signature":"<com.typesafe.config.Config: java.lang.String getString(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"value","from":"Argument[1]","provenance":"manual","ext":""},
+
+  "fix Path.Element",
+  {"signature":"org.apache.commons.io.file.PathUtils: * copyFileToDirectory(URL,Path,CopyOption[])","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[1]","provenance":"df-generated","ext":""},
+
+
+  {"signature":"<java.net.URLEncoder: java.lang.String encode(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"<java.net.URLDecoder: java.lang.String decode(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.net.URLDecoder: java.lang.String decode(java.lang.String,java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  {"signature":"java.util.Base64.Decoder: byte[] decode(String,**)","subtypes":true,"to":"ReturnValue.Element","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Decoder: byte[] decode(byte[])","subtypes":true,"to":"ReturnValue.Element","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Decoder: ByteBuffer decode(ByteBuffer,**)","subtypes":true,"to":"ReturnValue","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Decoder: int decode(byte[],byte[])","subtypes":true,"to":"Argument[1].Element","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+
+  {"signature":"java.util.Base64.Encoder: String encodeToString(byte[])","subtypes":true,"to":"ReturnValue","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Encoder: byte[] encode(byte[])","subtypes":true,"to":"ReturnValue.Element","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Encoder: ByteBuffer encode(ByteBuffer,**)","subtypes":true,"to":"ReturnValue","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"java.util.Base64.Encoder: int encode(byte[],byte[])","subtypes":true,"to":"Argument[1].Element","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+
+  {"signature":"<java.math.BigInteger: void <init>(java.lang.String)>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: void <init>(java.lang.String,int)>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: void <init>(byte[])>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: void <init>(byte[],int,int)>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[0].Element","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: void <init>(int,byte[])>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[1].Element","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: void <init>(int,byte[],int,int)>","subtypes":true,"to":"Argument[this]","propagate":"taint,const","from":"Argument[1].Element","provenance":"manual","ext":""},
+  {"signature":"<java.math.BigInteger: java.math.BigInteger valueOf(long)>","subtypes":true,"to":"ReturnValue","propagate":"taint,const","from":"Argument[0]","provenance":"manual","ext":""},
+
+  "ognl",
+  {"signature":"ognl.Ognl: * parseExpression(String expression)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"ognl.OgnlParser: void <init>(*,**)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""}
+
+
+
+]

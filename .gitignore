@@ -1,0 +1,13 @@
+out/
+tmp/
+temp/
+logs/
+build/
+target/
+.idea/
+.gradle/
+*.log
+*.rdgen
+*.zip
+.run
+gradle-local.properties

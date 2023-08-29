@@ -1,0 +1,12 @@
+[
+  {"kind":"hostname-verification","signature":"javax.net.ssl.HttpsURLConnection: * setDefaultHostnameVerifier(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"hostname-verification","signature":"javax.net.ssl.HttpsURLConnection: * setHostnameVerifier(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+
+  {"kind":"weak-ssl:default-http-client","signature":"<org.apache.http.impl.client.DefaultHttpClient: void <init>()>","subtypes":true,"provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String protocol,**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLParameters: void <init>(java.lang.String[],**)","subtypes":true,"arg":"Argument[1].Element","provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLParameters: void setProtocols(java.lang.String[])","subtypes":true,"arg":"Argument[0].Element","provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLSocket: void setEnabledProtocols(java.lang.String[] protocols)","subtypes":true,"arg":"Argument[0].Element","provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLServerSocket: void setEnabledProtocols(java.lang.String[] protocols)","subtypes":true,"arg":"Argument[0].Element","provenance":"manual","ext":""},
+  {"kind":"weak-ssl:algorithm","signature":"javax.net.ssl.SSLEngine: void setEnabledProtocols(java.lang.String[] protocols)","subtypes":true,"arg":"Argument[0].Element","provenance":"manual","ext":""}
+]

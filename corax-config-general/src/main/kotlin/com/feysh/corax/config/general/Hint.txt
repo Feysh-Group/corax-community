@@ -1,0 +1,14 @@
+注: corax-config-general 模块编译出来是 feysh-config-business-plugin.zip 插件, corax-config-community 模块也是如此
+
+注: 修改 general 中的源码的时候请注意以下要求:
+   自定义配置插件和商业版插件混合使用时, 可以删改定义, 不可删改声明, 否则会出现商业版插件冲突崩溃。
+   单独使用社区版插件可以任意修改 general 和 community 中的代码
+
+Q: 那为什么不把 corax-config-general 的定义全部放到 corax-config-community 模块中? 这样社区版插件和商业插件就没有任何交集,
+   任意修改代码都都不会产生错误。
+A: 因为商业版插件(大部分都是checker)是闭源的, 无法修改其中的某些功能和逻辑, 为了部分功能也要允许用户自定义，
+   但又因存在某些不能以文件序列化来达到自定义的配置和功能(比如一个java方法), 所以设计上就把部分可能需要用户自定义的功能方法以源码形式公开,
+   这部分的自定义放到 corax-config-general 中, 用户通过修改源码后再单独编译为一个插件 feysh-config-gen-plugin.zip,
+   并且 feysh-config-business-plugin.zip 插件依赖 general 插件, 所以通过替换掉 general 插件即可达到自定义商业配置插件的目的。
+   又因 community 插件 和 business 插件 同时依赖 general 插件, 这就是为什么自定义修改 general 中的内容的时候
+   应该保证 商业插件 依赖的 general 中的声明没有任何丢失和变化。

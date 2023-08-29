@@ -1,0 +1,12 @@
+[
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String cmdFilter(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String pathFilter(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String sqlFilter(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String checkURL(java.lang.String)>","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String cmdFilter(java.lang.String)>","subtypes":true,"to":"Argument[0]","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String pathFilter(java.lang.String)>","subtypes":true,"to":"Argument[0]","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String sqlFilter(java.lang.String)>","subtypes":true,"to":"Argument[0]","propagate":"taint","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<org.joychou.security.SecurityUtil: java.lang.String checkURL(java.lang.String)>","subtypes":true,"to":"Argument[0]","propagate":"taint","from":"empty","provenance":"manual","ext":""}
+
+
+]

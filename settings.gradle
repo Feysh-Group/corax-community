@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'corax-java-config'
+
+include 'corax-config-api'
+include 'corax-config-general'
+include 'corax-config-tests'
+include 'corax-config-community'

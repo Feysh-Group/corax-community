@@ -1,0 +1,8 @@
+[
+  {"signature":"<java.lang.Iterable: void clear()>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<java.util.Collection: void clear()>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<java.util.List: void clear()>","subtypes":true,"to":"Argument[this].Element","propagate":"value","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<java.util.Map: void clear()>","subtypes":true,"to":"Argument[this].MapKeys","propagate":"value","from":"empty","provenance":"manual","ext":""},
+  {"signature":"<java.util.Map: void clear()>","subtypes":true,"to":"Argument[this].MapValues","propagate":"value","from":"empty","provenance":"manual","ext":""}
+
+]
