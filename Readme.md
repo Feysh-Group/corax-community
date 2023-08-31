@@ -43,7 +43,7 @@ $ sudo apt-get install openjdk-17-jdk
 ```bash
 $ sudo yum -y install java-17-openjdk
 ```
-在 MacOS 上可以使用以下命令安装：
+在 MacOS令安装：
 ```bash
 $ brew install openjdk@17
 ```
@@ -56,9 +56,9 @@ $ java -version
 
 ### 编译构建
 
-在项目根目录`corax-java-config`下执行gradle构建：
+在项目根目录`corax-community`下执行gradle构建：
 ```bash
-$ cd corax-java-config
+$ cd corax-community
 $ gradlew build
 ```
 根据提示，需要在 [gradle-local.properties](gradle-local.properties) 文件中指定 `CoraxJava核心引擎` 的文件路径：
