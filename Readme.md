@@ -56,10 +56,10 @@ $ java -version
 
 ### 编译构建
 
-在项目根目录`corax-community`下执行gradle构建：
+在项目根目录`corax-community`下执行gradle构建(建议进入根目录执行./gradlew build构建，避免版本问题)：
 ```bash
 $ cd corax-community
-$ gradlew build
+$ ./gradlew build
 ```
 根据提示，需要在 [gradle-local.properties](gradle-local.properties) 文件中指定 `CoraxJava核心引擎` 的文件路径：
 
