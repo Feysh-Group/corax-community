@@ -77,13 +77,13 @@ $ gradlew build
 
 ```
 ├── analysis-config                                        // 分析配置目录
-│   ├── default-config.normalize.yml
-│   ├── default-config.yml                                 // 分析工具根据插件中的默认参数自动生成的yaml格式主配置
+│   ├── default-config.normalize.yml                       // 第一次分析后生成
+│   ├── default-config.yml                                 // 第一次分析后生成，分析工具根据插件中的默认参数自动生成的yaml格式主配置
 │   ├── plugins                                            // 插件存放目录
-│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT     		// 插件在分析工具加载时会自动解压到此同名目录，按需删除
-│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT.zip 		// corax-config-community module 编译后生成的规则检查器插件
-│   │   ├── feysh-config-general-plugin-2.0-SNAPSHOT
-│   │   └── feysh-config-general-plugin-2.0-SNAPSHOT.zip   		// corax-config-general module 编译后生成的规则检查器插件
+│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT     		// 第一次运行分析后，自动解压，按需删除
+│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT.zip 		// 编译产物，corax-config-community module 编译后生成的规则检查器插件
+│   │   ├── feysh-config-general-plugin-2.0-SNAPSHOT     		// 第一次运行分析后，自动解压，按需删除
+│   │   └── feysh-config-general-plugin-2.0-SNAPSHOT.zip   		// 编译产物, corax-config-general module 编译后生成的规则检查器插件
 │   └── rules                                              // checker 的配置文件
 │       ├── **.summaries.json
 │       ├── **.sinks.json
