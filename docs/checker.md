@@ -135,10 +135,10 @@
    
 4. 选择好后，开始按照需求和对应检查原理编写检查器，并在调用 `ICheckPoint.report(checkType)` 或者 `IOperatorFactory.check(boolExpr, checkType)` 时传入第二步中的 CheckType 即可。
 
-   如果需要检查 checker 一些比较直接的错误，可以按如下两个步骤验证
+   如果需要检查您编写的 checker 里的一些比较直接的bug，可以按如下两个步骤检查
 
-   1. 编辑 [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `resourceAnalysisImpl` 或 `semanticAnalysisImpl` 添加新加的 checker 注册。
-   2. 添加完后可以执行一次 `gradlw :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`，能够检查部分代码错误并提示纠正
+   1. 编辑 [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
+   2. 添加完后可以执行一次 `gradlw :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`，能够检查部分checker编写错误并提示纠正
 
 5. 前往 [corax-config-tests/src/main/java/testcode](../corax-config-tests/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
 

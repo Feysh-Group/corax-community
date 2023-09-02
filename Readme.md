@@ -77,8 +77,9 @@ $ gradlew build
 
 ```
 ├── analysis-config                                        // 分析配置目录
-│   ├── default-config.normalize.yml                       // 第一次分析后生成
 │   ├── default-config.yml                                 // 第一次分析后生成，分析工具根据插件中的默认参数自动生成的yaml格式主配置
+│   │                                                      // 仅当修改后的主配置文件存在部分配置缺失或者一些配置无法对应到已有插件，
+│   ├── default-config.normalize.yml                       // 以及存在风格问题时，引擎将会自动进行修补和规范化主配置并输出到此文件
 │   ├── plugins                                            // 插件存放目录
 │   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT     		// 第一次运行分析后，自动解压，按需删除
 │   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT.zip 		// 编译产物，corax-config-community module 编译后生成的规则检查器插件
