@@ -35,7 +35,7 @@ CoraxJava具有以下特点：
 
 ### 环境要求
 
-需要安装Java运行环境，并要求JDK版本不低于17。在 Debian，Ubuntu 等系统上可以使用以下命令安装 JDK 17：
+需要安装Java运行环境，并要求JDK版本为17（使用其他版本编译和分析很可能会出现错误）。在 Debian，Ubuntu 等系统上可以使用以下命令安装 JDK 17：
 ```bash
 $ sudo apt-get install openjdk-17-jdk
 ```
@@ -49,7 +49,7 @@ $ brew install openjdk@17
 ```
 Windows 用户可以下载 [openjdk-17+35_windows-x64_bin.zip](https://download.java.net/openjdk/jdk17/ri/openjdk-17+35_windows-x64_bin.zip) 并解压，在`高级系统设置`中设置好JDK的环境变量。
 
-可以使用以下命令查看jdk版本，并确认不低于17。
+可以使用以下命令查看jdk版本，并确认为17。
 ```bash
 $ java -version
 ```
