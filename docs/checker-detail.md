@@ -661,7 +661,7 @@ public final class URL implements java.io.Serializable {
 
 
 
-这里介绍 source 配置文件的规则：
+**source 配置文件的规则**：
 
 ​		以 `sources.json` 为后缀的文件 如 [general.sources.json](../corax-config-general/rules/general.sources.json) 这些 sinks 被放在一起并使用 `kind` 对这些 sinks 进行归类, 如：
 
@@ -713,7 +713,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 
 
-summary 配置文件的规则：
+**summary 配置文件的规则**
 
 ​		以 `summaries.json` 为后缀的文件 如 [general.summaries.json](../corax-config-general/rules/general.summaries.json)
 
@@ -730,6 +730,31 @@ summary 配置文件的规则：
 3. - "propagate": "taint" 意为 taint kinds 传递，在方法执行后，to 和 from 可能指向了不同的对象，如果不同，那么 to 被 taint 了或副作用了，from 仍然不受影响，除非在程序中存在别名关系
    - "propagate": "value" 意为值传递，就是上面讲到的别名，to 和 from 指向了一个对象
 4. `provenance`，和 `ext` 无关紧要，保留字段
+
+
+
+**sanitizer 配置**
+
+打开 [`???.summaries.json`](../corax-config-general/rules/supplement.summaries.json) 配置文件并添加如下类似的 `sanitizer rule` 去除 TaintKind:
+
+```json
+  {"signature":"org.springframework.web.util.HtmlUtils: * htmlEscape(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  "在紧跟着上面的taint传递的rule后面添加一条 xss 的 sanitizer，表示此 htmlEscape 方法返回的数据受到过滤或限制无法造成 XSS 注入，但是 Argument[0] 依旧可以造成 XSS 注入"
+  {"signature":"org.springframework.web.util.HtmlUtils: * htmlEscape(**)","subtypes":false,"to":"ReturnValue","propagate":"sanitizer","from":"xss","provenance":"manual","ext":""}
+```
+
+
+
+如果分析引擎通过分析`taintInTaintOut`方法后后认为 `Argument[0]` 会污染返回值 `ReturnValue` , **实际上却是无法污染**，所以可能导致误报，您可以使用如下规则强制全部去除的 taint 标记来降低误报。
+
+```json
+  {"signature":"org.test.Utils: * taintInTaintOut(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""}
+```
+
+`sanitizer` 实现在 [TaintSanitizerPropagate](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/processor/Propagate.kt) 
+
+其中规则中的 `"from":"xss"` 中的 **xss** 定义在 [sanitizerTaintTypesMap](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) ，可以通过修改主配置或者编辑代码方式进行自定义扩展
+
 
 
 
