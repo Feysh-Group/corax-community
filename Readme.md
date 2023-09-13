@@ -146,5 +146,8 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 - 发送邮件至bug@corax.com
 
 交流群：
-- 关注“蜚语科技”公众号，点击公众号下方“社区版”按钮
-<img src="https://github.com/Feysh-Group/corax-community/assets/6300471/636f1bcb-a388-434e-8ab8-4de2fc8855b7" height="200px">
+
+交流群人数较多，已经无法通过二维码加入，请通过以下方式入群：
+- 添加微信号“Corax社区助手”--注明“Corax社区版交流群”--等待被拉入群
+<img src="https://github.com/Feysh-Group/corax-community/assets/6300471/4e422679-4889-4209-8cd5-173654007c9f" height="200px">
+
