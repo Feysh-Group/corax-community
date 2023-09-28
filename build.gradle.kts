@@ -21,7 +21,7 @@ val guavaVersion: String by rootProject
 val semVer: String? by project
 val configDir by extra { file("$buildDir/analysis-config") }
 val pluginDir by extra { file("$buildDir/analysis-config/plugins") }
-version = semVer ?: "2.0-SNAPSHOT"
+version = semVer ?: "2.2"
 
 plugins {
     `java-library`
