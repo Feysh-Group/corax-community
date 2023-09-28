@@ -10,7 +10,7 @@ import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.IbatisUtils
 import com.feysh.corax.config.general.checkers.internetControl
 import com.feysh.corax.config.general.utils.isCollection
-import soot.Scene
+import com.feysh.corax.config.general.utils.isStringType
 
 object MybatisMapperXmlSQLSinkConsumer : AIAnalysisUnit() {
 
@@ -37,7 +37,7 @@ object MybatisMapperXmlSQLSinkConsumer : AIAnalysisUnit() {
                         val pt = sootMethod.getParameterType(parameterIndex)
                         when {
                             select.parameterType != null && pt.toQuotedString().endsWith(select.parameterType) -> {}
-                            select.parameterType == null && pt == Scene.v().getType("java.lang.String") -> {}
+                            select.parameterType == null && pt.isStringType -> {}
                             else -> continue
                         }
                         val p = parameter(parameterIndex)
