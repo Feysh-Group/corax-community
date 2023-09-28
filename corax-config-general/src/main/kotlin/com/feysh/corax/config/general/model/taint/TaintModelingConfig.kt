@@ -94,7 +94,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
         fun visitAccessPath(acp: ILocalT<*>)
     }
 
-    data class SimpleApplySink(
+     open class SimpleApplySink(
         val check: Collection<ITaintType>,
         val excludes: Collection<ITaintType>,
         val report: CheckType,
@@ -116,7 +116,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applySourceRule(sourceRule: TaintRule.Source, append: Set<ITaintType>) {
         if (!sourceRule.enable)
             return
-        applyMethodAccessPathConfig(sourceRule, object : IApplySourceSink {
+        applyMethodAccessPathConfig(sourceRule, object : TaintModelingConfig.IApplySourceSink {
             context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
             override fun visitAccessPath(acp: ILocalT<*>) {
                 acp.taint += taintOf(append) // must plusAssign
@@ -163,7 +163,11 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
-    fun applyJsonExtSinks(kinds: String, ruleManager: GroupedMethodsManager<out IMethodAccessPathGrouped>, apply: IApplySourceSink) {
+    fun applyJsonExtSinks(kinds: String,
+                          ruleManager: GroupedMethodsManager<out IMethodAccessPathGrouped>,
+                          apply: IApplySourceSink,
+                          filter: (rule: IMethodSignature) -> Boolean = { true }
+    ) {
         val sinkRules = ruleManager.getRulesByGroupKinds(kinds)
         val info = "${this.javaClass.simpleName}: ${sinkRules.size} rules defined in JSON have been found based on kinds: $kinds"
         if (sinkRules.isEmpty()) {
@@ -172,6 +176,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
             logger.debug { info }
         }
         for (sinkRule in sinkRules) {
+            if (!filter(sinkRule)) continue
             applyMethodAccessPathConfig(sinkRule, apply)
         }
     }

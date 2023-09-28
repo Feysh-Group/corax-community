@@ -236,6 +236,13 @@
   {"kind":"remote","signature":"<org.eclipse.jetty.http.HttpCookie: java.lang.String asString()>","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"remote","signature":"<org.eclipse.jetty.http.HttpURI: java.lang.String getParam()>","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"remote","signature":"<org.eclipse.jetty.http.HttpURI: java.lang.String getQuery()>","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
-  {"kind":"remote","signature":"<org.eclipse.jetty.http.HttpURI: java.lang.String getHost()>","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""}
+  {"kind":"remote","signature":"<org.eclipse.jetty.http.HttpURI: java.lang.String getHost()>","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
 
+  "jwt",
+  {"kind":"remote","signature":"io.jsonwebtoken.JwsHeader: * get(*)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"remote","signature":"io.jsonwebtoken.Claims: * get(*)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  "android{",
+  {"kind":"sensitive","signature":"android.telephony.TelephonyManager: String getDeviceId()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  "}",
+  "EOF"
 ]
