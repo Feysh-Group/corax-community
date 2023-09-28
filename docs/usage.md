@@ -166,11 +166,11 @@ Options:
 
 ### --auto-app-classes
 
-- 支持多参数
-- 指向项目或文件路径
-- 自动分析指定路径中的内容，对class自动分类，降低使用门槛
+- 指向项目根目录（源码）和二进制文件路径
+- 支持多参数，比如 `--auto-app-classes project_root_dir --auto-app-classes java_binary_dir`
+- 自动分析加载指定路径中的内容，对class自动分类，降低使用门槛
 
-​**本参数指定路径下必须包含完整的项目源代码，及尽可能完整的运行时类 `runtime classes`（格式为..jar/.class/.war/.dex等，包括完整的项目类文件 `ApplicationClasses` 和三方依赖类 `LibraryClasses` ）**：
+**本参数指定路径下必须包含完整的项目源代码，及尽可能完整的运行时类 `runtime classes`（格式为..jar/.class dir/.war/.dex等，包括完整的项目类文件 `ApplicationClasses` 和三方依赖类 `LibraryClasses` ）**：
 
 **原理**： `CoraxJava`会在本参数指定的路径中，递归查找所有的 Java字节码文件（class文件） 和 源代码文件，如果一个字节码类存在对应源码，则会被自动分类为 `ApplicationClasses`，如果一个字节码类（class）在本参数指定的路径下不存在源码，则被分类为 `LibrarayClasses`，**所以使用此参数时，如果源码缺少或不完整，会使`CoraxJava`以为该类为三方依赖库而非项目本身的源代码，从而导致漏报**。
 	
@@ -283,16 +283,31 @@ flag option。 此选项默认关闭
 
 
 
+### --enable-coverage
+
+分析完成后会输出 jacoco 的 html 报告及覆盖率数据  jacoco.exec 到输出目录
+
+污点覆盖展示 ：`${output}/taint-coverage/index.html`
+
+扫描覆盖展示 ：`${output}/code-coverage/index.html`
+
+效果如下：
+
+<img src="image/taint-cov-overview.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+
+
+
+
+<img src="image/taint-cov.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+
+
+
+
+
 ### --make-scorecard
 flag option。 此选项默认关闭
 
 在分析器输出目录中生成统计结果。请参考 [unit-tests.md](unit-tests.md)，使用该方式编写测试用例后，开启该选项会自动生成准确性的统计结果。
-
-
-
-
-
-
 
 
 
@@ -500,7 +515,7 @@ output
 │   └── sourceFileSkipList.txt       // 扫描资源文件中被过滤掉的文件
 ├── command.txt                      // 分析命令解析结果
 ├── source_files_which_class_not_found.txt // 项目中缺少对应class的源码, 可能是未能完整编译或没有正确指定到完整的classes
-├── missing_method_summary.txt       // 被分析到且没有找到行为描述摘要的方法
+├── undefined_summary_methods.txt    // 被分析到且没有定义方法行为描述摘要的方法
 ├── phantom_dependence_classes.txt   // 被调用方法的 declaringClass 属于 phantomClasses. 表明依赖的三方库不完整
 ├── report-accuracy-forms            // --make-scorecard 参数的输出，分析报告的统计信息，用来检查误漏报
 │   ├── FalsePN.csv                  // False(positive|negtive) 误漏报代码列表
@@ -508,6 +523,10 @@ output
 │   ├── Scorecard.txt                // 报告的积分统计表.txt
 │   ├── check-type-no-annotated.txt  // 在配置项目中找不到对应的BugType名字的标注漏洞points
 │   └── source-not-found.txt         // 在报告中但无法找到对应源码的 class。故这部分无法被统计数据
+├── taint-coverage
+│   └── index.html                   // 污点覆盖展示页面
+├── code-coverage
+│   └── index.html                   // 分析覆盖展示页面
 └── sarif                            // sarif 格式的报告
     ├── **.sarif
 
@@ -542,7 +561,7 @@ output
 
 ​		被分析到且分析器无法从 corax java config plugins 中的方法 summaries 数据中找到对应建模描述的方法。并不是所有此文件中所有的方法都需要方法摘要（Summary），只有 隐式流传递，native method 和 具有附加特殊属性（比如高密级数据这个秘密等级属性是计算机无法感知的，需要人工或者 AI 额外标注）等等几类方法才需要手动到配置项目中添加摘要，一般的方法引擎能够自动完成分析，无需手动额外编写方法摘要。
 
-​		前往查看 here: [`{output}/missing_method_summary.txt`](../build/output/missing_method_summary.txt)
+​		前往查看 here: [`{output}/undefined_summary_methods.txt`](../build/output/undefined_summary_methods.txt)
 
 
 ### 详细日志
@@ -623,7 +642,7 @@ A: 分析精度不仅受`核心分析引擎`的分析算法影响，**也受用�
 
 **Q: 为什么分析需要编译源码后的产物？**
 
-​A: 在静态分析技术实现上，纯源码分析往往需要先将其转换为 AST（抽象语法树），对于 JVM 上运行的语言（Java、Kotlin、JSP、Scala 和 Groovy 等）都需要分别设计一对一的语言前端来解析，AST 又包含了各种各样复杂的语言特性和各种版本上的语法糖，这将严重增加分析引擎的负担，并且这不是静态分析的侧重点，所以往往 java 静态分析都会采用直接或者间接的方式分析 JVM字节码（即各种形式的编译产物 class） 来获得程序的操作语义信息。
+A: 在静态分析技术实现上，纯源码分析往往需要先将其转换为 AST（抽象语法树），对于 JVM 上运行的语言（Java、Kotlin、JSP、Scala 和 Groovy 等）都需要分别设计一对一的语言前端来解析，AST 又包含了各种各样复杂的语言特性和各种版本上的语法糖，这将严重增加分析引擎的负担，并且这不是静态分析的侧重点，所以往往 java 静态分析都会采用直接或者间接的方式分析 JVM字节码（即各种形式的编译产物 class） 来获得程序的操作语义信息。
    另一方面，源码分析需要各种语言环境和依赖，比如有 `import package.a.*;` 如果环境没有 `package.a` 这个包，那么所有引用了该包下的声明都将因必要的依赖信息不完整导致解析失败或者丢失分析精度，所以通常来说，分析 class 能比分析源码得到更高精度的报告。
    还有一方面就是使用源码分析，将极大地限制静态分析的使用场景，比如想要分析一个不带源码的二进制包。
 
@@ -634,7 +653,7 @@ A: 源码不是必须提供的，只是为了更好地展示缺陷报告，以�
 
 **Q: 为什么使用kotlin?**
 
-​
+
 A: kotlin 编写的代码更简单易懂，能极高提升开发者开发效率，易于维护；并且很难出现头疼的 `NullPointerException` 问题。kotlin 还支持协程异步执行，极高地提升了分析器效率；另外 kotlin 支持更多的语法特性，让我们更多的时间花费在算法本身而不是浪费在编程上：)，有木有心动？好吧！当然您仍然可以编写 java 代码并和 kotlin 代码放在一起混合调用，无需另外做任何事。
 
 

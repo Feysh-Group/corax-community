@@ -209,7 +209,8 @@ object ExampleCheckUnit: PreAnalysisUnit() {
     override fun config() {
         atAnySourceFile(extension = "java") {
             // 解析只需要一行代码
-            val parseResult: ParseResult<CompilationUnit> = AnalysisCache.G.getAsync(CompilationUnitAnalysisKey(path)) // 同步获取
+            // 异步执行
+            val parseResult: ParseResult<CompilationUnit> = AnalysisCache.G.getAsync(CompilationUnitAnalysisKey(path))
             if (!parseResult.isSuccessful) {
                 return@atAnySourceFile
             }
@@ -244,25 +245,25 @@ import com.github.javaparser.ast.CompilationUnit
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 
+// 定义输入
 data class CompilationUnitAnalysisKey(val sourceFile: Path) :
-    AnalysisKey<ParseResult<CompilationUnit>>(CompilationUnitAnalysisDataFactory.key)
+    AnalysisKey<ParseResult<CompilationUnit>>(CompilationUnitAnalysisDataFactory.key/*选择处理该sourceFile的实现*/)
 
-// 工厂函数定义虽然眼花缭乱了一点，但是使用起来非常友好
+// 定义输出
+// 工厂函数定义虽然眼花缭乱了一点，但是在使用上非常方便且友好
 object CompilationUnitAnalysisDataFactory :
     AnalysisDataFactory<ParseResult<CompilationUnit>, CompilationUnitAnalysisKey> {
-    val p = JavaParser()
     override val cache: LoadingCache<CompilationUnitAnalysisKey, ParseResult<CompilationUnit>> = defaultBuilder
         .build { key ->
+            val configuration = ParserConfiguration()
+            val parser = JavaParser(configuration)
             key.sourceFile.inputStream().use { inputStream ->
-                synchronized(p) {
-                    p.parse(inputStream, Charsets.UTF_8)
-                }
+                parser.parse(inputStream, Charsets.UTF_8)
             }
         }
 
     override val key = object : AnalysisDataFactory.Key<ParseResult<CompilationUnit>>() {}
-
-
+    
     init {
         AnalysisCache.G.registerFactory(this)
     }
@@ -280,7 +281,7 @@ PreAnalysisApi.atAnyMethod(){ }                 // 遍历所有的 SootMethod
 PreAnalysisApi.atMethod(method){ }              // 匹配指定的 SootMethod
 ```
 
-**当然，如果您是专业人士，可以直接拿到 Jimple IR 输入给自定义的 过程间/内的数据流 Analysis 并加入到全局的 `AnalysisCache.G`（AnalysisCache 参考上面）**
+**当然，如果您是专业人士，可以直接获取 Jimple IR 在用于自定义的 过程间/内的数据流 Analysis 中，再把此 Analysis 封装加入到全局的 `AnalysisCache.G`（AnalysisCache 参考上面），可以非常方便地扩展功能 **
 
 ```kotlin
 
@@ -294,7 +295,7 @@ object ExampleCheckUnit: PreAnalysisUnit() {
 
             eachUnit { this: IUnitCheckPoint ->
                 eachExpr { expr: soot.jimple.Expr ->
-                    // 例如获取 Jimple IR 中的条件表达式
+                    // 例如获取 Java 中的 == 和 != Expr
                     val condExpr: ConditionExpr = when (expr) {
                         is JEqExpr -> expr
                         is JNeExpr -> expr
@@ -639,7 +640,7 @@ public final class URL implements java.io.Serializable {
 
 ### 配置文件建模
 
-​		对于 taint 传递和 source, sink 这种建模来说，其形式丢大部分比较的单一，写在代码中可能比较臃肿，可以按照一定的格式将简单的建模写到文件中，复杂的仍然使用 kotlin 硬编码方式 来建模。
+​		对于 taint 传递和 source, sink 这种污点建模来说，其格式大部分比较单一，写在代码中可能比较臃肿，可以按照一定的格式将简单的建模写到文件中，复杂的仍然使用 kotlin 硬编码方式 来建模。
 
 ​		前边介绍过的 [RuleManager](plugin-infrastructure.md#rulemanager) 就是在做规则文件解析事情，它被用来加载规则，然后在  [model/taint/TaintModelingConfig.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) 中读取 `ConfigCenter.taintRulesManager.sources` 和 `ConfigCenter.taintRulesManager.summaries` 并应用这些规则，即可达到统一快速建模目的。所有的配置格式、解析、管理均可以自定义无任何限制。
 
@@ -923,7 +924,7 @@ Tips:
 
 ### 污点检查
 
-​		前面的 source 和 summary 就是构建一个污点传递图，最终我们需要在这个图上的某一点检查标记的这些污点是否满足某一条件。
+​		前面的 source 和 summary 就是构建一个污点传递图，最终我们需要在这个图上的某一点检查标记的这些污点类型中是否存在某些特定 taint kind。
 
 #### 注入检查
 
