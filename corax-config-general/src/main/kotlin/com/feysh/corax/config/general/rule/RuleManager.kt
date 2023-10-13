@@ -78,14 +78,17 @@ open class GroupedMethodsManager<T: IMethodGrouped>(methods: List<T>) : RuleMana
         LinkedHashMap<String, MutableList<T>>().also {
             for (gMethod in methods) {
                 for (group in gMethod.group.split(",")) {
-                    it.getOrPut(group.trim()) { mutableListOf() }.add(gMethod)
+                    it.getOrPut(group.trim().lowercase(Locale.getDefault())) { mutableListOf() }.add(gMethod)
                 }
             }
         }
 
     val allKinds = methodsGroup.keys
 
-    fun getRulesByGroupKinds(kind: String): List<T> = methodsGroup.filter { it.key.lowercase(Locale.getDefault()) == kind }.values.flatten()
+    fun getRulesByGroupKinds(kind: String): List<T> {
+        val lowerKey = kind.lowercase(Locale.getDefault())
+        return methodsGroup.filter { it.key == lowerKey }.values.flatten()
+    }
 
     fun getRulesByGroupKinds(kinds: List<String>): Map<String, List<T>> = kinds.associateWith { getRulesByGroupKinds(it) }
 

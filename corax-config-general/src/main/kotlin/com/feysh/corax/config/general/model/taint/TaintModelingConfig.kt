@@ -163,13 +163,13 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
-    fun applyJsonExtSinks(kinds: String,
+    fun applyJsonExtSinks(kind: String,
                           ruleManager: GroupedMethodsManager<out IMethodAccessPathGrouped>,
                           apply: IApplySourceSink,
                           filter: (rule: IMethodSignature) -> Boolean = { true }
     ) {
-        val sinkRules = ruleManager.getRulesByGroupKinds(kinds)
-        val info = "${this.javaClass.simpleName}: ${sinkRules.size} rules defined in JSON have been found based on kinds: $kinds"
+        val sinkRules = ruleManager.getRulesByGroupKinds(kind)
+        val info = "${this.javaClass.simpleName}: ${sinkRules.size} rules defined in JSON have been found based on kinds: $kind"
         if (sinkRules.isEmpty()) {
             logger.warn { info }
         } else {
@@ -179,5 +179,18 @@ object TaintModelingConfig : AIAnalysisUnit() {
             if (!filter(sinkRule)) continue
             applyMethodAccessPathConfig(sinkRule, apply)
         }
+    }
+    context (AIAnalysisApi)
+    fun applyJsonExtSinksDefault(
+        kind: String,
+        visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>) -> Unit
+    ) {
+        applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase,
+            object : IApplySourceSink {
+                context(api@AIAnalysisApi, builder@ISootMethodDecl.CheckBuilder<Any>)
+                override fun visitAccessPath(acp: ILocalT<*>) {
+                    visit(this@api, this@builder, acp)
+                }
+            })
     }
 }
