@@ -7,6 +7,7 @@
   * [环境要求](#环境要求)
   * [编译构建](#编译构建)
   * [开始分析](#开始分析)
+  * [支持Docker](#支持Docker)
 * [查看报告](#查看报告)
 * [自定义规则检查器](#自定义规则检查器)
 * [交流反馈](#交流反馈)
@@ -116,6 +117,23 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 最终的结果会在`--output` 参数指定的路径下生成。
 
 **阅读 [CoraxJava使用](docs/usage.md) 了解完整的使用详情。**
+
+### 支持Docker
+
+请先确保已安装 `Docker`，在项目根目录 `corax-community` 下构建Docker镜像：
+```bash
+$ docker build -t corax-community .
+```
+构建期间会下载 `CoraxJava核心引擎`，并解压到 `/corax-community` 目录下，构建完成后生成快捷方式为 `/corax-community/corax-cli.jar`
+
+使用方式: 
+```bash
+$ corax_cmd='java -jar corax-cli.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes ./corax-config-tests --config default-config.yml@./build/analysis-config'
+$ docker run -it --rm -v {指定扫描结果输出路径}:/corax-community/build/output -v {指定需要扫描的代码仓库路径}:{映射到容器内的路径} corax-community ${corax_cmd}
+```
+注意:
+1. 由于扫描行为发生在容器内，所以需要将代码仓库映射到容器内，否则无法扫描，建议映射到容器内的路径和宿主机真实路径保持一致，否则可能无法体验 `sarif` 相关插件的跳转功能。
+2. 由于 Windows 与 Linux 文件系统差异，Windows 用户无法完整体验 `sarif` 相关插件的跳转功能，建议使用 Linux 系统或者手动构建。
 
 ## 查看报告
 
