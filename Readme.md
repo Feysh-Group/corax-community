@@ -122,9 +122,11 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 请先确保已安装 `Docker`，在项目根目录 `corax-community` 下构建Docker镜像：
 ```bash
-$ docker build -t corax-community .
+$ docker build -t --network=host corax-community .
 ```
 构建期间会下载 `CoraxJava核心引擎`，并解压到 `/corax-community` 目录下，构建完成后生成快捷方式为 `/corax-community/corax-cli.jar`
+
+>考虑到可能会遇到网络环境受限，也可以手动下载 `CoraxJava核心引擎`，放在 `/corax-community` 即可，注意版本号与 `Dockerfile CORAX_VERSION` 保持一致。
 
 使用方式: 
 ```bash
