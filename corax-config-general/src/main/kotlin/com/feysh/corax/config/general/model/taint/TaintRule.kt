@@ -77,7 +77,7 @@ object TaintRule {
 
         companion object {
 
-            val logger = KotlinLogging.logger {}
+            private val logger = KotlinLogging.logger {}
 
             fun loadJsons(
                 sourcesJsonFiles: List<Path>, summariesJsonFiles: List<Path>, sinksJsonFiles: List<Path>

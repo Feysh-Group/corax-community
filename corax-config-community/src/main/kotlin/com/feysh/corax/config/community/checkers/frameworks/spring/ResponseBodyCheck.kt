@@ -2,6 +2,7 @@
 package com.feysh.corax.config.community.checkers.frameworks.spring
 
 import com.feysh.corax.config.api.*
+import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.model.javaee.JavaeeFrameworkConfigs
 import com.feysh.corax.config.community.SensitiveDataExposeChecker
@@ -21,7 +22,7 @@ object ResponseBodyCheck : AIAnalysisUnit() {
             for (annotation in visibilityAnnotationTag.annotations) {
                 when (annotation.type) {
                     in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES -> {
-                        when (sootMethod.returnType.toQuotedString()) {
+                        when (sootMethod.returnType.typename) {
                             "java.lang.String" -> {
                                 /*
                                 *   @RequestMapping("/vuln")

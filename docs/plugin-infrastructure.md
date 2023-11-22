@@ -47,11 +47,11 @@
 ├── build
 │   ├── analysis-config                                  // 本配置项目生成的最终产物
 │   │   ├── plugins
-│   │   │   ├── feysh-config-business-plugin-2.0-SNAPSHOT.zip  // business checker 插件，依赖通用插件
+│   │   │   ├── feysh-config-commercial-plugin-2.0-SNAPSHOT.zip  // commercial checker 插件，依赖通用插件
 │   │   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT.zip // community checker 插件，依赖通用插件
 │   │   │   └── feysh-config-general-plugin-2.0-SNAPSHOT.zip   // 通用插件
 │   │   └── rules   // 不仅仅只包含 taint 规则, 由默认通用的 com.feysh.corax.config.general.rule.RuleManager 进行加载管理，也可以自定义格式加载
-│   │       ├── business.sinks.json                            // business 插件依赖的 sink 数据
+│   │       ├── commercial.sinks.json                            // commercial 插件依赖的 sink 数据
 │   │       ├── clear.summaries.json                           // java 容器 clear 方法摘要数据枚举
 │   │       ├── community.sinks.json                           // community 插件依赖的 sink 数据
 │   │       ├── general.sources.json                           // 两个插件都依赖的 source 数据

@@ -5,13 +5,16 @@ package com.feysh.corax.config.general.utils
 import com.feysh.corax.config.api.IMethodMatch
 import com.feysh.corax.config.api.baseimpl.matchSimpleSig
 import com.feysh.corax.config.api.baseimpl.matchSoot
+import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.general.rule.IMethodSignature
+import com.google.common.base.Optional
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import org.w3c.dom.Document
 import org.xml.sax.InputSource
 import soot.*
+import soot.asm.AsmUtil
 import java.io.CharArrayReader
 import java.io.File
 import java.io.IOException
@@ -90,7 +93,7 @@ val primTypes
 
 val primTypesBoxed get() = primTypes.mapTo(mutableSetOf()) { it.boxedType() }
 
-val primTypesBoxedQuotedString get() = primTypesBoxed.mapTo(mutableSetOf()) { it.toQuotedString() }
+val primTypesBoxedQuotedString get() = primTypesBoxed.mapTo(mutableSetOf()) { it.typename!! }
 
 val RefType.isBoxedPrimitives: Boolean
     get() = primTypesBoxed.contains(this)
@@ -227,3 +230,15 @@ suspend fun parseXmlSafe(xmlFile: Path): Document? {
     }
 
 }
+
+/**
+ * Converts type descriptor in bytecode to Soot type descriptor.
+ * For example:
+ *
+ *  * `[I` to `int[]`.
+ *  * `[[I` to `int[][]`.
+ *  * `Ljava/lang/Object;` to `java.lang.Object`.
+ *  * `[Ljava/lang/Object;` to `java.lang.Object[]`.
+ *
+ */
+fun classTypeToSootTypeDesc(ty: String): String = AsmUtil.toJimpleDesc(ty, Optional.fromNullable(null)).first().typename!!

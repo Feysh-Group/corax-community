@@ -1,5 +1,3 @@
-@file:Suppress("ClassName")
-
 package com.feysh.corax.config.community.checkers.frameworks.persistence.hibernate.jpa
 
 import com.feysh.corax.config.api.Elements

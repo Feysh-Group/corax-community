@@ -35,6 +35,8 @@ enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
     UNENCRYPTED_DATA("The data is not encrypted yet"),
     ENCRYPTED_DATA("The data is encrypted yet"),
 
+    EXTERNAL_STORAGE("From a location that is not controlled by the application (for example, an SD card that is universally writable)"),
+
     URL_ENCODED,
     CR_ENCODED, LF_ENCODED, QUOTE_ENCODED, LT_ENCODED,
 

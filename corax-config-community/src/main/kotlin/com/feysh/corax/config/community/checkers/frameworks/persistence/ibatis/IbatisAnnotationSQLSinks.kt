@@ -42,7 +42,7 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
                                     check(
                                         sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
                                         SqliChecker.SqlInjection
-                                    ) {
+                                    ){
                                         this.args["type"] = "ibatis annotations Select"
                                     }
                                 }

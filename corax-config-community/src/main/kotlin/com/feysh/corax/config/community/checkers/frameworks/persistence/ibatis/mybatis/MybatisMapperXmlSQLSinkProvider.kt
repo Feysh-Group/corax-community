@@ -3,11 +3,17 @@ package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.general.utils.parseXmlSafe
+import kotlin.io.path.exists
+import kotlin.io.path.pathString
 
 object MybatisMapperXmlSQLSinkProvider: PreAnalysisUnit() {
     context (PreAnalysisApi)
     override fun config() {
         atAnySourceFile(extension = "xml") {
+            val zipPath = archiveFile
+            if (zipPath != null && archivePath(zipPath, "AndroidManifest.xml").exists()) { //
+                return@atAnySourceFile
+            }
             val doc = parseXmlSafe(path) ?: return@atAnySourceFile
             val namespace =
                 doc.documentElement.attributes.getNamedItem("namespace")?.nodeValue ?: return@atAnySourceFile

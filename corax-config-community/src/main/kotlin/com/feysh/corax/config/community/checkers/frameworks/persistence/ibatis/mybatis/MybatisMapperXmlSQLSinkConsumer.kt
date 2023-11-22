@@ -5,6 +5,7 @@ import com.feysh.corax.config.api.AIAnalysisApi
 import com.feysh.corax.config.api.AIAnalysisUnit
 import com.feysh.corax.config.api.MethodConfig
 import com.feysh.corax.config.api.baseimpl.matchMethodName
+import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.IbatisUtils
@@ -36,7 +37,7 @@ object MybatisMapperXmlSQLSinkConsumer : AIAnalysisUnit() {
                     for (parameterIndex in 0 until sootMethod.parameterCount) {
                         val pt = sootMethod.getParameterType(parameterIndex)
                         when {
-                            select.parameterType != null && pt.toQuotedString().endsWith(select.parameterType) -> {}
+                            select.parameterType != null && pt.typename?.endsWith(select.parameterType) == true -> {}
                             select.parameterType == null && pt.isStringType -> {}
                             else -> continue
                         }

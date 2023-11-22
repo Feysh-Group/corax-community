@@ -79,7 +79,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
             for (source in sources) {
                 val refType = dataType as? RefType
                 if (refType != null) {
-                    val refTypeQuoted = refType.toQuotedString()
+                    val refTypeQuoted = refType.className
                     val refTypeClazz = refType.sootClass
                     if (refTypeQuoted == "java.lang.String" || refTypeQuoted in primTypesBoxedQuotedString) {
                         source.taint += taintOf(internetSource)

@@ -9,24 +9,24 @@ import mu.KotlinLogging
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
-abstract class Propagate {
-    abstract val name: String
+interface IPropagate {
+    val name: String
     context (ISootMethodDecl.CheckBuilder<Any>)
-    abstract fun interpretation(to: String, from: String)
+    fun interpretation(to: String, from: String)
 
     companion object {
-        private val operators = mutableMapOf<String, LinkedHashSet<Propagate>>()
+        private val operators = mutableMapOf<String, LinkedHashSet<IPropagate>>()
 
-        fun register(propagator: Propagate) {
+        fun register(propagator: IPropagate) {
             operators.getOrPut(propagator.name){ LinkedHashSet() }.add(propagator)
         }
 
-        operator fun get(name: String): LinkedHashSet<Propagate>? = operators[name]
+        operator fun get(name: String): LinkedHashSet<IPropagate>? = operators[name]
     }
 
 }
 
-object ValuePropagate : Propagate() {
+object ValuePropagate : IPropagate {
     override val name: String = "value"
     context (ISootMethodDecl.CheckBuilder<Any>)
     override fun interpretation(to: String, from: String) {
@@ -49,12 +49,12 @@ object ValuePropagate : Propagate() {
 
 }
 
-object TaintPropagate : Propagate() {
+object TaintPropagate : IPropagate {
     override val name: String = "taint"
     context (ISootMethodDecl.CheckBuilder<Any>)
     override fun interpretation(to: String, from: String) {
         val acpTo = RuleArgumentParser.parseArg2AccessPaths(to, shouldFillingPath = true)
-        if (from.lowercase(Locale.getDefault()) == "empty") {
+        if (from.lowercase() == "empty") {
             for (toAcp in acpTo) {
                 toAcp.taint = emptyTaint
             }
@@ -71,7 +71,7 @@ object TaintPropagate : Propagate() {
     }
 }
 
-object TaintSanitizerPropagate : Propagate() {
+object TaintSanitizerPropagate : IPropagate {
     override val name: String = "sanitizer"
     private val logger = KotlinLogging.logger {}
     context (ISootMethodDecl.CheckBuilder<Any>)
@@ -91,9 +91,9 @@ object TaintSanitizerPropagate : Propagate() {
 }
 
 
-object StrFragmentPropagate : Propagate() {
+object StrFragmentPropagate : IPropagate {
     override val name: String = "str-fragment"
-    val strFragment = CustomAttributeID<String>("str-fragment")
+    private val strFragment = CustomAttributeID<String>("str-fragment")
 
     context (ISootMethodDecl.CheckBuilder<Any>)
     private fun getAttr(l: ILocalT<*>): ILocalValue<String> {

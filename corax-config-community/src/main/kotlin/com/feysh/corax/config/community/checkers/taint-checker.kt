@@ -1,14 +1,10 @@
 package com.feysh.corax.config.community.checkers
 
-import com.feysh.corax.config.api.*
+import com.feysh.corax.config.api.*                           
 import com.feysh.corax.config.community.*
 import com.feysh.corax.config.general.checkers.*
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
-import com.feysh.corax.config.community.CmdiChecker
-import com.feysh.corax.config.community.SqliChecker
-import com.feysh.corax.config.general.checkers.GeneralTaintTypes
-import com.feysh.corax.config.general.checkers.control
 import kotlinx.serialization.*
 
 
@@ -29,7 +25,7 @@ object `taint-checker` : AIAnalysisUnit() {
             "command-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
             "command-injection-scala" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
 
-            "sql-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "Unknown ")),
+            "sql-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "SQL Sink")),
             "sql-injection-aws" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "AmazonAws ")),
             "sql-injection-hibernate" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "Hibernate")),
             "sql-injection-android" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "Android")),

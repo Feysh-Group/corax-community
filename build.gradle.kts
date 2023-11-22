@@ -8,7 +8,7 @@ val pluginModules : String by project
 val publishingModules : String by project
 val kotlinVersion: String by project
 val coroutinesVersion: String by project
-val collectionsVersion: String by project
+val immutableCollectionsVersion: String by project
 val pf4jVersion: String by project
 val sootVersion: String by rootProject
 val junit4Version: String by project
@@ -21,18 +21,31 @@ val guavaVersion: String by rootProject
 val semVer: String? by project
 val configDir by extra { file("$buildDir/analysis-config") }
 val pluginDir by extra { file("$buildDir/analysis-config/plugins") }
-version = semVer ?: "2.3"
+version = semVer ?: "2.4.1"
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.8.21"
-    kotlin("kapt") version "1.8.21"
-    kotlin("plugin.serialization") version "1.8.21"
+    kotlin("jvm") version "1.9.10"
+    kotlin("kapt") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.10"
     `maven-publish`
     // Gradle Properties Plugin - read more: https://github.com/stevesaliman/gradle-properties-plugin
     id("net.saliman.properties") version "1.5.2"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
+
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.9.10")
+    }
+}
+
+apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
 
 configure<JavaPluginExtension> {
@@ -145,7 +158,7 @@ allprojects {
         testImplementation(
             group = "org.jetbrains.kotlinx",
             name = "kotlinx-collections-immutable-jvm",
-            version = collectionsVersion
+            version = immutableCollectionsVersion
         )
     }
 }
@@ -202,7 +215,7 @@ configure(
         compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = kotlinVersion)
         compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-reflect", version = kotlinVersion)
         compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-bom", version = kotlinVersion)
-        compileOnly(group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable-jvm", version = collectionsVersion)
+        compileOnly(group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable-jvm", version = immutableCollectionsVersion)
 
         compileOnly(sootVersion) {
             exclude(group="com.google.guava", module="guava")
@@ -269,7 +282,9 @@ configure(
         if (fromConfigsDir.exists()) {
             from(fromConfigsDir)
             into(toConfigDir)
-            println("copy $fromConfigsDir to $toConfigDir")
+            doFirst {
+                println("copy $fromConfigsDir to $toConfigDir")
+            }
         }
     }
 
@@ -280,14 +295,15 @@ configure(
         dependsOn(pluginZip)
         from(pluginZip)
         into(pluginDir)
-        val archiveFileName = pluginZip.get().archiveFileName.get()
-        val folder = archiveFileName.substringBeforeLast(pluginZip.get().archiveExtension.get()).dropLast(1)
-        val extract = "$pluginDir/${folder}"
-        println("delete $extract")
-        delete(extract)
-        delete("$configDir/default-config.yml")
-        delete("$configDir/default-config.normalize.yml")
-
+//        val archiveFileName = pluginZip.get().archiveFileName.get()
+//        val folder = archiveFileName.substringBeforeLast(pluginZip.get().archiveExtension.get()).dropLast(1)
+//        val extract = "$pluginDir/${folder}"
+//        doFirst {
+//            println("delete $extract")
+//            delete(extract)
+//            delete("$configDir/default-config.yml")
+//            delete("$configDir/default-config.normalize.yml")
+//        }
     }
 
     tasks.register("createProperties") {

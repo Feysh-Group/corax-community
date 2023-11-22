@@ -84,7 +84,7 @@ object RuleArgumentParser {
         return null
     }
 
-    private fun parseRange(range: String): List<Int>? {
+    fun parseRange(range: String): List<Int>? {
         isRange(range)?.let { return it.toList() }
         range.split(",").takeIf { it.isNotEmpty() }?.let {
             it.fold(emptyList<Int>()) { acc, arg ->

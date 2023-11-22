@@ -18,10 +18,10 @@ import kotlin.collections.LinkedHashSet
 object TaintModelingConfig : AIAnalysisUnit() {
 
     init {
-        Propagate.register(TaintPropagate)
-        Propagate.register(TaintSanitizerPropagate)
-        Propagate.register(ValuePropagate)
-        Propagate.register(StrFragmentPropagate)
+        IPropagate.register(TaintPropagate)
+        IPropagate.register(TaintSanitizerPropagate)
+        IPropagate.register(ValuePropagate)
+        IPropagate.register(StrFragmentPropagate)
     }
 
     @Serializable
@@ -34,7 +34,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
             "content-provider" to userInputSource,
             "android-widget" to userInputSource,
-            "android-external-storage-dir" to fileIoSource,
+            "android-external-storage-dir" to setOf(GeneralTaintTypes.EXTERNAL_STORAGE),
             "device" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
             "sensitive" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
         )
@@ -134,7 +134,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
         method(match).modelNoArgSoot {
             for (operator in operators) {
                 try {
-                    val fns = Propagate[operator] ?: continue
+                    val fns = IPropagate[operator] ?: continue
                     for (fn in fns) {
                         fn.interpretation(to = summary.to, from = summary.from)
                     }
@@ -180,6 +180,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
             applyMethodAccessPathConfig(sinkRule, apply)
         }
     }
+
     context (AIAnalysisApi)
     fun applyJsonExtSinksDefault(
         kind: String,

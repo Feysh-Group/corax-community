@@ -9,6 +9,7 @@ import com.feysh.corax.config.general.rule.MethodAccessPath
 import com.feysh.corax.config.general.utils.walkFiles
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
+import mu.KotlinLogging
 import soot.PrimType
 import soot.Type
 import java.nio.file.Path
@@ -48,9 +49,9 @@ object ConfigCenter : CheckerUnit() {
         val summariesJsonFiles = walkFiles(jsonDirs){ file -> file.name.endsWith("summaries.json") }
         val sinksJsonFiles = walkFiles(jsonDirs){ file -> file.name.endsWith("sinks.json") }
 
-        TaintRule.TaintRulesManager.logger.info { "sourcesJsonFiles: $sourcesJsonFiles" }
-        TaintRule.TaintRulesManager.logger.info { "summariesJsonFiles: $summariesJsonFiles" }
-        TaintRule.TaintRulesManager.logger.info { "sinksJsonFiles: $sinksJsonFiles" }
+        logger.info { "sourcesJsonFiles: $sourcesJsonFiles" }
+        logger.info { "summariesJsonFiles: $summariesJsonFiles" }
+        logger.info { "sinksJsonFiles: $sinksJsonFiles" }
         TaintRule.TaintRulesManager.loadJsons(sourcesJsonFiles, summariesJsonFiles, sinksJsonFiles)
     }
 
@@ -61,4 +62,6 @@ object ConfigCenter : CheckerUnit() {
 
     fun skipTaintPrimitiveType(type: Type) = !option.taintPrimTypeValue && type is PrimType
 
+
+    private val logger = KotlinLogging.logger {}
 }

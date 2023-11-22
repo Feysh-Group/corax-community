@@ -7,6 +7,7 @@ val testModules: String by rootProject
 val kamlVersion: String by rootProject
 val log4j2Version: String by rootProject
 val caffeineVersion: String by rootProject
+val mavenArtifactVersion: String by rootProject
 
 plugins {
     kotlin("kapt")
@@ -26,6 +27,8 @@ dependencies {
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = caffeineVersion)
     implementation(group = "org.apache.commons", name = "commons-lang3", version = commonsLangVersion)
+    implementation(group = "org.apache.maven", name = "maven-artifact", version = mavenArtifactVersion)
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("javax:javaee-api:7.0")
     implementation("org.mybatis:mybatis:3.4.5")
     implementation("org.apache.wicket:wicket:1.4.15")
@@ -46,3 +49,14 @@ dependencies {
     }
 }
 
+
+sourceSets {
+    main{
+        java{
+            srcDirs("src/main/java", "src/main/kotlin")
+        }
+        kotlin{
+            srcDirs("src/main/java", "src/main/kotlin")
+        }
+    }
+}

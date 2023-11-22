@@ -52,109 +52,149 @@ CoraxJava主要由两部分组成，分别是`CoraxJava核心分析引擎`，和
 简单的使用可参考  [开始分析](../Readme.md#开始分析) 。完整参数如下所示（对部分不重要选项有删减）：
 
 ```YAML
-Usage: CoraxJava [OPTIONS]
+Usage: CoraxJava [<options>]
 
 Java Target Options:
-  --custom-entry-point TEXT
-                Sets the entry point method(s) for analyze. Eg: [file, soot
-                signature, apk]
-  --make-component-dummy-main
-                Simple entry point creator that builds a sequential list of
-                method invocations. Each method is invoked only once.
+  --custom-entry-point=<method signature, signature file>
+                               Sets the entry point method(s) for analyze.
+  --make-component-dummy-main  Simple entry point creator that builds a
+                               sequential list of method invocations. Each
+                               method is invoked only once.
+  --disable-javaee-component   disable create the JavaEE lifecycle component
+                               methods
 
 Android Target Options:
-  --android-platform-dir PATH
-                Sets the android platform directory or path of android.jar.
-                The value of environment variable "ANDROID_JARS" is also
-                accepted.
-  --one-component-at-atime
-                Set if analysis shall be performed on one entry of (Android
-                component/Web application) at a time
+  --android-platform-dir=<path>  Sets the android platform directory or path of
+                                 android.jar. The value of environment variable
+                                 "ANDROID_JARS" is also accepted. (required)
+  --one-component-at-atime       Set if analysis shall be performed on one
+                                 entry of (Android component/Web application)
+                                 at a time
 
-FlowDroid Engine Options:
-  --enable-flow-droid BOOL
-                Set if the FlowDroid engine shall be enabled
+Dump DefaultConfigOptions Options:
+  --dump-default-config=<dir of analysis-config>
+    Set the analysis-config directory path (required)
 
-DataFlow Engine Options:
-  --enable-data-flow BOOL
-                Set if the DataFlow engine shall be enabled
+FlowDroid Options:
+  --enable-flow-droid=<bool>     Set if the FlowDroid engine shall be enabled
+                                 (required)
+  ...
 
+Data Flow Options:
+  --enable-data-flow=<bool>  Set if the DataFlow engine shall be enabled
+                             (required)
+  --enable-coverage          Turn on static analysis code coverage reporting
+                             with Jacoco
+  --source-encoding=<text>   The encoding of coverage source files used by
+                             Jacoco (default: utf-8)
+  ...
+
+UtAnalyze Options:
+  --enable-ut-analyze=<bool>  Set if the UtAnalyze engine shall be enabled
+                              (required)
 
 Options:
-  --version     Show the version and exit
-  --verbosity [ERROR|WARN|INFO|DEBUG|TRACE]
-                Sets verbosity level of command line interface
-  --config [NAME@]PATH[{pathSeparator}PATH]#pluginId or custom-config.yml@PATH[{pathSeparator}PATH]
-                Specify the configuration jar and portal name which will be
-                used as the analysis configuration. The environment variable:
-                CORAX_CONFIG_DEFAULT_DIR Eg:
-                "feysh.main.v1@corax-config/build/plugins"
-  --output PATH
-                Sets output directory of analysis result and metadata
-  --dump-soot-scene
-                dump soot scene
-  --result-type [PLIST|SARIF|COUNTER]
-                Sets output format of analysis result. This can be set
-                multiple times, then different format of output will be given
-                simultaneously. Eg: --result-type plist --result-type sarif
-  --target [java|android]
-                Specify the analyze target. Warning: Only corresponding target
-                options are valid and others are ignored.
-  --process TEXT
-                Specify the classes that shall be processed(analyzed). Eg:
-                --process [directory, dex, apk, jar, zip]
-  --class-path TEXT
-                Specify the [JAR/CLASS/SOURCE] paths. Hint: There are library
-                classes and system classes in a project. Specify the
-                "--process" with application classes to exclude them.
-  --auto-app-classes TEXT
-                The automatically classified classes from the specified paths
-  --disable-library-load
-                Disable load the library automatically.
+  --version                      Show the version and exit
+  --verbosity=(ERROR|WARN|INFO|DEBUG|TRACE)
+                                 Sets verbosity level of command line interface
+                                 (default: INFO)
+  --config=<(custom-config.yml@)?{configpath}[{pathseparator}{configpath}]*>
+                                 Specify the configuration jar and portal name
+                                 which will be used as the analysis
+                                 configuration. eg: "default-config.yml@{path
+                                 to analysis-config}" The environment variable:
+                                 CORAX_CONFIG_DEFAULT_DIR
+  --enable-checkers=(JSON_FILE|CHECKER_TYPE,...)
+                                 A way to directly control the checker switch
+                                 through this parameter (whitelist).
+  --output=<directory>           Sets output directory of analysis result and
+                                 metadata (default:
+                                 C:\Users\notify\Desktop\java\utbot\corax-cli\output)
+  --dump-soot-scene              dump soot scene
+  --result-type=(PLIST|SARIF|COUNTER)
+                                 Sets output format of analysis result. This
+                                 can be set multiple times, then different
+                                 format of output will be given simultaneously.
+                                 Eg: --result-type plist --result-type sarif
+  --enable-decompile             Automatically decompile the classes missing
+                                 from the source code in the report into source
+                                 code, and map the realign line numbers to the
+                                 decompiled source file line numbers
+  --target=(java|android|src-only)
+                                 Specify the analyze target. [src-only: analyze
+                                 resources without class files] Warning: Only
+                                 corresponding target options are valid and
+                                 others are ignored.
+  --process=class dir, [dir of] jar|war|apk|dex, glob pattern, inside zip
+                                 Specify the classes that shall be
+                                 processed(analyzed).
+  --class-path=class dir, [dir of] jar|dex, glob pattern, inside zip
+                                 Specify the [JAR/CLASS/SOURCE] paths. Hint:
+                                 There are library classes and system classes
+                                 in a project. Specify the "--process" with
+                                 application classes to exclude them.
+  --auto-app-classes=<target project root dir (contains both binary and
+corresponding complete project source code)>
+                                 The automatically classified classes from the
+                                 specified paths
+  --auto-app-traverse-mode=(Default|IndexArchive|RecursivelyIndexArchive)
+                                 Set the locator mode for automatically loading
+                                 project resources. (default:
+                                 RecursivelyIndexArchive)
   --disable-default-java-class-path
-                Disable the default jdk/jre path for class path. Then a custom
-                java class path should be given by "--class-path".
-  --source-path PATH
-                Specify the source file path with source directory root or
-                source.jar file
-  --src-precedence [prec_class|prec_only_class|prec_jimple|prec_java|prec_java_soot|prec_apk|prec_apk_class_jimple|prec_dotnet]
-                Sets the source precedence type of analysis targets
-  --ecj-options-file JSON_FILE
-                Sets custom ecj options file
-  --hide-no-source
-                Set if problems found shall be hidden in the final report when
-                source code is not available
-  --indexes-in-archive
-                Set whether to find the source code file from the compressed
-                package
-  --project-scan-config PATH
-                Specify the path of project scan config file
-  --disable-analyze-library-classes
-                Sets whether classes that are declared library classes in Soot
-                shall be excluded from the analysis, i.e., no flows shall be
-                tracked through them
-  --app-only    Setting this option to true causes Soot to only consider
-                application classes when building the callgraph. The resulting
-                callgraph will be inherently unsound.
-  --disable-pre-analysis
-                Skip the pre analysis phase. This will disable some checkers.
-  --disable-built-in-analysis
-                Skip the flow built-in analysis phase. This will disable some
-                checkers.
-  --static-field-tracking-mode [ContextFlowSensitive|ContextFlowInsensitive|None]
-  --call-graph-algorithm TEXT
-  --disable-reflection
-                True if reflective method calls shall be not supported,
-                otherwise false
-  --max-thread-num INT
-  --make-scorecard
-                auto make scores for reports.
-  -h, --help    Show this message and exit
+                                 Disable the default jdk/jre path for class
+                                 path. Then a custom java class path should be
+                                 given by "--class-path".
+  --source-path=<source file dir or any parent dir>
+                                 Specify the source file path with source
+                                 directory root or source.jar file
+  --src-precedence=
+(prec_class|prec_only_class|prec_jimple|prec_java|prec_java_soot|prec_apk|prec_apk_class_jimple|prec_dotnet)
+                                 Sets the source precedence type of analysis
+                                 targets (default: prec_apk_class_jimple)
+  --ecj-options=<file path>      Sets custom ecj options file
+  --serialize-cg                 Serialize the on-the-fly call graph.
+                                 (dot/json)
+  --hide-no-source               Set if problems found shall be hidden in the
+                                 final report when source code is not available
+  --traverse-mode=(Default|IndexArchive|RecursivelyIndexArchive)
+                                 Set whether to find the source code file from
+                                 the compressed package (default:
+                                 RecursivelyIndexArchive)
+  --project-scan-config=<file path>
+                                 Specify the path of project scan config file
+  --disable-wrapper              Analyze the full frameworks together with the
+                                 app without any optimizations (default: Use
+                                 summary modeling (taint wrapper, ...))
+  --app-only, --apponly          Sets whether classes that are declared library
+                                 classes in Soot shall be excluded from the
+                                 analysis, i.e., no flows shall be tracked
+                                 through them
+  --disable-pre-analysis         Skip the pre analysis phase. This will disable
+                                 some checkers.
+  --disable-built-in-analysis    Skip the flow built-in analysis phase. This
+                                 will disable some checkers.
+  --enable-original-names        enable original names for stack local
+                                 variables.
+  --static-field-tracking-mode=
+(ContextFlowSensitive|ContextFlowInsensitive|None)
+                                 (default: None)
+  --call-graph-algorithm=<text>  (default: insens)
+  --disable-reflection           True if reflective method calls shall be not
+                                 supported, otherwise false
+  --max-thread-num=<int>
+  --memory-threshold=<float>     (default: 0.93)
+  --zipfs-env=<value>
+  --zipfs-encodings=<text>
+  --make-scorecard               auto make scores for reports.
+  -h, --help                     Show this message and exit
 ```
 
-### --target [java|android]
+### --target [java|android|src-only]
 
 区别在于分析入口类和方法的选择，android有其特定的组件生命周期及入口点类，java则会包含更多的入口点类。
+
+src-only模式：只扫描src（比如一些简单的硬编码检查）, 不加载也不扫描指定的资源中的class
 
 ### --android-platform-dir
 
@@ -178,20 +218,31 @@ Options:
 
 使用此参数时可以配合 --process, --class-path, --source-path 三个参数同时使用
 
-以maven项目举例：
+1. 编译
 
-```BASH
-cd {YourProject}
-mvn package
-... --enable-data-flow true --target java --auto-app-classes .
+以maven项目举例（先`cd {YourProject}`）：
+
 ```
-执行上述命令，会在maven项目根目录下执行分析，自动查找根据本项目的class字节码类有无对应的源代码，查找用户项目类，并建议将三方依赖库一并加入分析，如本项目目录下无三方依赖库，可以手动使用如下命令将三方库拉取到本项目目录。
+mvn package
+```
 
-Maven: **`mvn dependency:copy-dependencies -DoutputDirectory=target\libs`**
+执行上述命令，会在maven项目根目录下执行分析，自动查找根据本项目的class字节码类有无对应的源代码，查找用户项目类，并建议将三方依赖库一并加入分析。
+
+2. 如果本项目目录下无三方依赖库，可以手动使用如下命令将三方库拉取到本项目目录。
+
+- Maven: **`mvn dependency:copy-dependencies -DoutputDirectory=target\libs`**
+
 
 > 注：不建议直接将系统的三方库目录（如/User/xxx/.m2/）加入分析，因为数量太大导致分析效率低，建议只将本项目依赖的三方库加入分析。
 
-Gradle:  参考 [Gradle项目](#Gradle项目) 
+- Gradle:  参考 [Gradle项目](#Gradle项目) 
+
+3. 开始分析
+
+
+```bash
+java -jar corax-cli.jar ... --enable-data-flow true --target java --auto-app-classes .
+```
 
 
 
@@ -471,8 +522,9 @@ analyze-filter:
 --auto-app-classes .\jadx-src
 ```
 
-
 ### Gradle项目
+
+一般使用 `gradle build` 生成应用，而不是 `gradle compile` 只编译不打包三方jar
 
 gradle 项目中的分析配置 和 maven 项目是没有什么区别的，因为`CoraxJava`分析的是编译产物，构建工具如何的运作是不影响的。
 
@@ -502,6 +554,21 @@ tasks.register<Copy>("copyRuntimeDependencies") {
 --class-path **\build\libs\*.jar
 --source-path .
 ```
+
+
+
+## Android App
+
+测试用例：https://github.com/signalapp/Signal-Androidapk不能有任何 混淆、加密、保护壳等！！！
+
+先下载apk然后将apk正确对应的版本的源码克隆下来，然后 --auto-app-classes 指向项目根目录，--process 指向apk文件，--android-platform-dir 指向存放 non-stub android.jar 的 platforms 资源文件夹（此资源文件可以在下文的 [--android-platform-dir 参数] 说明处获得）
+
+```TOML
+... --extra-args --verbosity info --enable-data-flow true --target android --auto-app-classes ./Signal-Android --process Signal-Android\*.apk --android-platform-dir ./android/platforms
+```
+
+`--target`也可指定`java`, 将会以普通java程序模式完整扫描所有项目类
+
 
 
 ## 结果输出
@@ -647,7 +714,6 @@ A: 在静态分析技术实现上，纯源码分析往往需要先将其转换�
    还有一方面就是使用源码分析，将极大地限制静态分析的使用场景，比如想要分析一个不带源码的二进制包。
 
 **Q: 为什么分析需要源码？**
-​
 
 A: 源码不是必须提供的，只是为了更好地展示缺陷报告，以及在使用 `--auto-app-classes` 参数时候可以用来辅助分析器根据源码来匹配对应的 classes 以获知哪些类是项目类哪些是库类，这将帮助分析器更清楚分析的侧重点，简化参数的配置。
 

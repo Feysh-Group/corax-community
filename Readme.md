@@ -171,3 +171,8 @@ $ docker run -it --rm -v {指定扫描结果输出路径}:/corax-community/build
 - 添加微信号“Corax社区助手”--注明“Corax社区版交流群”--等待被拉入群
 <img src="https://github.com/Feysh-Group/corax-community/assets/6300471/4e422679-4889-4209-8cd5-173654007c9f" height="320px">
 
+
+
+## 招贤纳士：
+
+如果您对本项目或Java代码静态分析感兴趣，并希望从事这方面的工作或研究（全职/兼职/实习皆可），欢迎发送邮件至 [job@feysh.com](mailto:job@feysh.com)，并注明“CoraxJava岗位”，我们会第一时间联系您。

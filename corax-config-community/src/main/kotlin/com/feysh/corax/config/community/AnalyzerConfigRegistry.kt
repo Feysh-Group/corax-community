@@ -1,4 +1,4 @@
-@file:Suppress("MemberVisibilityCanBePrivate", "ObjectPropertyName")
+@file:Suppress("MemberVisibilityCanBePrivate", "ObjectPropertyName", "ClassName")
 
 package com.feysh.corax.config.community
 
