@@ -57,6 +57,9 @@ $ java -version
 
 ### 编译构建
 
+提示： 如果只想快速地体验功能，可以在 [Release](https://github.com/Feysh-Group/corax-community/releases) 中可以直接下载已编译好的插件和 `CoraxJava核心引擎 corax-cli-x.x.jar`，然后跳到下一步骤直接开始分析！
+
+
 在项目根目录`corax-community`下执行gradle构建(建议进入根目录执行./gradlew build构建，避免版本问题)：
 ```bash
 $ cd corax-community
@@ -120,7 +123,7 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 ### CoraxJava+Docker
 
-**如果非开发仅想快速体验：可阅读 [CoraxJava+Docker扫描教程](docs/coraxdocker-usage.md) 了解完整的使用详情。**
+**如果想体验docker方式的扫描：可阅读 [CoraxJava+Docker扫描教程](docs/coraxdocker-usage.md) 了解完整的使用详情。**
 
 ## 查看报告
 

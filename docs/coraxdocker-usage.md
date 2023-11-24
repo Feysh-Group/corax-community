@@ -1,6 +1,6 @@
 # CoraxJava + Docker
 
-docker 仅适用于快速体验，目前不建议开发使用
+docker 方式的扫描**目前**仅适用于尝新，不建议用于快速体验和开发使用
 
 请先确保已安装 `Docker`
 
