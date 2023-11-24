@@ -118,24 +118,9 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 **阅读 [CoraxJava使用](docs/usage.md) 了解完整的使用详情。**
 
-### 支持Docker
+### CoraxJava+Docker
 
-请先确保已安装 `Docker`，在项目根目录 `corax-community` 下构建Docker镜像：
-```bash
-$ docker build -t --network=host corax-community .
-```
-构建期间会下载 `CoraxJava核心引擎`，并解压到 `/corax-community` 目录下，构建完成后生成快捷方式为 `/corax-community/corax-cli.jar`
-
->考虑到可能会遇到网络环境受限，也可以手动下载 `CoraxJava核心引擎`，放在 `/corax-community` 即可，注意版本号与 `Dockerfile CORAX_VERSION` 保持一致。
-
-使用方式: 
-```bash
-$ corax_cmd='java -jar corax-cli.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes ./corax-config-tests --config default-config.yml@./build/analysis-config'
-$ docker run -it --rm -v {指定扫描结果输出路径}:/corax-community/build/output -v {指定需要扫描的代码仓库路径}:{映射到容器内的路径} corax-community ${corax_cmd}
-```
-注意:
-1. 由于扫描行为发生在容器内，所以需要将代码仓库映射到容器内，否则无法扫描，建议映射到容器内的路径和宿主机真实路径保持一致，否则可能无法体验 `sarif` 相关插件的跳转功能。
-2. 由于 Windows 与 Linux 文件系统差异，Windows 用户无法完整体验 `sarif` 相关插件的跳转功能，建议使用 Linux 系统或者手动构建。
+**如果非开发仅想快速体验：可阅读 [CoraxJava+Docker扫描教程](docs/coraxdocker-usage.md) 了解完整的使用详情。**
 
 ## 查看报告
 
