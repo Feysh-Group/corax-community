@@ -303,25 +303,19 @@ flag option。 此选项默认关闭以保证分析精度
 
 ### --project-scan-config
 
-在 **ApplicationClasses** 和 资源文件（比如source file, config files） 对象中 进一步筛选要分析的目标，参考 [命令行参数](#命令行参数) 中的图示。
-
-> 作用：选取项目中部分代码和资源文件进行分析
+> 用于告知分析器分析的重点及期望分析和不希望分析的 类或者文件
 
 eg：
 
 ```
---project-scan-config JavaScanFilter.yml
+--project-scan-config project-scan-config.yml
 ```
 
-获取详细内容请查看此文件 [JavaScanFilter.yml](JavaScanFilter.yml)
+获取详细内容请查看此文件 [project-scan-file.yml](project-scan-file.yml)
+
+请注意正确的转义，比如yml中的 `\.` 是正则非yaml的转义。如果想要知道该配置产生的影响，可以查看 output 目录中的 `scan-classifier-info.yml` 文件
 
 
-
-请注意正确的转义，比如这里的 `\.` 是正则的转义。如果想要知道该配置产生的影响，可以查看 output 目录中的这两个文件
-
-`${output}/analyzeSkip/classSkipList.txt `（过滤掉的类）
-
-`${output}/analyzeSkip/sourceFileSkipList.txt `（过滤掉的资源文件）
 
 ### --serialize-cg
 flag option。 此选项默认关闭
