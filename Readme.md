@@ -57,7 +57,7 @@ $ java -version
 
 ### 编译构建
 
-提示： 如果只想快速地体验功能，可以在 [Release](https://github.com/Feysh-Group/corax-community/releases) 中可以直接下载已编译好的插件和 `CoraxJava核心引擎 corax-cli-x.x.jar`，然后跳到下一步骤直接开始分析！
+提示： 此步骤仅供开发者参考，如果只想快速地体验功能，可以在 [release](https://github.com/Feysh-Group/corax-community/releases) 中直接下载最新的已编译好的产物，包含`CoraxJava核心引擎 corax-cli-x.x.jar`和规则配置，然后跳到下个步骤直接开始分析！
 
 
 在项目根目录`corax-community`下执行gradle构建(建议进入根目录执行./gradlew build构建，避免版本问题)：
@@ -80,46 +80,81 @@ $ gradlew build
 构建成功后，会生成 多个zip后缀的插件 和 配置文件，并按结构存放到 [build/analysis-config](build%2Fanalysis-config) 文件夹中，统称为分析配置目录，结构如下：
 
 ```
-├── analysis-config                                        // 分析配置目录
+├── analysis-config                                     // CoraxJava规则检查器 所在位置
 │   ├── default-config.yml                                 // 第一次分析后生成，分析工具根据插件中的默认参数自动生成的yaml格式主配置
 │   │                                                      // 仅当修改后的主配置文件存在部分配置缺失或者一些配置无法对应到已有插件，
 │   ├── default-config.normalize.yml                       // 以及存在风格问题时，引擎将会自动进行修补和规范化主配置并输出到此文件
 │   ├── plugins                                            // 插件存放目录
-│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT     		// 第一次运行分析后，自动解压，按需删除
-│   │   ├── feysh-config-community-plugin-2.0-SNAPSHOT.zip 		// 编译产物，corax-config-community module 编译后生成的规则检查器插件
-│   │   ├── feysh-config-general-plugin-2.0-SNAPSHOT     		// 第一次运行分析后，自动解压，按需删除
-│   │   └── feysh-config-general-plugin-2.0-SNAPSHOT.zip   		// 编译产物, corax-config-general module 编译后生成的规则检查器插件
-│   └── rules                                              // checker 的配置文件
-│       ├── **.summaries.json
-│       ├── **.sinks.json
-│       ├── **.sources.json
-│       ├── **.access-path.json
+│   │   ├── feysh-config-community-plugin-2.4.1               // 第一次运行分析后，自动解压，按需删除
+│   │   ├── feysh-config-community-plugin-2.4.1.zip           // 编译产物，corax-config-community module 编译后生成的规则检查器插件
+│   │   ├── feysh-config-general-plugin-2.4.1                 // 第一次运行分析后，自动解压，按需删除
+│   │   └── feysh-config-general-plugin-2.4.1.zip             // 编译产物, corax-config-general module 编译后生成的规则检查器插件
+│   └── rules                                              // 规则检查器的一些静态数据，用户可以自定义进行配置
+│       ├── **.summaries.json                                 // taint summaries
+│       ├── **.sinks.json                                     // taint sinks
+│       ├── **.sources.json                                   // taint sources
+│       ├── **.access-path.json                               // 一些方法签名分类数据
 ```
-> 注意：`feysh-config-community-plugin-2.0-SNAPSHOT.zip` 为 `corax-config-community` 模块编译后生成的规则检查器插件，主要包含了自定义规则检查器的实现，`feysh-config-general-plugin-2.0-SNAPSHOT.zip` 为 `corax-config-general` 模块编译后生成的规则检查器插件，主要包含了一些通用的内建检查器模型，一般不需要修改。
+> 注意：`feysh-config-community-plugin-2.4.1.zip` 为 `corax-config-community` 模块编译后生成的规则检查器插件，主要包含了自定义规则检查器的实现，`feysh-config-general-plugin-2.4.1.zip` 为 `corax-config-general` 模块编译后生成的规则检查器插件，主要包含了一些通用的内建检查器模型，一般不需要修改。
 
 ### 开始分析
 
-开始 `CoraxJava` 的分析，需要使用 `Java` 执行 `CoraxJava核心引擎`（`corax-cli-x.x.x.jar`），引擎会以插件方式载入 `CoraxJava规则检查器`（`feysh-config-general-plugin-2.0-SNAPSHOT.zip`及`feysh-config-community-plugin-2.0-SNAPSHOT.zip`） 及其配置文件（`default-config.yml`），最后再正确指定需要分析的Java项目的字节码及源代码的路径即可。
+​		**第一步：首先请准备好您的待分析对象**，一般情况：
 
-手动配置 `CoraxJava` 以下必要参数，开始进行分析
+- [x] 需要包含java源码的项目且尽量完整，项目源码不可放在压缩归档中
+- [x] 需要完整的项目编译产物和尽量完整的三方库jar：（如果没有已经编译打包好的产物，则请手动编译打包：如`mvn package -Dmaven.test.skip.exec=true -DskipTests` 、`gradle build -x test` ， 应避免使用`mvn compile/jar`  or `gradle compile/jar` ，因后者命令往往不会拉取项目依赖的三方库jar且编译产物不完整）
+  - [x] 比如此项目源码对应的 包含大量.class的文件夹（`target/classes`、`build/classes`）
+  - [x] 项目源码编译后对应的 `.jar`/`.war`/`.zip` 文件，或包含它们的任意文件夹路径
+  - [x] 三方库jar的所在文件夹（尽量提供, 没有的话可以使用 `mvn dependency:copy-dependencies -DoutputDirectory=target\libs`命令手动拉取）
 
-- ​		分析器的启动命令 `java -jar corax-cli-x.x.x.jar` 
-- ​		设置输出目录 `--output build/output`
-- ​		开启数据流引擎 `--enable-data-flow true`
-- ​		设置分析对象的类型 `--target java`
-- ​		设置报告输出格式 `--result-type sarif`，可不加，默认为 sarif 格式
-- ​		设置分析目标所在路径，此处以本项目所包含的测试用例举例 `--auto-app-classes ./corax-config-tests`，此参数要求该路径或子目录下必须包含项目源码及编译后的字节码产物（class文件或 jar 包都可），
-- ​		指定配置的参数格式为 `--config (yaml文件名字.yml)@(配置文件夹路径)`，yml 文件名可以任意命名不必一定存在，配置的路径为上一  步骤 [编译构建](#编译构建) 中生成的配置文件夹 [build/analysis-config](build%2Fanalysis-config)
+
+
+​        **第二步**：分析引擎需要载入 `CoraxJava规则检查器插件`（如：`analysis-config/plugins/feysh-config-*-plugin-*.*.*.zip`）及依赖的一些配置文件（如` analysis-config/rules`），所有需要准备好 `analysis-config` (规则配置文件夹) **：**
+
+  - 可以使用从 [release](https://github.com/Feysh-Group/corax-community/releases) 下载并解压zip得到已生成好的 `analysis-config`目录： `{corax-java-cli-community-2.4.1.zip解压位置}/analysis-config/`
+  - 或者使用[编译构建](#编译构建)步骤中生成的[build/analysis-config](build%2Fanalysis-config)目录：`./build/analysis-config/`
+
+
+
+​        **第三步：开始分析 ！需要手动配置 `CoraxJava` 以下必要参数：**
+
+- ​        分析器的启动命令 `java -jar corax-cli-x.x.x.jar`    （从 [release](https://github.com/Feysh-Group/corax-community/releases) 下载并解压zip得到 `CoraxJava核心引擎`（`corax-cli-x.x.x.jar`））
+
+- ​        设置输出目录 `--output build/output`
+
+- ​        开启数据流引擎 `--enable-data-flow true`
+
+- ​        设置分析对象的类型 `--target java`
+
+- ​        设置报告输出格式 `--result-type sarif`，可不加，默认为 sarif 格式
+
+- ​        设置分析目标所在路径，此处以本项目所包含的测试用例举例 `--auto-app-classes ./corax-config-tests`，此参数要求该路径或子目录下必须包含项目源码及编译后的字节码产物（class文件或 jar 包都可），
+
+- ​        指定配置的参数格式为 `--config (yaml文件名字.yml)@(规则配置文件夹)`，yml 文件名可以任意命名不必一定存在。`(规则配置文件夹)`就是前面所准备好的 `analysis-config` 的路径。例如
+  - `--config default-config.yml@{corax-java-cli-community-2.4.1.zip解压位置}/analysis-config/`
+  - `--config default-config.yml@./build/analysis-config/`
+  
+  
+  
+  分析命令模板：
 
 ```bash
-$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes ./corax-config-tests --config default-config.yml@./build/analysis-config
+$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes {项目根目录（包含源码和编译产物）} --config default-config.yml@{corax-java-cli-community-2.4.1.zip解压位置}/analysis-config/
 ```
 
-执行此命令时，如果分析器无法在指定的 `./build/analysis-config` 目录中被找到该名为`default-config.yml`的 yml 文件，将自动根据插件中的默认参数生成一个同名的默认配置：[build/analysis-config/default-config.yml](build%2Fanalysis-config%2Fdefault-config.yml)，如果需要更改配置，请复制整个 [build/analysis-config](build%2Fanalysis-config) 文件夹到您的工作目录，并适当按照您的需求自定义修改配置，在下次的分析前指定参数 `--config 配置文件名.yml@配置文件夹` ，使其生效。
+​        **tips**: 如果项目根目录没有编译产物，可以再增加任意个数的 `--auto-app-classes` 参数指向编译产物所在的位置或文件夹
 
-最终的结果会在`--output` 参数指定的路径下生成。
+​		执行此命令时，如果分析引擎无法在指定的 `{corax-java-cli-community-2.4.1.zip解压位置}/analysis-config/` 目录中找到名为`default-config.yml`的 yml 文件，将自动根据插件中的默认参数生成一个同名的默认yaml主要配置文件到规则配置文件夹：`{corax-java-cli-community-2.4.1.zip解压位置}/analysis-config/default-config.yml`，如果需要更改配置，请复制整个 `analysis-config` 文件夹到您的工作目录，并适当按照您的需求自定义修改配置，在下次的分析前指定参数 `--config 配置文件名.yml@新的规则配置文件夹` ，使其生效。
 
-**阅读 [CoraxJava使用](docs/usage.md) 了解完整的使用详情。**
+
+
+​		最终的报告会在`--output` 参数指定的文件夹路径下生成。
+
+
+
+​		**阅读 [CoraxJava使用](docs/usage.md) 了解完整的使用详情。**
+
+
 
 ### CoraxJava+Docker
 
