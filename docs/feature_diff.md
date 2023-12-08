@@ -1,3 +1,17 @@
+**Table of contents**
+
+
+* [社区版&商业版 Diff](#社区版&商业版-diff)
+* [已开放规则](#已开放规则)
+* [SAST测试集表现](#sast测试集表现)
+  * [BenchmarkJava](#benchmarkjava)
+  * [Java Sec Code](#java-sec-code)
+
+
+
+
+#  社区版&商业版 Diff
+
 || Corax社区版 |Corax商业版|
 |------------------|:--------:|:--:|
 |支持语言|   Java   |JSP、JAVA、C/C++、Python、Go等十余种|
@@ -26,6 +40,8 @@
 **如果您想了解更多与Corax商业版相关的信息，可以访问www.feysh.com或直接联系contact@feysh.com**
 
 
+
+# 已开放规则
 
 目前本项目中包含以下已实现的规则检查器：
 
@@ -60,3 +76,44 @@
 | 使用弱 hash 算法                    |  |
 
 **如果您想了解更多与Corax商业版相关的信息，可以访问www.feysh.com或直接联系contact@feysh.com**
+
+
+
+# SAST测试集表现
+
+## BenchmarkJava
+
+测试 `BenchmarkJava` 的静态分析工具需要不限于路径敏感、上下文敏感、常见容器建模、常量和字符串计算、污点分析、污点Sanitizer、反射分析、Spring框架建模等等特性为支撑，否则会导致大量误漏报！
+
+Corax 静态分析工具展示其出色的分析能力和误漏报把控能力，目前 Java 社区版在 [OWASP-Benchmark/BenchmarkJava-1.2beta](https://github.com/OWASP-Benchmark/BenchmarkJava/tree/1.2beta) 测试集上的表现参考下表：
+
+| Category     | CWE # | TP   | FN   | TN   | FP   | Total | TPR  | FPR  | Score |
+| ------------ | ----- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ----- |
+| cmdi         | 78    | 126  | 0    | 125  | 0    | 251   | 1    | 0    | 1     |
+| securecookie | 614   | 36   | 0    | 31   | 0    | 67    | 1    | 0    | 1     |
+| ldapi        | 90    | 27   | 0    | 32   | 0    | 59    | 1    | 0    | 1     |
+| pathtraver   | 22    | 133  | 0    | 135  | 0    | 268   | 1    | 0    | 1     |
+| sqli         | 89    | 272  | 0    | 232  | 0    | 504   | 1    | 0    | 1     |
+| trustbound   | 501   | 83   | 0    | 43   | 0    | 126   | 1    | 0    | 1     |
+| crypto       | 327   | 130  | 0    | 23   | 93   | 246   | 1    | 0.8  | 0.2   |
+| hash         | 328   | 89   | 40   | 107  | 0    | 236   | 0.69 | 0    | 0.69  |
+| weakrand     | 330   | 218  | 0    | 275  | 0    | 493   | 1    | 0    | 1     |
+| xpathi       | 643   | 15   | 0    | 20   | 0    | 35    | 1    | 0    | 1     |
+| xss          | 79    | 246  | 0    | 209  | 0    | 455   | 1    | 0    | 1     |
+| Total        |       | 1375 | 40   | 1232 | 93   | 2740  | 0.97 | 0.07 | 0.9   |
+
+`TP/FN/TN/FP/TPR/FPR` 解释和计算公式详见 [误漏报解释](usage.md#误漏报表单)
+
+1. 另外 `BenchmarkJava` 中一个`testcase java`源文件仅包含一个或不包含不合规问题，且代码是自动合成的。
+2. 上面的 `crypto` 分类存在误报，其实是这个testcase 因代码合成缘故导致的其他同类型漏洞也被包含到这个testcase，本工具在其他位置产生了报告故被认为误报！
+3. `hash` 分类的误报的测试用例是从配置文件中读取一个弱hash算法名，本工具暂不支持这种 case
+
+## Java Sec Code
+
+Java社区版目前在 [JoyChou93/java-sec-code](https://github.com/JoyChou93/java-sec-code/tree/8604af55fb68834cf330169cb0a16c27c9e38480) 测试集上的表现参考下表：
+
+统计中 ...
+
+
+
+欢迎使用其他SAST的测试集进行测试！
