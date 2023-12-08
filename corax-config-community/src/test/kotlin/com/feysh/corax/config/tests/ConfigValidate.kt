@@ -1,8 +1,6 @@
 package com.feysh.corax.config.tests
 
-import TestClassAnchorPoint
 import com.feysh.corax.config.api.IAnalyzerConfigManager
-import com.feysh.corax.config.api.utils.ClassCommons
 import com.feysh.corax.config.api.validate.AnalyzerConfigValidator
 import com.feysh.corax.config.community.AnalyzerConfigRegistry
 import com.feysh.corax.config.general.model.ConfigCenter
@@ -17,6 +15,7 @@ import soot.jimple.DynamicInvokeExpr
 import soot.jimple.Stmt
 import soot.jimple.toolkits.callgraph.Edge
 import soot.options.Options
+import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -57,16 +56,18 @@ class ConfigValidate {
         private val logger = KotlinLogging.logger {}
     }
 
-    private val classPath = ClassCommons.locateAllClass(TestClassAnchorPoint::class.java)
-    // val classPath = locateBytecode("scala_ssl_disabler.jar")
+    private val testClasses = "../corax-config-tests/build/classes/java"
 
     @Before
     fun initSoot() {
         Options.v().prepend_classpath()
         Options.v().apply {
-            set_soot_classpath(classPath.toString())
-            set_process_dir(listOf(classPath.toString()))
-            set_src_prec(Options.src_prec_c)
+//            set_soot_classpath(classPath.toString())
+            check(File(testClasses).exists()) {
+                "需要手动 gradle build 一次 corax-config-tests 模块，或者更改IDEA的Build+Execution+Deployment>Build+Tools>Gradle>using 更改为 gradle"
+            }
+            set_process_dir(listOf(testClasses))
+            set_src_prec(Options.src_prec_only_class)
             set_prepend_classpath(true)
 //            set_process_dir(listOf("target/test-classes"))
             set_whole_program(true)
@@ -78,12 +79,14 @@ class ConfigValidate {
             setPhaseOption("cg.spark", "on")
             // enableReflection
             setPhaseOption("cg", "types-for-invoke:true")
+            setPhaseOption("jb.sils", "enabled:false")
         }
         println(Scene.v().sootClassPath)
         Scene.v().loadNecessaryClasses()
         val applicationClasses = Scene.v().applicationClasses
         val libraryClasses = Scene.v().libraryClasses
         val phantomClasses = Scene.v().phantomClasses
+        check(applicationClasses.size > 1)
         for (appClass in applicationClasses) {
             if (appClass.isPhantom) {
                 continue

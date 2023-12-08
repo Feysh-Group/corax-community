@@ -97,17 +97,6 @@
 
 ## 场景三：CoraxJava规则检查器修改
 
-目前本项目中包含以下已实现的规则检查器。
-
-| 名称                 | 说明                                     |
-| -------------------- | ---------------------------------------- |
-| SQL注入检测          | 支持检测常见的SQL注入，并支持mybatis框架 |
-| XSS漏洞检测          | 仅开放Spring接口的ResponseBody注入场景检查 |
-| 命令注入检测         | 支持检测常见的命令注入                   |
-| cookie未设置httpOnly | 支持检测Cookie未设置httpOnly标志位       |
-| cookie未设置secure   | 支持检测Cookie未设置secure标志位         |
-| 不安全的TLS版本      | 支持检测设置TLS版本低于1.2的情况         |
-
 开发者可以根据想要检测漏洞类型与已实现的规则类型相类似的，通过修改部分代码或参数的形式，实现自定义的规则检查器。
 
 1. 命令注入规则检查器是典型的Taint类型的检查器，如注入问题（SSRF检测、SQL注入、XSS注入、路径穿越、模板注入、开放重定向、etc ...）和敏感信息泄露两大类taint问题都可以参考此类型的规则检查器实现。
@@ -115,7 +104,7 @@
 3. XSS漏洞的Spring ResponseBody注入检查实现大致方式为通过匹配相应Java注解以动态检查sink点，类似的有 hibernate.jpa `Query` 注解和 ibatis `Select` 注解场景的 sql 注入检查。
 4. cookie属性设置检查主要展示了API调用序列组合检查和特定参数的检测，类似的有 PermissiveCors 检查。
 5. 不安全的TLS版本检测，实现主要是特定API的检测和常量参数的检测，类似的有 密码学误用、weak hash algorithm 和 cookie persistent maxAge、Ldap anonymous 等检查
-
+6. 省略，可以详见本项目中其他规则开源实现
 
 
 

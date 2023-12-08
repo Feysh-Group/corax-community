@@ -2,6 +2,7 @@ package com.feysh.corax.config.community.checkers
 
 import com.feysh.corax.config.api.*                           
 import com.feysh.corax.config.community.*
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.checkers.*
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
@@ -22,8 +23,29 @@ object `taint-checker` : AIAnalysisUnit() {
     @Serializable
     class Options : SAOptions {
         val kind2Checker: List<Pair<String, CustomSinkDataForCheck>> = listOf(
+            "log4j-injection" to CustomSinkDataForCheck(control, reportType = Log4jChecker.Log4jInjection),
+
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = PathTraversalChecker.PathTraversal),
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = UnrestrictedFileUploadChecker.UnrestrictedFileUpload),
+
+            "template-injection" to CustomSinkDataForCheck(control, reportType = TemplateIChecker.TemplateInjection),
+            "request-forgery" to CustomSinkDataForCheck(control, reportType = SsrfChecker.RequestForgery),
+            "ldap-injection" to CustomSinkDataForCheck(control, reportType = LdapiChecker.LdapInjection),
+            "url-redirection" to CustomSinkDataForCheck(control, reportType = OpenRedirectChecker.UnvalidatedRedirect),
+            "response-splitting" to CustomSinkDataForCheck(control, reportType = HttpRespSplitChecker.HttpResponseSplitting),
+            "xpath-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_XPATH_INJECT, reportType = XpathiChecker.XpathInjection),
             "command-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
-            "command-injection-scala" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
+
+            "deserialization" to CustomSinkDataForCheck(control, reportType = DeserializationChecker.ObjectDeserialization),
+            "xss-injection" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "XSS Sink")),
+            "html-injection" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "Html Sink")),
+            "xss-injection-jsp" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "JSP Sink")),
+            "xss-servlet" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "Servlet Sink")),
+
+            "trust-boundary-violation" to CustomSinkDataForCheck(control, reportType = TrustBoundaryChecker.TrustBoundaryViolation),
+
+            "groovy-injection" to CustomSinkDataForCheck(control, reportType = CodeInjectionChecker.GroovyShell),
+            "spel-injection" to CustomSinkDataForCheck(control, reportType = CodeInjectionChecker.SpringElInjection),
 
             "sql-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "SQL Sink")),
             "sql-injection-aws" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "AmazonAws ")),
@@ -56,7 +78,9 @@ object `taint-checker` : AIAnalysisUnit() {
                 for ((name, msg) in sink.msgArgs) {
                     args[name] = msg
                 }
-            })
+            }) { sinkRule ->
+                LibVersionProvider.isEnable(sinkRule.ext)
+            }
         }
     }
 }

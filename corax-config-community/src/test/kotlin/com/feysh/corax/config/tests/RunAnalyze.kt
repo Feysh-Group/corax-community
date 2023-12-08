@@ -14,7 +14,7 @@ internal fun testSamplesByYmlConfig() { // 推荐的
 }
 
 internal fun testSamplesByConfigName() { // 可能废弃
-    runAnalyzeAndTest(listOf("--config", "community.java@build\\analysis-config"))
+    runAnalyzeAndTest(listOf("--config", "feysh.community.java@build\\analysis-config"))
 }
 
 internal fun runAnalyzeAndTest(args: List<String>) = runBlocking {

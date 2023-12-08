@@ -158,4 +158,6 @@ dependencies {
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     compileOnly("commons-codec:commons-codec:1.10")
 
+    compileOnly("io.jsonwebtoken:jjwt:0.9.1") { isTransitive = false }
+
 }
