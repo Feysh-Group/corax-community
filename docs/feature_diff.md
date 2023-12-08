@@ -1,7 +1,7 @@
 **Table of contents**
 
 
-* [社区版&商业版 Diff](#社区版&商业版-diff)
+* [社区版&商业版 Diff](#社区版商业版-diff)
 * [已开放规则](#已开放规则)
 * [SAST测试集表现](#sast测试集表现)
   * [BenchmarkJava](#benchmarkjava)
@@ -105,8 +105,8 @@ Corax 静态分析工具展示其出色的分析能力和误漏报把控能力�
 `TP/FN/TN/FP/TPR/FPR` 解释和计算公式详见 [误漏报解释](usage.md#误漏报表单)
 
 1. 另外 `BenchmarkJava` 中一个`testcase java`源文件仅包含一个或不包含不合规问题，且代码是自动合成的。
-2. 上面的 `crypto` 分类存在误报，其实是这个testcase 因代码合成缘故导致的其他同类型漏洞也被包含到这个testcase，本工具在其他位置产生了报告故被认为误报！
-3. `hash` 分类的误报的测试用例是从配置文件中读取一个弱hash算法名，本工具暂不支持这种 case
+2. `crypto` 分类存在误报，其实是这个 testcase 因代码合成缘故导致的其他同类型漏洞也被包含到这个 testcase，本工具在其他位置产生了报告故被认为误报！
+3. `hash` 分类的漏报的 testcase 因从配置文件中读取一个弱hash算法名，本工具暂不支持这种 case
 
 ## Java Sec Code
 
