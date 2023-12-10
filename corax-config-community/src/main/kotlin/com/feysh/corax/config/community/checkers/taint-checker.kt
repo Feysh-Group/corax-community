@@ -46,6 +46,7 @@ object `taint-checker` : AIAnalysisUnit() {
 
             "groovy-injection" to CustomSinkDataForCheck(control, reportType = CodeInjectionChecker.GroovyShell),
             "spel-injection" to CustomSinkDataForCheck(control, reportType = CodeInjectionChecker.SpringElInjection),
+            "script-engine" to CustomSinkDataForCheck(control, reportType = CodeInjectionChecker.ScriptEngineInjection),
 
             "sql-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "SQL Sink")),
             "sql-injection-aws" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "AmazonAws ")),

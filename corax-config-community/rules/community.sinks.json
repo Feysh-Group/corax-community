@@ -428,7 +428,17 @@
   {"kind":"request-forgery","signature":"cn.hutool.http.HttpRequest: HttpRequest delete(String)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"request-forgery","signature":"cn.hutool.http.HttpRequest: HttpRequest trace(String)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"request-forgery","signature":"cn.hutool.http.HttpRequest: HttpRequest setUrl(String)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
-
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpRequest: HttpRequest of(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpRequest: HttpRequest of(UrlBuilder url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: HttpRequest createRequest(Method method, String url)","subtypes":false,"arg":"Argument[1]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: HttpRequest createGet(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: String get(String urlString, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: String post(String urlString, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: String downloadString(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: long downloadFile(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: File downloadFileFromUrl(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: File download(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"request-forgery","signature":"cn.hutool.http.HttpUtil: byte[] downloadBytes(String url, **)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
 
   {"kind":"response-splitting","signature":"<javax.servlet.http.Cookie: void <init>(java.lang.String,java.lang.String)>","subtypes":true,"arg":"Argument[0..1]","provenance":"manual","ext":""},
   {"kind":"response-splitting","signature":"<javax.servlet.http.Cookie: void setValue(java.lang.String)>","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
@@ -1215,7 +1225,10 @@
   {"kind":"request-forgery","signature":"org.apache.commons.io.IOUtils: * toString(URL)","subtypes":true,"arg":"Argument[0]","provenance":"df-generated","ext":""},
   {"kind":"request-forgery","signature":"org.apache.commons.io.IOUtils: * toString(URL,Charset)","subtypes":true,"arg":"Argument[0]","provenance":"df-generated","ext":""},
   {"kind":"request-forgery","signature":"org.apache.commons.io.IOUtils: * toString(URL,String)","subtypes":true,"arg":"Argument[0]","provenance":"df-generated","ext":""},
-  
+
+  {"kind":"script-engine","signature":"javax.script.ScriptEngine: Object eval(String script, **)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+  {"kind":"script-engine","signature":"javax.script.ScriptEngine: Object eval(Reader reader, **)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+
   {"kind":"groovy-injection","signature":"groovy.lang.GroovyClassLoader: * parseClass(GroovyCodeSource)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"groovy-injection","signature":"groovy.lang.GroovyClassLoader: * parseClass(GroovyCodeSource,boolean)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"groovy-injection","signature":"groovy.lang.GroovyClassLoader: * parseClass(InputStream,String)","subtypes":false,"arg":"Argument[0]","provenance":"manual","ext":""},
@@ -1706,6 +1719,11 @@
   {"kind":"deserialization","signature":"jodd.json.JsonParser: * parse(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"deserialization","signature":"jodd.json.JsonParser: * parseUrl(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"deserialization","signature":"flexjson.JSONDeserializer: * deserialize(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
+
+  {"kind":"deserialization","signature":"java.io.ObjectInput: * readObject(**)","subtypes":true,"arg":"Argument[this]","provenance":"manual","ext":""},
+  {"kind":"deserialization","signature":"java.io.ObjectInputStream: * readObject(**)","subtypes":true,"arg":"Argument[this]","provenance":"manual","ext":""},
+  {"kind":"deserialization","signature":"java.io.ObjectInput: * readUnshared(**)","subtypes":true,"arg":"Argument[this]","provenance":"manual","ext":""},
+  {"kind":"deserialization","signature":"java.io.ObjectInputStream: * readUnshared(**)","subtypes":true,"arg":"Argument[this]","provenance":"manual","ext":""},
 
   {"kind":"xpath-injection","signature":"javax.xml.xpath.XPath: * compile(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"xpath-injection","signature":"javax.xml.xpath.XPath: * evaluate(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},

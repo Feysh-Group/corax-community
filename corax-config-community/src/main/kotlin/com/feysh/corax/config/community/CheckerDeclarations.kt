@@ -287,6 +287,14 @@ object CodeInjectionChecker : IChecker {
 //        CERTRules.,
     )
 
+    object ScriptEngineInjection : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "使用 `$callee` 可能容易受到代码注入的攻击" },
+            Language.EN to msgGenerator { "This use of `$callee` can be vulnerable to code injection" }
+        )
+        override val checker: IChecker = CodeInjectionChecker
+    }
+
     object SpringElInjection : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
             Language.ZH to msgGenerator { "使用 `$callee` 可能容易受到代码注入的攻击 (Spring Expression)" },
