@@ -5,6 +5,7 @@
 * [已开放规则](#已开放规则)
 * [SAST测试集表现](#sast测试集表现)
   * [BenchmarkJava](#benchmarkjava)
+  * [alipay/sast-java](#alipayant-application-security-testing-benchmarksast-java)
   * [Java Sec Code](#java-sec-code)
 
 
@@ -107,6 +108,25 @@ Corax 静态分析工具展示其出色的分析能力和误漏报把控能力�
 1. 另外 `BenchmarkJava` 中一个`testcase java`源文件仅包含一个或不包含不合规问题，且代码是自动合成的。
 2. `crypto` 分类存在误报，其实是这个 testcase 因代码合成缘故导致的其他同类型漏洞也被包含到这个 testcase，本工具在其他位置产生了报告故被认为误报！
 3. `hash` 分类的漏报的 testcase 因从配置文件中读取一个弱hash算法名，本工具暂不支持这种 case
+
+
+
+## alipay/ant-application-security-testing-benchmark/sast-java
+
+测试集链接: [sast-java](https://github.com/alipay/ant-application-security-testing-benchmark/tree/00f10e1cdcb5b95f1a34e18ab0dea2a3b16905fb/sast-java) 
+
+| checker     | CheckType        | CWE     | Positive(TP | FN)  | Negative(TN | FP)  | Total | TPR  | FPR  | Score |
+| ----------- | ---------------- | ------- | ----------- | ---- | ----------- | ---- | ----- | ---- | ---- | ----- |
+| CmdiChecker | CommandInjection | cwe-78  | 74          | 7    | 4           | 0    | 85    | 0.91 | 0    | 0.91  |
+| SsrfChecker | RequestForgery   | cwe-918 | 10          | 1    | 2           | 1    | 14    | 0.91 | 0.33 | 0.58  |
+| Total       |                  |         | 84          | 8    | 6           | 1    | 99    | 0.91 | 0.14 | 0.77  |
+
+注：
+
+1. 此测试集注重测试sast工具对java语言基础特性支持的完整性（比如数组、别名赋值、循环、基础Collectors、字符串操作、等等）
+2. 其中不合规**测试用例过少**，所以该单一类型对应的FPR没有太大参考意义
+
+
 
 ## Java Sec Code
 
