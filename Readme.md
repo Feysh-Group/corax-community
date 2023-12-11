@@ -9,6 +9,7 @@
   * [开始分析](#开始分析)
   * [CoraxJava+Docker](#CoraxJavaDocker)
 * [查看报告](#查看报告)
+* [测试集表现](#测试集表现)
 * [自定义规则检查器](#自定义规则检查器)
 * [交流反馈](#交流反馈)
 
@@ -29,6 +30,7 @@ CoraxJava具有以下特点：
 > 注意：目前CoraxJava核心分析引擎不开源，需要[下载引擎的jar包](https://github.com/Feysh-Group/corax-community/releases)（ corax-cli-x.x.x.jar）配合规则检查器使用。本代码仓库为CoraxJava自定义规则检查器模块，其中包含多个开源规则检查器的代码实现。
 
 **阅读 [Corax社区版功能对比](docs/feature_diff.md) 了解Corax社区版与商业版的差异。**
+
 ## 快速开始
 
 本仓库为`CoraxJava规则检查器`模块，并包含测试用例 [corax-config-tests](corax-config-tests)，项目构建完成后，`CoraxJava规则检查器`模块为插件（独立zip包）形式，需配合`CoraxJava核心引擎`模块，可执行Java静态代码检测与分析，测试用例可用来快速测试和验证CoraxJava的检测结果。
@@ -166,18 +168,12 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 建议使用 `VSCode` 查看 `SARIF` 格式的报告，可以安装 `Sarif Viewer` 插件方便可视化查看和跳转。
 
+## 测试集表现
+**阅读 [Corax社区版功能对比](docs/feature_diff.md#SAST测试集表现) 了解本Java社区版工具在SAST测试集上的表现。**
+
 ## 自定义规则检查器
 
-目前本项目中包含以下已实现的规则检查器，我们会在后续的更新中持续添加其他的检测规则。
-| 名称                 | 说明                                     |
-| -------------------- | ---------------------------------------- |
-| SQL注入检测          | 支持检测常见的SQL注入，并支持mybatis框架 |
-| XSS漏洞检测          | 支持检测Spring接口的responsebody注入场景     |
-| 命令注入检测         | 支持检测常见的命令注入                   |
-| cookie未设置httpOnly | 支持检测Cookie未设置httpOnly标志位       |
-| cookie未设置secure   | 支持检测Cookie未设置secure标志位         |
-| 不安全的TLS版本      | 支持检测设置TLS版本低于1.2的情况         |
-
+**阅读 [Corax社区版功能对比](docs/feature_diff.md#已开放规则) 了解本Java社区版工具已开放的规则。**
 
 **如需实现自定义的 `CoraxJava规则检查器`，请参考 [CoraxJava规则检查器](docs/checker.md) 了解更多详情。**
 
