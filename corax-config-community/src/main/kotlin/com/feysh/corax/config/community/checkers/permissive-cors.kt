@@ -19,7 +19,7 @@ object `permissive-cors` : AIAnalysisUnit() {
     private val accessControlAllowOrigin = CustomAttributeID<Boolean>("AccessControlAllowOrigin")
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         method(matchSoot("<org.springframework.web.servlet.config.annotation.CorsRegistration: org.springframework.web.servlet.config.annotation.CorsRegistration allowedOrigins(java.lang.String[])>"))
             .modelNoArg {
                 check(p0.field(Elements).getString().stringEquals(literal("*")), PermissiveCorsChecker.PermissiveCors)
@@ -59,7 +59,7 @@ object `permissive-cors` : AIAnalysisUnit() {
 
     object `any-url-request`: PreAnalysisUnit(){
         context (PreAnalysisApi)
-        override fun config() {
+        override suspend fun config() {
             atAnyMethod {
                 val mapping = visibilityAnnotationTag?.annotations?.filter { it.type in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES } ?: return@atAnyMethod
                 for (m in mapping){

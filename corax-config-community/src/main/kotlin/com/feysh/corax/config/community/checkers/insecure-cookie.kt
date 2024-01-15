@@ -12,7 +12,7 @@ object `insecure-cookie`  : AIAnalysisUnit() {
     private val secureAttr = CustomAttributeID<Boolean>("secure")
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         constructor(::Cookie).modelNoArg {
             `this`.attr[secureAttr] = false  // default: `secure = false`
         }

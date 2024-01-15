@@ -12,7 +12,7 @@ object `httponly-cookie` : AIAnalysisUnit() {
     private val httpOnlyAttr = CustomAttributeID<Boolean>("httpOnly")
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         constructor(::Cookie).modelNoArg {
             `this`.attr[httpOnlyAttr] = false  // default: `isHttpOnly = false`
         }

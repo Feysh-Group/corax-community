@@ -2,8 +2,6 @@ package com.feysh.corax.config.general.model
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
-import com.feysh.corax.config.general.utils.isCollection
-import com.feysh.corax.config.general.utils.isMap
 import kotlinx.serialization.Serializable
 import soot.RefLikeType
 import soot.SootField
@@ -67,9 +65,9 @@ object `secret-data-annotation` : AIAnalysisUnit() {
             }
 
             atGet {
-                val accessPaths = if (fieldType.isCollection) {
+                val accessPaths = if (ConfigCenter.isCollectionClassType(fieldType) || ConfigCenter.isOptionalClassType(fieldType)) {
                     listOf(field.field(Elements))
-                } else if (fieldType.isMap) {
+                } else if (ConfigCenter.isMapClassType(fieldType)) {
                     listOf(field.field(MapValues))
                 } else {
                     listOf(field)
@@ -83,7 +81,7 @@ object `secret-data-annotation` : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         fieldSource()
         // TODO
     }

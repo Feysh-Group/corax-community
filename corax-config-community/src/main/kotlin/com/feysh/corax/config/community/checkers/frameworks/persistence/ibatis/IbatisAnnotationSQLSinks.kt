@@ -7,15 +7,16 @@ import com.feysh.corax.config.api.MethodConfig
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.general.checkers.internetControl
-import com.feysh.corax.config.general.utils.isCollection
+import com.feysh.corax.config.general.model.ConfigCenter
 import soot.tagkit.AnnotationArrayElem
 import soot.tagkit.AnnotationStringElem
 import soot.tagkit.AnnotationTag
 
+// TODO: need refactor
 object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         eachMethod {
             val visibilityAnnotationTag = visibilityAnnotationTag ?: return@eachMethod
             if (!visibilityAnnotationTag.hasAnnotations()) {
@@ -38,7 +39,7 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
                                     .filterIsInstance<AnnotationStringElem>().map { it.value }.toSet()
 
                                 if (params.intersect(riskNames).isNotEmpty()) {
-                                    val sink = if (p.type.isCollection) p.field(Elements) else p
+                                    val sink = if (ConfigCenter.isCollectionClassType(p.type) || ConfigCenter.isOptionalClassType(p.type)) p.field(Elements) else p
                                     check(
                                         sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
                                         SqliChecker.SqlInjection

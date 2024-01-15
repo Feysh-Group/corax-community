@@ -233,7 +233,7 @@ object `xxe-attacks` : AIAnalysisUnit() {
     }
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         DocumentBuilder.Parse.apply()
         XmlInputFactory.StreamReader.apply()
         XmlInputFactory.EventReader.apply()

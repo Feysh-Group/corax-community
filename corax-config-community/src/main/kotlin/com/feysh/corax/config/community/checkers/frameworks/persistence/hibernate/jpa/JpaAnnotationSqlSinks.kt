@@ -7,12 +7,12 @@ import com.feysh.corax.config.api.MethodConfig
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.general.checkers.internetControl
-import com.feysh.corax.config.general.utils.isCollection
+import com.feysh.corax.config.general.model.ConfigCenter
 
 object JpaAnnotationSqlSinks : AIAnalysisUnit() {
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         eachMethod {
             val visibilityAnnotationTag = visibilityAnnotationTag ?: return@eachMethod
             if (!visibilityAnnotationTag.hasAnnotations()) {
@@ -26,7 +26,7 @@ object JpaAnnotationSqlSinks : AIAnalysisUnit() {
                         modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCaller }) {
                             for (parameterIndex in 0 until sootMethod.parameterCount) {
                                 val p = parameter(parameterIndex)
-                                val sink = if (p.type.isCollection) p.field(Elements) else p
+                                val sink = if (ConfigCenter.isCollectionClassType(p.type) || ConfigCenter.isOptionalClassType(p.type)) p.field(Elements) else p
                                 check(
                                     sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
                                     SqliChecker.SqlInjection

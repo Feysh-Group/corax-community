@@ -591,33 +591,61 @@ import com.feysh.corax.config.api.ISootInitializeHandler
 @Suppress("unused")
 object EmptySootConfiguration: ISootInitializeHandler
 
-object DefaultSootConfiguration: ISootInitializeHandler {
+object DefaultSootConfiguration : ISootInitializeHandler {
+    @Serializable
+    class CustomOptions : SAOptions {
+        val excludeList: List<String> = listOf(
+            "java.*",
+            "javax.*",
+            "jdk.*",
+
+            "com.apple.*",
+            "apple.awt.*",
+            "org.w3c.*",
+            "org.xml.*",
+            "com.sun.*",
+            "sun.*",
+
+            // exclude classes of android.* will cause layout class cannot be
+            // loaded for layout file based callback analysis.
+
+            // 2020-07-26 (SA): added back the exclusion, because removing it breaks
+            // calls to Android SDK stubs. We need a proper test case for the layout
+            // file issue and then see how to deal with it.
+            "android.*",
+            "androidx.*",
+
+            // logger
+            "org.slf4j.*",
+            "org.apache.log4j.*",
+            "org.apache.logging.*",
+            "java.util.logging.*",
+            "ch.qos.logback.*",
+            "com.mysql.*",
+
+            // "org.apache.*",
+            "org.eclipse.*",
+            "soot.*"
+        )
+
+        val sootPhaseNameToOption: Map<String, String> = mapOf(
+            "jb.sils" to "enabled:false", // null_type bug
+            "jb.tr" to "ignore-nullpointer-dereferences:true", // don't replace to npe
+        )
+    }
+
+    var options: CustomOptions = CustomOptions()
+
     override fun configure(options: Options) {
         // explicitly include packages for shorter runtime:
         val excludeList: MutableList<String> = LinkedList()
-        excludeList.add("java.*")
-        excludeList.add("javax.*")
-        excludeList.add("jdk.*")
-
-        excludeList.add("sun.*")
-
-        // exclude classes of android.* will cause layout class cannot be
-        // loaded for layout file based callback analysis.
-
-        // 2020-07-26 (SA): added back the exclusion, because removing it breaks
-        // calls to Android SDK stubs. We need a proper test case for the layout
-        // file issue and then see how to deal with it.
-        excludeList.add("android.*")
-        excludeList.add("androidx.*")
-
-        excludeList.add("org.apache.*")
-        excludeList.add("org.eclipse.*")
-        excludeList.add("soot.*")
-        
+        excludeList.addAll(this.options.excludeList)
         //  soot.Options exclude 掉的类仅加载其 signature，不会加载任何 method body
         //  可以加快扫描速度，减少不关心的类的分析，但是可能降低分析精度
-        options.set_exclude(excludeList) 
-        options.set_no_bodies_for_excluded(true)
+        options.set_exclude(excludeList)
+        for ((phaseName, opt) in this.options.sootPhaseNameToOption) {
+            options.setPhaseOption(phaseName, opt)
+        }
     }
 }
 

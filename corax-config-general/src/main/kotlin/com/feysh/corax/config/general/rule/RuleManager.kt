@@ -1,6 +1,7 @@
 package com.feysh.corax.config.general.rule
 
 import com.feysh.corax.config.general.model.taint.TaintRule
+import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -49,7 +50,7 @@ open class RuleManager<T> (val rules: List<T>){
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                error("invalid parse json file $file")
+                error("Failed to parse json file $file")
             }
         }
 
@@ -91,6 +92,10 @@ open class GroupedMethodsManager<T: IMethodGrouped>(methods: List<T>) : RuleMana
     }
 
     fun getRulesByGroupKinds(kinds: List<String>): Map<String, List<T>> = kinds.associateWith { getRulesByGroupKinds(it) }
+
+    fun validate() {
+        rules.forEach { it.methodMatch }
+    }
 
     companion object {
         fun <T: IMethodGrouped> load(files: List<Path>, serializer: KSerializer<T>): GroupedMethodsManager<T> {

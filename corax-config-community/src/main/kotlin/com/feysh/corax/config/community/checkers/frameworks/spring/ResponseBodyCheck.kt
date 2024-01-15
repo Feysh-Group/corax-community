@@ -12,7 +12,7 @@ object ResponseBodyCheck : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
 
         eachMethod {
             val visibilityAnnotationTag = visibilityAnnotationTag ?: return@eachMethod

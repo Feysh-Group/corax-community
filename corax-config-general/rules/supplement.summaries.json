@@ -107,7 +107,7 @@
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"sanitizer","from":"xss","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeHtml(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
-  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"xss","provenance":"manual","ext":""},
+  {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"sanitizer","from":"xss","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String unescapeJava(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang.StringEscapeUtils: java.lang.String escapeJavaScript(java.lang.String)>","subtypes":false,"to":"ReturnValue","propagate":"sanitizer","from":"xss","provenance":"manual","ext":""},

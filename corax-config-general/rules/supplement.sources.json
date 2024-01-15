@@ -247,6 +247,14 @@
   {"kind":"sensitive","signature":"android.telephony.TelephonyManager: String getDeviceId()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   "}",
 
+  "ZipEntry",
+  {"kind":"zip-entry","signature": "java.util.zip.ZipEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.ArchiveEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "java.util.jar.JarFile.JarFileEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "java.util.jar.JarEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "java.nio.file.Path: Path resolve(java.lang.String)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
+  {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.zip.ZipFile: InputStream getInputStream(org.apache.commons.compress.archivers.zip.ZipArchiveEntry)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
 
   "EOF"
 ]

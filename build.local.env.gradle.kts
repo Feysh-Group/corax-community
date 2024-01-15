@@ -14,13 +14,14 @@ kotlin.run {
         error("coraxEnginePath: $coraxEnginePath does not exist. Please modify $properties and " +
                 "set property: \"coraxEngine\" to the path of corax-cli_x.x.x.jar." )
     }
-    val engineJar by extra { if (coraxEnginePath.isDirectory){
-        val foundJar = coraxEnginePath.listFiles()?.filter { it.extension == "jar" }
-        println("foundJar: \n[${foundJar?.joinToString("\n"){ "\t$it "}}]")
-        foundJar?.sortedBy { it.name }?.lastOrNull() ?: error("directory: $coraxEnginePath doesn't contains any corax_cli_x.x.x.jar")
-    } else {
-        coraxEnginePath
-    }
+    val engineJar by extra {
+        if (coraxEnginePath.isDirectory){
+            val foundJar = coraxEnginePath.listFiles()?.filter { it.extension == "jar" }
+            println("foundJar: \n[${foundJar?.joinToString("\n"){ "\t$it "}}]")
+            foundJar?.sortedBy { it.name }?.lastOrNull() ?: error("directory: $coraxEnginePath doesn't contains any corax_cli_x.x.x.jar")
+        } else {
+            coraxEnginePath
+        }
     }
     println("used engine jar: $engineJar")
 

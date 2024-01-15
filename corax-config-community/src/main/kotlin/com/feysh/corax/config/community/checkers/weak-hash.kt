@@ -25,7 +25,7 @@ object `weak-hash` : AIAnalysisUnit() {
     private fun IOperatorFactory.isMdHash(algorithm: IStringExpr) =
         algorithm.stringEquals("md2") or algorithm.stringEquals("md4") or algorithm.stringEquals("md5")
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
 
         listOf(
             matchStaticMethod<MessageDigest, String>(MessageDigest::getInstance),
@@ -65,7 +65,7 @@ object `weak-hash` : AIAnalysisUnit() {
 
 
         context (PreAnalysisApi)
-        override fun config() {
+        override suspend fun config() {
 
             atAnyClass {
                 if (superClasses.any { it.name == "java.security.MessageDigest" }){

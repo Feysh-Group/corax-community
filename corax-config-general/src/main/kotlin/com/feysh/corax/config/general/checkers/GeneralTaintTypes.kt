@@ -31,6 +31,7 @@ enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
     CONTAINS_SENSITIVE_DATA("The data is sensitive"),
 
     BASE_ENCODE("base16/32/64 data"),
+    ZIP_ENTRY_NAME("Zip Entry Name"),
 
     UNENCRYPTED_DATA("The data is not encrypted yet"),
     ENCRYPTED_DATA("The data is encrypted yet"),

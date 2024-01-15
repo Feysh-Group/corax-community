@@ -32,12 +32,19 @@ object SqliChecker : IChecker {
 
     object SqlInjection : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "使用  ${args["type"]} 中的 `$callee` 可能容易受到 SQL 注入的攻击"},
-            Language.EN to msgGenerator { "This use of `$callee` can be vulnerable to SQL injection in the ${args["type"]} " }
+            Language.ZH to msgGenerator { "使用  ${args["type"]} 中的 `$callee` 可能容易受到 SQL 注入的攻击.${args["msg"]?.let { " $it" } ?: ""}"},
+            Language.EN to msgGenerator { "This use of `$callee` can be vulnerable to SQL injection in the ${args["type"]}.${args["msg"]?.let { " $it" } ?: ""}" }
         )
         override val checker: IChecker = SqliChecker
     }
 
+    object MybatisSqlInjectionSinkHint : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "找到 SQL 注入 sink 点 ${args["numSinks"]} 个 . 存在风险的 Mybatis SQL 查询语句为: `${args["boundSql"]}`"},
+            Language.EN to msgGenerator { "Found `${args["numSinks"]}` SQL injection sinks in the risk Mybatis SQL statement: `${args["boundSql"]}`" }
+        )
+        override val checker: IChecker = SqliChecker
+    }
 }
 
 object InsecureCookieChecker : IChecker {
@@ -84,8 +91,15 @@ object PathTraversalChecker : IChecker {
 
     object PathTraversal : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "此 API `$callee` 打开的可能是由用户输入指定的文件" },
-            Language.EN to msgGenerator { "This API `$callee` opens a file whose location might be specified by user input" }
+            Language.ZH to msgGenerator { "此 API `$callee` 读取的可能是由用户输入指定的文件" },
+            Language.EN to msgGenerator { "This API `$callee` reads a file whose location might be specified by user input" }
+        )
+        override val checker: IChecker = PathTraversalChecker
+    }
+    object ZipSlip : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "此处的方法 `$callee` 可能产生 zipSlip 漏洞" },
+            Language.EN to msgGenerator { "This method `$callee` may create a zipSlip vulnerability" }
         )
         override val checker: IChecker = PathTraversalChecker
     }

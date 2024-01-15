@@ -8,14 +8,10 @@ import com.feysh.corax.config.api.baseimpl.matchSoot
 import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.general.rule.IMethodSignature
 import com.google.common.base.Optional
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import mu.KotlinLogging
-import org.w3c.dom.Document
-import org.xml.sax.InputSource
+import org.xml.sax.*
 import soot.*
 import soot.asm.AsmUtil
-import java.io.CharArrayReader
 import java.io.File
 import java.io.IOException
 import java.nio.file.FileVisitResult
@@ -24,11 +20,8 @@ import java.nio.file.Path
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
-import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.io.path.inputStream
 
-// Hint: 自定义配置插件和商业版插件混合使用时, 可以删改定义, 不可删改声明, 否则会出现商业版插件冲突崩溃。注: 单独使用社区版插件可以任意修改
+// Hint: 自定义配置插件和商业版插件混合使用时, 可以修改定义, 但不可删改声明, 否则会出现商业版插件冲突崩溃。注: 单独使用社区版插件可以任意修改
 
 private val logger = KotlinLogging.logger {}
 fun Any.enumerate(e: (Int) -> Unit) {
@@ -38,46 +31,6 @@ fun Any.enumerate(e: (Int) -> Unit) {
         is Long -> e(this.toInt())
     }
 }
-
-
-val collectionClasses = mutableListOf(
-    "java.util.List",
-    "java.util.Set",
-    "java.lang.Iterable",
-    "java.util.Collection",
-    "java.util.Enumeration",
-    "java.util.ArrayList",
-    "java.util.Optional"
-)
-val Type.isCollection: Boolean
-    get() = run {
-        if (this is ArrayType)
-            return@run true
-        @Suppress("DuplicatedCode")
-        if (this is RefType){
-            val hierarchy = Scene.v().orMakeFastHierarchy
-            val scene = Scene.v()
-            return@run collectionClasses.any { hierarchy.canStoreType(this@isCollection, scene.getOrAddRefType(it)) }
-        }
-        return@run false
-    }
-
-val mapClasses = mutableListOf(
-    "java.util.Map",
-    "java.util.HashMap",
-    "java.util.LinkedHashMap",
-    "java.util.TreeMap",
-)
-val Type.isMap: Boolean
-    get() = run {
-        if (this is RefType) {
-            val hierarchy = Scene.v().orMakeFastHierarchy
-            val scene = Scene.v()
-            return@run mapClasses.any { hierarchy.canStoreType(this@isMap, scene.getOrAddRefType(it)) }
-        }
-        return@run false
-    }
-
 
 val primTypes
     get() = setOf(
@@ -95,28 +48,40 @@ val primTypesBoxed get() = primTypes.mapTo(mutableSetOf()) { it.boxedType() }
 
 val primTypesBoxedQuotedString get() = primTypesBoxed.mapTo(mutableSetOf()) { it.typename!! }
 
-val RefType.isBoxedPrimitives: Boolean
+inline val Type.isBoxedPrimitives: Boolean
     get() = primTypesBoxed.contains(this)
+inline val Type.isPrimitives: Boolean
+    get() = this is PrimType
+inline val stringType: RefType get() = Scene.v().getRefType("java.lang.String")
+inline val charSequenceType: RefType get() = Scene.v().getRefType("java.lang.CharSequence")
 
-val stringType: RefType get() = Scene.v().getRefType("java.lang.String")
-val Type.isStringType: Boolean
-    get() = this == stringType
+inline val Type.isStringType: Boolean
+    get() = this.typename.let { name -> name == "java.lang.String" || name == "java.lang.CharSequence" }
 
-val Type.isByteArray: Boolean
+inline val Type.isVoidType: Boolean get() = this is VoidType || (this is RefType && this.className.substringAfterLast(".") == "Void")
+
+inline val Type.isByteArray: Boolean
     get() = this == G.v().soot_ByteType().arrayType
 
-val Type.isCharArray: Boolean
+inline val Type.isCharArray: Boolean
     get() = this == G.v().soot_CharType().arrayType
 
-val Type.isIntArray: Boolean
+inline val Type.isIntArray: Boolean
     get() = this == G.v().soot_IntType().arrayType
 
-val Type.isLongArray: Boolean
+inline val Type.isLongArray: Boolean
     get() = this == G.v().soot_LongType().arrayType
 
-val Type.isStringArray: Boolean
-    get() = this == stringType.arrayType
+inline val Type.isStringArray: Boolean
+    get() = this == stringType.arrayType || this == charSequenceType.arrayType
 
+fun Type.isInstanceOf(parents: Collection<Type>): Boolean  {
+    if (this is RefType) {
+        val hierarchy = Scene.v().orMakeFastHierarchy
+        return parents.any { hierarchy.canStoreType(this, it) }
+    }
+    return false
+}
 
 object Utils {
 
@@ -197,38 +162,6 @@ fun walkFiles(jsonDirs: List<Path>, filter: (file: Path) -> Boolean): List<Path>
         })
     }
     return files
-}
-
-suspend fun parseXmlSafe(xmlFile: Path): Document? {
-    try {
-        xmlFile.inputStream().use { stream ->
-            val dbFactory = DocumentBuilderFactory.newInstance()
-            with(dbFactory) {
-                setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
-                setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
-                setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "")
-                isValidating = false
-                isExpandEntityReferences = false
-            }
-            val dBuilder = dbFactory.newDocumentBuilder()
-            dBuilder.setEntityResolver { _, _ -> InputSource(CharArrayReader(CharArray(0))) }
-            val doc = withContext(Dispatchers.IO) {
-                try {
-                    dBuilder.parse(stream)
-                } catch (e: Exception) {
-                    logger.warn { "failed to parse xml file $xmlFile, e: ${e.message}" }
-                    null
-                }
-            } ?: return null
-            doc.documentElement.normalize()
-            return doc
-        }
-
-    } catch (e: Exception) {
-        logger.warn { "failed to open stream of file $xmlFile. e: ${e.message}" }
-        return null
-    }
-
 }
 
 /**

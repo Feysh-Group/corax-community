@@ -46,7 +46,7 @@ object `hardcode-credential` : HardCodeBase() {
 
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         applyRules(option.kind2Checker)
         hardcodedCredentialsSourceCall()
         hardcodedCredentialComparison()

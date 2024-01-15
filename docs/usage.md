@@ -553,7 +553,7 @@ tasks.register<Copy>("copyRuntimeDependencies") {
 
 ## Android App
 
-测试用例：https://github.com/signalapp/Signal-Androidapk不能有任何 混淆、加密、保护壳等！！！
+测试用例：https://github.com/signalapp/Signal-Androidapk （注：apk不能有任何 混淆、加密、保护壳等！！！）
 
 先下载apk然后将apk正确对应的版本的源码克隆下来，然后 --auto-app-classes 指向项目根目录，--process 指向apk文件，--android-platform-dir 指向存放 non-stub android.jar 的 platforms 资源文件夹（此资源文件可以在下文的 [--android-platform-dir 参数] 说明处获得）
 

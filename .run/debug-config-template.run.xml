@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="debug-config-template" type="JarApplication">
     <option name="JAR_PATH" value="{corax-cli.jar path}" />
-    <option name="PROGRAM_PARAMETERS" value="--verbosity info --output build/output --make-scorecard --enable-data-flow true --target java --auto-app-classes corax-config-tests --result-type sarif --result-type plist --config default-config.yml@build\analysis-config" />
+    <option name="PROGRAM_PARAMETERS" value="--verbosity info --output build/report/normal --make-scorecard --enable-data-flow true --target java --auto-app-classes corax-config-tests/normal --result-type sarif --result-type plist --config default-config.yml@build\analysis-config" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Gradle.BeforeRunTask" enabled="false" tasks="build" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="-x test" />

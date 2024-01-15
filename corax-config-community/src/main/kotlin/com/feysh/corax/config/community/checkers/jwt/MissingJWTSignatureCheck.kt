@@ -16,14 +16,15 @@ object MissingJWTSignatureCheck : PreAnalysisUnit() {
      * where the `handler` is considered insecure.
      */
     context (PreAnalysisApi)
-    override fun config() {
-        val vulnHandlerDeclareType = mutableSetOf<String>()
-        runInScene {
-            val jwtHandlerSc = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandler") ?: return@runInScene
-            val jwtHandlerAdapterSc: SootClass? = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandlerAdapter")
+    override suspend fun config() {
+        val vulnHandlerDeclareTypes = runInSceneAsync {
+            val vulnHandlerDeclareType = mutableSetOf<String>()
+            val jwtHandlerSc = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandler",  false) ?: return@runInSceneAsync emptySet()
+            val jwtHandlerAdapterSc: SootClass? = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandlerAdapter", false)
             val missingSigCheckMethodNames = setOf("onClaimsJwt", "onPlaintextJwt")
-            val subs = Scene.v().orMakeFastHierarchy.let { h -> h.getSubclassesOf(jwtHandlerSc) +
-                    (jwtHandlerAdapterSc?.let { h.getSubclassesOf(it) } ?: emptyList() )
+            val subs = Scene.v().orMakeFastHierarchy.let { h ->
+                h.getSubclassesOf(jwtHandlerSc) +
+                        (jwtHandlerAdapterSc?.let { h.getSubclassesOf(it) } ?: emptyList())
             }
             for (subJwtHandler in subs) {
                 if (subJwtHandler == jwtHandlerAdapterSc) {
@@ -34,6 +35,7 @@ object MissingJWTSignatureCheck : PreAnalysisUnit() {
                     vulnHandlerDeclareType.add(subJwtHandler.name)
                 }
             }
+            vulnHandlerDeclareType.toSet()
         }
 
 
@@ -50,7 +52,7 @@ object MissingJWTSignatureCheck : PreAnalysisUnit() {
         atInvoke(matchSimpleSig("io.jsonwebtoken.JwtParser: * parse(String accessToken, JwtHandler JwtHandler)")) {
             val handlerTypes = this.invokeExpr?.getArg(1)?.possibleTypes ?: return@atInvoke
             val handlerTypeStrings = handlerTypes.mapNotNullTo(mutableSetOf()) { (it as? RefType)?.className }
-            val intersection = handlerTypeStrings.intersect(vulnHandlerDeclareType)
+            val intersection = handlerTypeStrings.intersect(vulnHandlerDeclareTypes.await())
             if (intersection.isNotEmpty()) {
                 report(IncompleteModelOfEndpointFeatures.HasMissingJwtSignatureCheck)
             }

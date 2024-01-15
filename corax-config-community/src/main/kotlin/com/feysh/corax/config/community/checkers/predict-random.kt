@@ -1,18 +1,34 @@
 package com.feysh.corax.config.community.checkers
 
+import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchConstructor
 import com.feysh.corax.config.api.baseimpl.matchSimpleSig
 import com.feysh.corax.config.api.baseimpl.matchStaticMethod
-import com.feysh.corax.config.api.PreAnalysisApi
-import com.feysh.corax.config.api.PreAnalysisUnit
+import com.feysh.corax.config.api.utils.superClasses
+import com.feysh.corax.config.api.utils.superInterfaces
 import com.feysh.corax.config.community.PredictRandomChecker
+import kotlinx.serialization.Serializable
 import java.util.*
 
 @Suppress("ClassName")
 object `predict-random` : PreAnalysisUnit() {
+    @Serializable
+    class Options : SAOptions {
+        val secureRandomClass: Set<String> = setOf("java.security.SecureRandom")
+    }
+
+    private var option: Options = Options()
+    
+    context (PreAnalysisApi)
+    private fun IInvokeCheckPoint.checkAndReport(bugType: CheckType = PredictRandomChecker.PredictRandom) {
+        val calleeClass = callee.declaringClass
+        if (option.secureRandomClass.any { calleeClass.isInstanceOf(it) == true })
+            return
+        report(bugType)
+    }
 
     context (PreAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         listOf(
             matchConstructor<Random>(::Random),
             matchConstructor<Random, Long>(::Random),
@@ -24,7 +40,7 @@ object `predict-random` : PreAnalysisUnit() {
             matchSimpleSig("org.apache.commons.lang3.math.JVMRandom: * <init>(**)"),
             matchSimpleSig("org.apache.commons.lang3.math.JVMRandom: * nextLong(**)")
         ).forEach {
-            atInvoke(it) { report(PredictRandomChecker.PredictRandom) }
+            atInvoke(it) { checkAndReport() }
         }
 
         listOf(
@@ -44,7 +60,7 @@ object `predict-random` : PreAnalysisUnit() {
             matchSimpleSig("org.apache.commons.lang3.RandomStringUtils: * randomNumeric(**)"),
             matchSimpleSig("org.apache.commons.lang3.RandomStringUtils: * randomPrint(**)"),
         ).forEach {
-            atInvoke(it) { report(PredictRandomChecker.PredictRandom) }
+            atInvoke(it) { checkAndReport() }
         }
         listOf(
             matchSimpleSig("org.apache.commons.lang.math.RandomUtils: * nextBoolean(**)"),
@@ -60,7 +76,7 @@ object `predict-random` : PreAnalysisUnit() {
             matchSimpleSig("org.apache.commons.lang3.math.RandomUtils: * nextInt(**)"),
             matchSimpleSig("org.apache.commons.lang3.math.RandomUtils: * nextLong(**)"),
         ).forEach {
-            atInvoke(it) { report(PredictRandomChecker.PredictRandom) }
+            atInvoke(it) { checkAndReport() }
         }
 
 
@@ -79,7 +95,7 @@ object `predict-random` : PreAnalysisUnit() {
             matchSimpleSig("scala.util.Random: * nextPrintableChar(**)"),
         ).forEach {
             atInvoke(it) {
-                report(PredictRandomChecker.PredictRandom)
+                checkAndReport()
             }
         }
     }

@@ -20,7 +20,7 @@ object `hardcode-crypto-key` : HardCodeBase() {
 
     private var option: Options = Options()
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         applyRules(option.kind2Checker)
     }
 

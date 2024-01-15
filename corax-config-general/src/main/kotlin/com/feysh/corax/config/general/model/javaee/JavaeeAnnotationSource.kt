@@ -4,23 +4,23 @@ import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
 import com.feysh.corax.config.general.checkers.internetSource
 import com.feysh.corax.config.general.model.ConfigCenter
-import com.feysh.corax.config.general.rule.RuleArgumentParser
-import com.feysh.corax.config.general.utils.primTypesBoxedQuotedString
+import com.feysh.corax.config.general.model.type.HandlerTypeVisitor
+import com.feysh.corax.config.general.model.type.HandlerTypeVisitorInTaint
+import com.feysh.corax.config.general.model.type.TypeHandler
 import kotlinx.serialization.Serializable
-import soot.ArrayType
-import soot.G
-import soot.PrimType
-import soot.RefLikeType
-import soot.RefType
-import soot.SootClass
+import soot.*
 import soot.tagkit.VisibilityParameterAnnotationTag
 
+
+internal enum class WebFramework {
+    SPRING, JAVAX_WS_RS
+}
 
 object JavaeeAnnotationSource : AIAnalysisUnit() {
 
     @Serializable
     class Options : SAOptions {
-        val excludeRequestBodyTypes: Set<String> = setOf(
+        val excludeModelingJavaWebModelClassTypes: Set<String> = setOf(
             "javax.servlet.ServletRequest",
             "javax.servlet.ServletRequestWrapper",
             "javax.servlet.http.HttpServletRequest",
@@ -47,156 +47,190 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
 
     var option: Options = Options()
 
-    private fun addParamSource(
-        dtoClasses: MutableSet<SootClass>,
-        method: ISootMethodDecl<Any>,
-        i: Int
-    ) {
+    context (api@PreAnalysisApi)
+    private fun parseWebControllerMappingMethods(): PreAnalysisApi.Result<Pair<WebFramework, SootMethod>> {
+        return atAnyMethod(config = { incrementalAnalyze = false }) {
+            val visibilityAnnotationTag = visibilityAnnotationTag
+            if (visibilityAnnotationTag != null) {
+                if (!visibilityAnnotationTag.hasAnnotations()) {
+                    return@atAnyMethod null
+                }
 
-        method.modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCallee }) {
-            val param = parameter(i)
-            val paramType = method.sootMethod.getParameterType(i)
-            val sources = RuleArgumentParser.fillingPath(param, paramType)
-            val dataType = when (paramType) {
-                is ArrayType -> paramType.elementType
-                is PrimType -> paramType
-                is RefLikeType -> paramType
-                else -> return@modelNoArg
+                for (annotation in visibilityAnnotationTag.annotations) {
+                    when (annotation.type) {
+                        in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES_SPRING -> {
+                            return@atAnyMethod WebFramework.SPRING to sootMethod
+                        }
+
+                        in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_JAVAX_WS_RS -> {
+                            return@atAnyMethod WebFramework.JAVAX_WS_RS to sootMethod
+                        }
+                    }
+                }
             }
-            if (ConfigCenter.skipTaintPrimitiveType(dataType)) {
-                return@modelNoArg
+
+            val tags = sootMethod.tags
+            for (paramTag in tags.filterIsInstance<VisibilityParameterAnnotationTag>()) {
+                for (paramAnnotation in paramTag.visibilityAnnotations) {
+                    if (paramAnnotation == null) continue
+                    if (paramAnnotation.annotations.any { it.type in JavaeeFrameworkConfigs.option.REQUEST_PARAM_ANNOTATION_TYPES_SPRING }) {
+                        return@atAnyMethod WebFramework.SPRING to sootMethod
+                    }
+                    if (paramAnnotation.annotations.any { it.type in JavaeeFrameworkConfigs.option.REQUEST_PARAM_ANNOTATION_TYPES_JAVAX_WS_RS }) {
+                        return@atAnyMethod WebFramework.JAVAX_WS_RS to sootMethod
+                    }
+                }
             }
+            return@atAnyMethod null
+        }.nonNull()
+    }
 
-//            with(method) {
-//                val annotations = param.annotationTag
-//                val annotationTypes = annotations.map { it.type }
-//                if (option.requestBodyAnnotationWhiteList.isNotEmpty() &&
-//                    option.requestBodyAnnotationWhiteList.intersect(annotationTypes).isEmpty()){
-//                    return@modelNoArg
-//                }
-//            }
+    fun isWebModelClassType(t: TypeHandler.OtherClassType): Boolean {
+        // the black list
+        if (t.type.className in option.excludeModelingJavaWebModelClassTypes) {
+            return false
+        }
+        return true
+    }
 
-            for (source in sources) {
-                val refType = dataType as? RefType
-                if (refType != null) {
-                    val refTypeQuoted = refType.className
-                    val refTypeClazz = refType.sootClass
-                    if (refTypeQuoted == "java.lang.String" || refTypeQuoted in primTypesBoxedQuotedString) {
-                        source.taint += taintOf(internetSource)
-                        continue
+
+    context (AIAnalysisApi)
+    private fun taintWebRequestMappingHandlerParameters(framework: WebFramework, requestMappingHandler: SootMethod) {
+        val hTypes = TypeHandler.getHandlerType(requestMappingHandler)
+        for ((i, hType) in hTypes) {
+            method(matchSoot(requestMappingHandler.signature))
+                .modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCallee }) {
+                    val p = parameter(i)
+                    val visitor = object : HandlerTypeVisitor(this, p) {
+
+                        override fun visit(accessPath: ILocalT<*>, paramType: Type) {
+                            // (TAINT IN): add taint source kinds
+                            accessPath.taint += taintOf(internetSource)
+                        }
+
+                        override fun visit(t: TypeHandler.PrimitiveType) {
+                            if (!ConfigCenter.option.taintPrimTypeValue) {
+                                return
+                            }
+                            super.visit(t)
+                        }
+
+                        override fun visit(t: TypeHandler.BoxedPrimitiveType) {
+                            if (!ConfigCenter.option.taintPrimTypeValue) {
+                                return
+                            }
+                            return super.visit(t)
+                        }
+
+                        override fun visit(t: TypeHandler.OtherClassType) {
+                            if (!isWebModelClassType(t)) {
+                                return
+                            }
+                            // taint object instance base
+                            visit(param, t.type)
+                            // taint all the class declaring fields
+                            visit(param.subFields, t.type)
+                        }
                     }
-
-                    if (source is IAccessPathT) {
-                        source.taint += taintOf(internetSource)
-                        continue
-                    }
-
-                    if (refTypeQuoted in option.excludeRequestBodyTypes) {
-                        continue
-                    }
-
-                    // taint in: taint DTO this
-                    source.taint += taintOf(internetSource)
-
-                    // taint in: all the class declaring fields
-                    source.subFields.taint += taintOf(internetSource)
+                    hType.visit(visitor)
+                }
+        }
+    }
 
 
-                    if (refTypeClazz.isJavaLibraryClass ||
-                        option.requestParameterTypePrefixBlackList.any { refTypeClazz.name.startsWith(it) }
-                    ) {
-                        continue
-                    }
-                    // Serializable DTO Class
-                    // taint out: taint DTO method return value from this
-                    dtoClasses.add(refTypeClazz)
-                } else {
-                    source.taint += taintOf(internetSource)
+    context (bdr@ISootMethodDecl.CheckBuilder<Any>)
+    private fun taintModelClassSetterMethods() {
+        val m = method.sootMethod
+        if (m.isStatic || m.isStaticInitializer || m.isSynchronized) {
+            return
+        }
+        if (m.isJavaLibraryMethod) {
+            return
+        }
+
+        val hTypes = TypeHandler.getHandlerType(m)
+        for ((i, hType) in hTypes) {
+            val taintFrom = HandlerTypeVisitorInTaint.TaintFrom(this@bdr, parameter(i)).getExpr(hType)
+            if (taintFrom != null) {
+                `this`.taint += taintFrom
+            }
+        }
+    }
+
+    context (bdr@ISootMethodDecl.CheckBuilder<Any>)
+    private fun taintModelClassGetterMethods() {
+        val m = method.sootMethod
+        if (!ConfigCenter.isEnableTaintFlowType(m.returnType)) {
+            return
+        }
+        if (m.isStatic || m.isStaticInitializer || m.isSynchronized) {
+            return
+        }
+        if (m.isJavaLibraryMethod) {
+            return
+        }
+
+        val returnHType = TypeHandler.getHandlerType(`return`.type)
+        val taintOut = HandlerTypeVisitorInTaint.TaintOut(this@bdr, `return`).get(returnHType)
+
+        for (out in taintOut) {
+            out.taint += `this`.taint
+        }
+    }
+
+
+    // taint propagate: auto modeling getter and setter
+    context (AIAnalysisApi)
+    private fun taintModelClassMemberMethods(javaWebModelClassType: RefType) {
+        val modelClass = javaWebModelClassType.sootClass
+        for (m in modelClass.methods) {
+            if (m.name.startsWith("set") && m.name.length > 3) {
+                // taint in
+                method(matchSoot(m.signature)).modelNoArgSoot {
+                    taintModelClassSetterMethods()
+                }
+                continue
+            } else if (m.name.startsWith("get") && m.name.length > 3 && m.parameterCount == 0) {
+                // taint out
+                method(matchSoot(m.signature)).modelNoArgSoot {
+                    taintModelClassGetterMethods()
                 }
             }
         }
     }
 
-    context (api@AIAnalysisApi)
-    override fun config() {
-        val taintParameters = mutableMapOf<ISootMethodDecl<Any>, MutableSet<Int>>()
-        eachMethod {
-            val visibilityAnnotationTag = visibilityAnnotationTag ?: return@eachMethod
-            if (!visibilityAnnotationTag.hasAnnotations()) {
-                return@eachMethod
-            }
-            for (annotation in visibilityAnnotationTag.annotations) {
-                when (annotation.type) {
-                    in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES -> {
-                        for (parameterIndex in 0 until sootMethod.parameterCount) {
-                            taintParameters.getOrPut(this) { mutableSetOf() }.add(parameterIndex)
-                        }
-                    }
-                }
-            }
+    context (AIAnalysisApi)
+    override suspend fun config() {
 
-            for (paramTag in tags.filterIsInstance<VisibilityParameterAnnotationTag>()) {
-                paramTag.visibilityAnnotations.forEachIndexed { parameterIndex, tag ->
-                    if (tag != null && tag.annotations.any { it.type in JavaeeFrameworkConfigs.option.REQUEST_PARAM_ANNOTATION_TYPES }) {
-                        taintParameters.getOrPut(this) { mutableSetOf() }.add(parameterIndex)
-                    }
-                }
-            }
+        // parse controllers from web framework and configure taint source for parameters of request mapping methods
+        val requestMappingHandlers = with(preAnalysis) { parseWebControllerMappingMethods() }
 
+        for ((framework, requestMappingHandler) in requestMappingHandlers.await()) {
+            taintWebRequestMappingHandlerParameters(framework, requestMappingHandler)
         }
-        afterConfig {
-            val dtoClasses = mutableSetOf<SootClass>()
-            for ((m, parameters) in taintParameters) {
-                for (taintParameter in parameters) {
-                    addParamSource(dtoClasses, m, taintParameter)
+
+
+        val visitor = object : TypeHandler.Visitor<TypeHandler.OtherClassType?> {
+            override fun visitDefault(t: TypeHandler.HType) = null
+            override fun visit(t: TypeHandler.OtherClassType): TypeHandler.OtherClassType? {
+                if (isWebModelClassType(t)) {
+                    return t
+                }
+                return null
+            }
+        }
+
+        val javaWebModelClassTypesAtMappingMethodParam: Set<RefType> =
+            requestMappingHandlers.await().flatMapTo(mutableSetOf()) { (_, requestMappingHandler) ->
+                val hTypes = TypeHandler.getHandlerType(requestMappingHandler)
+                hTypes.mapNotNull { indexedValue ->
+                    indexedValue.value.visit(visitor)?.type
                 }
             }
 
-            for (dto in dtoClasses) {
-                for (m in dto.methods) {
-                    // auto modeling getter and setter
-                    if (m.name.startsWith("set")) {
-                        method(matchSoot(m.signature)).modelNoArgSoot {
-                            when {
-                                m.isStatic || m.isStaticInitializer || m.isSynchronized -> {}
-                                m.isJavaLibraryMethod -> {}
-                                else -> {
-                                    val from = method.sootMethod.parameterTypes.withIndex().flatMap { (i, type) ->
-                                        if (ConfigCenter.skipTaintPrimitiveType(type)) {
-                                            return@flatMap emptyList()
-                                        }
-                                        RuleArgumentParser.fillingPath(parameter(i), type)
-                                    }
-                                    val taintTypes = from.fold(null as ITaintSet?) { acc, argFrom ->
-                                        acc?.let { it + argFrom.taint } ?: argFrom.taint
-                                    }
-                                    if (taintTypes != null) {
-                                        `this`.taint += taintTypes
-                                    }
-                                }
-                            }
-                        }
-                        continue
-                    } else if (m.name.startsWith("get")) {
-                        if (ConfigCenter.skipTaintPrimitiveType(m.returnType) || m.returnType == G.v()
-                                .soot_VoidType()
-                        ) {
-                            continue
-                        }
-                        method(matchSoot(m.signature)).modelNoArgSoot {
-                            when {
-                                m.isStatic || m.isStaticInitializer || m.isSynchronized -> {}
-                                m.isJavaLibraryMethod -> {}
-                                else -> {
-                                    for (to in RuleArgumentParser.fillingPath(`return`, `return`.type)) {
-                                        to.taint += `this`.taint
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        // (TAINT IN/OUT): add taint propagate between setter and getter
+        for (javaWebModelClass in javaWebModelClassTypesAtMappingMethodParam) {
+            taintModelClassMemberMethods(javaWebModelClass)
         }
     }
 }

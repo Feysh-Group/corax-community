@@ -9,5 +9,6 @@ rootProject.name = 'corax-java-config'
 
 include 'corax-config-api'
 include 'corax-config-general'
-include 'corax-config-tests'
 include 'corax-config-community'
+include 'corax-config-tests:normal'
+include 'corax-config-tests:android10x'

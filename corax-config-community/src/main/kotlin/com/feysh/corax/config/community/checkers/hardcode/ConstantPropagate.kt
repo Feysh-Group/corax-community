@@ -36,6 +36,6 @@ object ConstantPropagate : AIAnalysisUnit(), IPropagate {
         }
     }
 
-    context(AIAnalysisApi) override fun config() { }
+    context(AIAnalysisApi) override suspend fun config() { }
 
 }

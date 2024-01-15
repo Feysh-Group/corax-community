@@ -1,9 +1,12 @@
 package com.feysh.corax.config.tests
 
-import com.feysh.corax.config.api.IAnalyzerConfigManager
-import com.feysh.corax.config.api.validate.AnalyzerConfigValidator
+import com.feysh.corax.config.api.AIAnalysisUnit
+import com.feysh.corax.config.api.CheckerUnit
+import com.feysh.corax.config.api.validate.AIAnalysisValidator
 import com.feysh.corax.config.community.AnalyzerConfigRegistry
 import com.feysh.corax.config.general.model.ConfigCenter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.junit.Before
 import org.junit.Test
@@ -56,7 +59,7 @@ class ConfigValidate {
         private val logger = KotlinLogging.logger {}
     }
 
-    private val testClasses = "../corax-config-tests/build/classes/java"
+    private val testClasses = "../corax-config-tests/normal/build/classes/java"
 
     @Before
     fun initSoot() {
@@ -107,11 +110,6 @@ class ConfigValidate {
         logger.info("applicationClasses: ${applicationClasses.size}. libraryClasses: ${libraryClasses.size}. phantomClasses: ${phantomClasses.size}")
     }
 
-    private fun IAnalyzerConfigManager.testConfig() {
-        aiCheckerImpl?.eachLocalVariable {
-            name
-        }
-    }
 
     // entry for validate and debug
     @Test
@@ -126,18 +124,25 @@ class ConfigValidate {
             fun failedText(kind: String, actual: Int): String {
                 return "The number is too small ($kind size: $actual) to meet the assertion. Please adjust the limitation here accordingly or ensure that there are no omissions."
             }
+            sources.validate()
+            summaries.validate()
+            sinks.validate()
             assert(sources.size >= 429){ failedText("sources", sources.size) }
             assert(summaries.size >= 9447){ failedText("summaries", summaries.size) }
             assert(sinks.size >= 30){ failedText("sinks", sinks.size) }
         }
-        with(AnalyzerConfigValidator()) {
-            with(AnalyzerConfigRegistry.CommunityJavaDefault) {
-                configCallBack()
-            }
-            testConfig()
-            validate()
-//            assert(this.modelConfig.errors.isEmpty()) { "detected ${this.modelConfig.errors.size} errors, abort" }
+        ConfigCenter.methodAccessPathDataBase.validate()
+        val aiCheckerImpl = AIAnalysisValidator()
+        runBlocking {
+            val allUnits: Set<CheckerUnit> = AnalyzerConfigRegistry.CommunityJavaDefault().units
+            allUnits.filterIsInstance<AIAnalysisUnit>()
+                .forEach {
+                    launch {
+                        CheckerUnit.processUnit(aiCheckerImpl, it) { it.config() }
+                    }
+                }
         }
+        aiCheckerImpl.validate()
     }
 
 

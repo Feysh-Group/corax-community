@@ -4,6 +4,7 @@ package com.feysh.corax.config.general.model.taint
 
 
 import com.feysh.corax.config.general.rule.*
+import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.*
 import mu.KotlinLogging
 import java.nio.file.*
@@ -47,6 +48,10 @@ object TaintRule {
     ) : IMethodAccessPathGrouped, ISelectable
 
     open class SummaryManager(methods: List<Summary>) : RuleManager<Summary>(methods) {
+        fun validate() {
+            rules.forEach { it.methodMatch }
+        }
+
         companion object {
             fun load(files: List<Path>, serializer: KSerializer<Summary>): SummaryManager {
                 val methods = RuleManager.load(files, serializer)

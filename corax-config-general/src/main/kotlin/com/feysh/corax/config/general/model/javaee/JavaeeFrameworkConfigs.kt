@@ -20,6 +20,11 @@ object JavaeeFrameworkConfigs: CheckerUnit() {
             "Lorg/springframework/web/bind/annotation/PatchMapping;"
         )
 
+        val REQUEST_PARAM_ANNOTATION_TYPES_SPRING = setOf(
+            "Lorg/springframework/web/bind/annotation/RequestParam;",
+            "Lorg/springframework/web/bind/annotation/PathVariable;",
+        )
+
         val REQUEST_MAPPING_ANNOTATION_JAVAX_WS_RS = setOf(
             "Ljavax/ws/rs/GET;",
             "Ljavax/ws/rs/POST;",
@@ -29,9 +34,9 @@ object JavaeeFrameworkConfigs: CheckerUnit() {
             "Ljavax/ws/rs/OPTIONS;",
         )
 
-        val REQUEST_PARAM_ANNOTATION_TYPES = setOf(
-            "Lorg/springframework/web/bind/annotation/RequestParam;",
-            "Lorg/springframework/web/bind/annotation/PathVariable;"
+        val REQUEST_PARAM_ANNOTATION_TYPES_JAVAX_WS_RS = setOf(
+            "Ljavax/ws/rs/QueryParam;",
+            "Ljavax/ws/rs/PathParam;"
         )
 
         val REQUEST_MAPPING_ANNOTATION_TYPES get() = REQUEST_MAPPING_ANNOTATION_TYPES_SPRING + REQUEST_MAPPING_ANNOTATION_JAVAX_WS_RS

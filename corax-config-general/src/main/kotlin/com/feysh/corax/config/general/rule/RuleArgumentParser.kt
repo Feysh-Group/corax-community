@@ -1,10 +1,7 @@
 package com.feysh.corax.config.general.rule
 
 import com.feysh.corax.config.api.*
-import com.feysh.corax.config.api.baseimpl.SootParameter
-import com.feysh.corax.config.api.baseimpl.SootReturn
-import com.feysh.corax.config.general.utils.isCollection
-import com.feysh.corax.config.general.utils.isMap
+import com.feysh.corax.config.general.model.type.TypeHandler
 import soot.G
 import soot.Type
 import java.util.*
@@ -13,30 +10,23 @@ import java.util.*
 object RuleArgumentParser {
     private val argRangeRegex = "(?<start>-?(\\d+)|global|this)..(?<end>-?(\\d+)|this)".toRegex()
 
-
-    context (ISootMethodDecl.CheckBuilder<*>)
-    fun fillingPath(acp: ILocalT<Any>, acpType: Type?): List<ILocalT<Any>> {
-        val type = if ((acp is SootParameter<*>))
-            acp.type
-        else if (acp is SootReturn)
-            acp.type
-        else
-            acpType
-
-        return if (type?.isCollection == true) {
-            listOf(acp.field(Elements))
-        } else if (type?.isMap == true) {
-            listOf(acp.field(MapKeys), acp.field(MapValues))
-        } else {
-            listOf(acp)
-        }
-    }
-
     context (ISootMethodDecl.CheckBuilder<*>)
     private fun addAccessPath(p: ILocalT<Any>, type: Type, acpStr: String, shouldFillingPath: Boolean): List<ILocalT<Any>> {
         val acp = acpStr.split(".").filter { it.isNotEmpty() }
         if (acp.isEmpty()) {
-            return if (shouldFillingPath) fillingPath(p, type) else listOf(p)
+            if (!shouldFillingPath) {
+                return listOf(p)
+            }
+            return when (val hType = TypeHandler.getHandlerType(type)) {
+                is TypeHandler.BoxedPrimitiveType -> listOf(p)
+                is TypeHandler.CollectionType -> listOf(p.field(Elements))
+                is TypeHandler.MapType -> if (hType.isMultiValueMap) listOf(p.field(MapKeys), p.field(MapValues).field(Elements)) else listOf(p.field(MapKeys), p.field(MapValues))
+                is TypeHandler.OptionalType -> listOf(p.field(Elements))
+                is TypeHandler.OtherClassType -> listOf(p)
+                is TypeHandler.PrimitiveType -> listOf(p)
+                is TypeHandler.StringType -> listOf(p)
+                is TypeHandler.UnknownType -> listOf(p)
+            }
         }
 
         var cur = listOf(p)
@@ -142,6 +132,10 @@ object RuleArgumentParser {
                     } else{
                         return argLocals
                     }
+                }
+                arguments.equals("global", ignoreCase = true) -> {
+                    val acp = arguments.substringAfter(".", missingDelimiterValue = "")
+                    return addAccessPath(global, G.v().soot_VoidType(), acp, shouldFillingPath)
                 }
                 else -> {
                     null

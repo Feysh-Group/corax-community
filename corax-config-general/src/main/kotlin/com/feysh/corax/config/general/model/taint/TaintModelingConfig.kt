@@ -37,6 +37,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
             "android-external-storage-dir" to setOf(GeneralTaintTypes.EXTERNAL_STORAGE),
             "device" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
             "sensitive" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
+            "zip-entry" to (internetSource - GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL) + setOf(GeneralTaintTypes.ZIP_ENTRY_NAME)
         )
 
         val sanitizerTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
@@ -82,14 +83,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     }
 
 
-    context (AIAnalysisApi)
-    open fun applyMethodAccessPathConfig(accessPaths: Collection<IMethodAccessPath>, apply: IApplySourceSink) {
-        for (accessPath in accessPaths) {
-            applyMethodAccessPathConfig(accessPath, apply)
-        }
-    }
-
-    interface IApplySourceSink {
+    fun interface IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
         fun visitAccessPath(acp: ILocalT<*>)
     }
@@ -116,12 +110,9 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applySourceRule(sourceRule: TaintRule.Source, append: Set<ITaintType>) {
         if (!sourceRule.enable)
             return
-        applyMethodAccessPathConfig(sourceRule, object : TaintModelingConfig.IApplySourceSink {
-            context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-            override fun visitAccessPath(acp: ILocalT<*>) {
-                acp.taint += taintOf(append) // must plusAssign
-            }
-        })
+        applyMethodAccessPathConfig(sourceRule) { acp ->
+            acp.taint += taintOf(append) // must plusAssign
+        }
     }
 
     context(AIAnalysisApi)
@@ -147,7 +138,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         val taintRulesManager = ConfigCenter.taintRulesManager
         for ((kind, taintTypes) in option.sourceKindToAppendTaintTypesMap.mapKeys { it.key.lowercase(Locale.getDefault()) }) {
             val sources = taintRulesManager.sources.getRulesByGroupKinds(kind)
@@ -186,12 +177,6 @@ object TaintModelingConfig : AIAnalysisUnit() {
         kind: String,
         visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>) -> Unit
     ) {
-        applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase,
-            object : IApplySourceSink {
-                context(api@AIAnalysisApi, builder@ISootMethodDecl.CheckBuilder<Any>)
-                override fun visitAccessPath(acp: ILocalT<*>) {
-                    visit(this@api, this@builder, acp)
-                }
-            })
+        applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase, visit)
     }
 }

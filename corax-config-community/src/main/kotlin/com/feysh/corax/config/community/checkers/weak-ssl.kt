@@ -21,7 +21,7 @@ object `weak-ssl` {
 
     object `default-http-client` : PreAnalysisUnit() {
         context (PreAnalysisApi)
-        override fun config() {
+        override suspend fun config() {
             val avoidMethods = ConfigCenter.methodAccessPathDataBase.getRulesByGroupKinds("weak-ssl:default-http-client")
             for (avoidMethod in avoidMethods) {
                 atInvoke(avoidMethod.methodMatch) {
@@ -34,17 +34,13 @@ object `weak-ssl` {
     object SSLContext : AIAnalysisUnit() {
 
         context (AIAnalysisApi)
-        override fun config() {
-            val methodAndAlgorithmArguments = ConfigCenter.methodAccessPathDataBase.getRulesByGroupKinds("weak-ssl:algorithm")
-            TaintModelingConfig.applyMethodAccessPathConfig(methodAndAlgorithmArguments, object : TaintModelingConfig.IApplySourceSink {
-                context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-                override fun visitAccessPath(acp: ILocalT<*>) {
-                    val isRisk = options.riskAlgorithm.fold(literal(false)) { acc, algorithm ->
-                        acc or acp.getString().toLowerCase().stringEquals(algorithm.lowercase(Locale.getDefault()))
-                    }
-                    check(isRisk, WeakSslChecker.SslContext)
+        override suspend fun config() {
+            TaintModelingConfig.applyJsonExtSinksDefault("weak-ssl:algorithm") {
+                val isRisk = options.riskAlgorithm.fold(literal(false)) { acc, algorithm ->
+                    acc or it.getString().toLowerCase().stringEquals(algorithm.lowercase(Locale.getDefault()))
                 }
-            })
+                check(isRisk, WeakSslChecker.SslContext)
+            }
         }
     }
 }

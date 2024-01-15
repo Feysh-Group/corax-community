@@ -10,7 +10,7 @@ import soot.tagkit.AnnotationEnumElem
 @Suppress("ClassName")
 object csrf : PreAnalysisUnit() {
     context (PreAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         atAnyInvoke {
             /*
              * security.and().csrf().disable(); // $CWE-352

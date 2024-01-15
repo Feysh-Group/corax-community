@@ -132,7 +132,7 @@ object LibVersionProvider : PreAnalysisUnit() {
         getLibraryDescriptor(other.groupId, other.artifactId).associateWith { it.compareTo(other) }
 
     context (PreAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         atAnySourceFile(extension = "properties") {
             if (path.name != "pom.properties") {
                 return@atAnySourceFile

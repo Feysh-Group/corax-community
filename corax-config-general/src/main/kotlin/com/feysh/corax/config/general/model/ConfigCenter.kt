@@ -6,12 +6,11 @@ import com.feysh.corax.config.api.utils.ClassCommons
 import com.feysh.corax.config.general.model.taint.TaintRule
 import com.feysh.corax.config.general.rule.GroupedMethodsManager
 import com.feysh.corax.config.general.rule.MethodAccessPath
-import com.feysh.corax.config.general.utils.walkFiles
+import com.feysh.corax.config.general.utils.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 import mu.KotlinLogging
-import soot.PrimType
-import soot.Type
+import soot.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.name
@@ -26,16 +25,65 @@ object ConfigCenter : CheckerUnit() {
 
     @Serializable
     class Options : SAOptions {
-         val ruleDirectories: MutableList<String> = mutableListOf(
+        val ruleDirectories: MutableList<String> = mutableListOf(
             "${configDirectoryIdentifier}/rules"
         )
         val taintPrimTypeValue: Boolean = true
+
         val taintToStringMethod: Boolean = true
+
+        val optionalClasses = mutableListOf(
+            "java.util.Optional"
+        )
+
+        val collectionClasses = mutableListOf(
+            "java.util.List",
+            "java.util.Set",
+            "java.lang.Iterable",
+            "java.util.Collection",
+            "java.util.Enumeration",
+            "java.util.ArrayList",
+        )
+
+        val multiValueMapTypes = mutableListOf(
+            "org.springframework.util.MultiValueMap",
+            "javax.ws.rs.core.MultiValueMap",
+        )
+
+        val mapClasses = mutableListOf(
+            "java.util.Map",
+            "java.util.HashMap",
+            "java.util.LinkedHashMap",
+            "java.util.TreeMap",
+            "org.springframework.util.MultiValueMap",
+            "javax.ws.rs.core.MultiValueMap",
+        )
+
     }
 
     var option: Options = Options()
 
+    fun isCollectionClassType(type: Type): Boolean {
+        if (type is ArrayType)
+            return true
+        val scene = Scene.v()
+        return type.isInstanceOf(option.collectionClasses.map { scene.getOrAddRefType(it) })
+    }
 
+    fun isMultiValueMapClassType(type: Type): Boolean {
+        val scene = Scene.v()
+        return type.isInstanceOf(option.multiValueMapTypes.map { scene.getOrAddRefType(it) })
+    }
+
+    fun isMapClassType(type: Type): Boolean {
+        val scene = Scene.v()
+        return type.isInstanceOf(option.mapClasses.map { scene.getOrAddRefType(it) })
+    }
+
+    fun isOptionalClassType(type: Type): Boolean {
+        val scene = Scene.v()
+        return type.isInstanceOf(option.optionalClasses.map { scene.getOrAddRefType(it) })
+    }
 
     fun pathTranslate(paths: List<String>): List<Path> {
         return paths.map { Paths.get(it.replace(configDirectoryIdentifier, analysisConfigPathRelativizePlugin)) }
@@ -60,7 +108,11 @@ object ConfigCenter : CheckerUnit() {
         GroupedMethodsManager.load(sourcesJsonFiles, serializer = serializer())
     }
 
-    fun skipTaintPrimitiveType(type: Type) = !option.taintPrimTypeValue && type is PrimType
+    fun isEnableTaintFlowType(type: Type): Boolean {
+        if (!option.taintPrimTypeValue && (type.isPrimitives || type.isBoxedPrimitives)) return false
+        if (type.isVoidType) return false
+        return true
+    }
 
 
     private val logger = KotlinLogging.logger {}

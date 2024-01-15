@@ -2,14 +2,12 @@ package com.feysh.corax.config.general.model
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
-import com.feysh.corax.config.general.utils.isCollection
-import com.feysh.corax.config.general.utils.isMap
 import com.feysh.corax.config.general.utils.primTypesBoxedQuotedString
 
 
 @Suppress("ClassName")
 object `outstanding-summaries` : AIAnalysisUnit() {
-    context(AIAnalysisApi) override fun config() {
+    context(AIAnalysisApi) override suspend fun config() {
         method(matchSoot("<java.lang.Object: java.lang.Object clone()>"))
             .modelNoArg {
                 `return`.field(MapKeys).value = `this`.field(MapKeys).value
@@ -27,11 +25,12 @@ object `outstanding-summaries` : AIAnalysisUnit() {
                     sootMethod.isSynchronized || sootMethod.isJavaLibraryMethod) {
                     return@eachMethod
                 }
-                if (sootMethod.declaringClass.type.isCollection) {
+                val thisType = sootMethod.declaringClass.type
+                if (ConfigCenter.isCollectionClassType(thisType) || ConfigCenter.isOptionalClassType(thisType)) {
                     modelNoArg {
-                        `return`.taint += `this`.taint
+                        `return`.taint += `this`.field(Elements).taint
                     }
-                } else if (sootMethod.declaringClass.type.isMap) {
+                } else if (ConfigCenter.isMapClassType(sootMethod.declaringClass.type)) {
                     modelNoArg {
                         `return`.taint += `this`.field(MapKeys).taint + `this`.field(MapValues).taint
                     }

@@ -27,6 +27,7 @@ object `taint-checker` : AIAnalysisUnit() {
 
             "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = PathTraversalChecker.PathTraversal),
             "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = UnrestrictedFileUploadChecker.UnrestrictedFileUpload),
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.ZIP_ENTRY_NAME, reportType = PathTraversalChecker.ZipSlip),
 
             "template-injection" to CustomSinkDataForCheck(control, reportType = TemplateIChecker.TemplateInjection),
             "request-forgery" to CustomSinkDataForCheck(control, reportType = SsrfChecker.RequestForgery),
@@ -65,7 +66,7 @@ object `taint-checker` : AIAnalysisUnit() {
     private var option: Options = Options()
 
     context(AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         val kindsExists = ConfigCenter.taintRulesManager.sinks.allKinds
         val unusedKinds = kindsExists - option.kind2Checker.mapTo(mutableSetOf()) { it.first }
         if (unusedKinds.isNotEmpty()) {

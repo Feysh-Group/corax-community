@@ -21,7 +21,7 @@ object `open-redirect` : AIAnalysisUnit() {
     private val modelAndViewType: String = org.springframework.web.servlet.ModelAndView::class.sootTypeName
 
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         listOf(
             matchMethod(javax.servlet.http.HttpServletResponse::sendRedirect) to 0,
             matchMethod(javax.servlet.http.HttpServletResponseWrapper::sendRedirect) to 0,

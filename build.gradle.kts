@@ -21,7 +21,7 @@ val guavaVersion: String by rootProject
 val semVer: String? by project
 val configDir by extra { file("$buildDir/analysis-config") }
 val pluginDir by extra { file("$buildDir/analysis-config/plugins") }
-version = semVer ?: "2.5"
+version = semVer ?: "2.6"
 
 plugins {
     `java-library`
@@ -295,15 +295,15 @@ configure(
         dependsOn(pluginZip)
         from(pluginZip)
         into(pluginDir)
-//        val archiveFileName = pluginZip.get().archiveFileName.get()
-//        val folder = archiveFileName.substringBeforeLast(pluginZip.get().archiveExtension.get()).dropLast(1)
-//        val extract = "$pluginDir/${folder}"
-//        doFirst {
-//            println("delete $extract")
-//            delete(extract)
-//            delete("$configDir/default-config.yml")
-//            delete("$configDir/default-config.normalize.yml")
-//        }
+        val archiveFileName = pluginZip.get().archiveFileName.get()
+        val folder = archiveFileName.substringBeforeLast(pluginZip.get().archiveExtension.get()).dropLast(1)
+        val extract = "$pluginDir/${folder}"
+        doFirst {
+            println("delete $extract")
+            delete(extract)
+            delete("$configDir/default-config.yml")
+            delete("$configDir/default-config.normalize.yml")
+        }
     }
 
     tasks.register("createProperties") {

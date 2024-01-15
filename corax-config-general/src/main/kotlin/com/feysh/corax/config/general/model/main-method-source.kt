@@ -11,7 +11,7 @@ import com.feysh.corax.config.general.checkers.userInputSource
 
 object `main-method-source` : AIAnalysisUnit() {
     context (AIAnalysisApi)
-    override fun config() {
+    override suspend fun config() {
         eachMethod {
             if (sootMethod.subSignature != "void main(java.lang.String[])") {
                 return@eachMethod
