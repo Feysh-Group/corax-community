@@ -1,17 +1,26 @@
-# CoraxJava - 社区版
+<p align="center">
+ <img width="100px" src="https://res.cloudinary.com/dwvfopirq/image/upload/v1706766411/corax.svg" align="center" alt="Corax For Java - Community Edition" />
+ <h2 align="center">Corax For Java - 社区版</h2>
+</p>
+  <p align="center">
+    <a href="/docs/feature_diff.md">社区版功能对比</a>
+    ·
+    <a href="https://github.com/Feysh-Group/corax-community/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml">报告BUG</a>
+    ·
+    <a href="https://github.com/Feysh-Group/corax-community/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml">功能需求</a>
+    ·
+    <a href="https://github.com/Feysh-Group/corax-community/blob/main/docs/usage.md#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">常见问题</a>
+    ·
+    <a href="https://github.com/Feysh-Group/corax-community/issues">提问</a>
+  </p>
+  <p align="center">
+    <a href="/Readme_en.md">English</a>
+  </p>
+</p>
+
 
 ## 目录
-
-* [项目介绍](#项目介绍)
-* [快速开始](#快速开始)
-  * [环境要求](#环境要求)
-  * [编译构建](#编译构建)
-  * [开始分析](#开始分析)
-  * [CoraxJava+Docker](#CoraxJavaDocker)
-* [查看报告](#查看报告)
-* [测试集表现](#测试集表现)
-* [自定义规则检查器](#自定义规则检查器)
-* [交流反馈](#交流反馈)
+[[_TOC_]]
 
 ## 项目介绍
 
@@ -192,6 +201,6 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 
 
-## 招贤纳士：
+## 招贤纳士
 
 如果您对本项目或Java代码静态分析感兴趣，并希望从事这方面的工作或研究（全职/兼职/实习皆可），欢迎发送邮件至 [job@feysh.com](mailto:job@feysh.com)，并注明“CoraxJava岗位”，我们会第一时间联系您。
