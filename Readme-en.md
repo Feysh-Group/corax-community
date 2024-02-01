@@ -23,18 +23,6 @@
 [[_TOC_]]
 
 
-## Table of Contents
-
-* [Project Introduction](#project-introduction)
-* [Quick Start](#quick-start)
-    * [Environment Requirements](#environment-requirements)
-    * [Compilation and Build](#compilation-and-build)
-    * [Start Analysis](#start-analysis)
-    * [CoraxJava+Docker](#coraxjavdocker)
-* [Viewing the Report](#viewing-the-report)
-* [Test Set Performance](#test-set-performance)
-* [Custom Rule Checker](#custom-rule-checker)
-* [Communication and Feedback](#communication-and-feedback)
 
 ## Project Introduction
 
@@ -144,7 +132,7 @@ The analysis engine needs to load the `CoraxJava rule checker plugin` (e.g., `an
 - Set the report output format `--result-type sarif`, it can be omitted as it defaults to sarif format
 - Set the path of the analysis target. For example, for this project's test cases: `--auto-app-classes ./corax-config-tests`, this parameter requires that the path or subdirectory must contain project source code and compiled bytecode artifacts (class files or jar files).
 
-Specify the configuration parameters in the format `--config (yaml file name.yml)@(rule configuration folder)`, where the yaml file name can be arbitrary. The `(rule configuration folder)` is the path to the previously prepared `analysis-config`. For example:
+- Specify the configuration parameters in the format `--config (yaml file name.yml)@(rule configuration folder)`, where the yaml file name can be arbitrary. The `(rule configuration folder)` is the path to the previously prepared `analysis-config`. For example:
 - `--config default-config.yml@{corax-java-cli-community-2.6.zip extraction location}/analysis-config/`
 - `--config default-config.yml@./build/analysis-config/`
 
