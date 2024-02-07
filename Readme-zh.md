@@ -9,7 +9,7 @@
     ·
     <a href="https://github.com/Feysh-Group/corax-community/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml">功能需求</a>
     ·
-    <a href="https://github.com/Feysh-Group/corax-community/blob/main/docs/usage.md#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">常见问题</a>
+    <a href="/docs/zh/FAQ.md">常见问题</a>
     ·
     <a href="https://github.com/Feysh-Group/corax-community/issues">提问</a>
   </p>

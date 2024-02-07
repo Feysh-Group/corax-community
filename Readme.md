@@ -9,7 +9,7 @@
     ·
     <a href="https://github.com/Feysh-Group/corax-community/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml">Request Feature</a>
     ·
-    <a href="https://github.com/Feysh-Group/corax-community/blob/main/docs/usage.md#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">FAQ</a>
+    <a href="/docs/en/FAQ.md">FAQ</a>
     ·
     <a href="https://github.com/Feysh-Group/corax-community/issues">Ask Question</a>
   </p>
