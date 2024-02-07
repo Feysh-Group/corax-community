@@ -4,31 +4,7 @@
 
 **Table of contents**
 
-* [插件项目架构](#插件项目架构)
-* [基础类型](#基础类型)
-  * [IStandard](#istandard)
-  * [IRule](#irule)
-  * [IBugCategory](#ibugcategory)
-  * [IChecker](#ichecker)
-  * [CheckType](#checktype)
-  	*  [Language](#language)
-  	*  [BugMessage](#bugmessage)
-  * [SAOptions](#saoptions)
-  * [IMethodMatch](#imethodmatch)
-    * [SootSignatureMatch](#sootsignaturematch)
-    * [RawSignatureMatch](#rawsignaturematch)
-  * [IMethodDecl](#imethoddecl)
-    * [ISootMethodDecl](#isootmethoddecl)
-    * [IRawMethodDecl](#irawmethoddecl)
-  * [IMethodGrouped](#imethodgrouped)
-  * [RuleManager](#rulemanager)
-  * [ConfigCenter](#configcenter)
-  * [CheckerUnit](#checkerunit)
-  	* [PreAnalysisUnit](#preanalysisunit)
-      * [PreAnalysisApi](#preanalysisapi)
-  	* [AIAnalysisUnit](#aianalysisunit)
-  	  * [AIAnalysisApi](#aianalysisapi)
-  * [ISootInitializeHandler](#isootinitializehandler)
+[[_TOC_]]
 
 ## 插件项目架构
 
@@ -36,7 +12,7 @@
 
 （非完整）社区版的架构如下图：
 
-![架构图](./image/infrastructure.jpg)
+![架构图](../image/infrastructure.jpg)
 
 
 
@@ -187,7 +163,7 @@ enum class BuiltinCWERules(
 }
 ```
 
-您可以仿照此 Rules 的定义进行扩展，[CWERules.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/standard/CWERules.kt)
+您可以仿照此 Rules 的定义进行扩展，[CWERules.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/standard/CWERules.kt)
 
 
 
@@ -231,7 +207,7 @@ enum class BuiltinBugCategory(
 
 ```
 
-您可以仿照此 Category 的定义进行扩展 [BugCategory.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/category/BugCategory.kt)
+您可以仿照此 Category 的定义进行扩展 [BugCategory.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/category/BugCategory.kt)
 
 
 
@@ -253,7 +229,7 @@ object SqliChecker : IChecker {
 }
 ```
 
-您可以仿照此 Checker 的定义进行扩展 [CheckerDeclarations.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt)
+您可以仿照此 Checker 的定义进行扩展 [CheckerDeclarations.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt)
 
 
 
@@ -277,7 +253,7 @@ object SqliChecker : IChecker {
  }
 ```
 
-​		您可以仿照此 Checker 的定义进行扩展 [CheckerDeclarations.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt)
+​		您可以仿照此 Checker 的定义进行扩展 [CheckerDeclarations.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt)
 
 
 
@@ -364,7 +340,7 @@ msgGenerator { "使用 ${args["type"]} 中的 $callee 可能容易受到 SQL 注
 
 ### SAOptions
 
-​		通过添加自定义的可序列化类，方便快捷地从 外部 yml 配置此对象的各个字段，参考 [Readme.md#编译构建](../Readme.md#编译构建) ，打开生成的 yml 配置文件再找到 SSLContext Unit 中的 options 字段，更改配置并保存，在下次分析时分析器会自动反序列化此 yml 文件成一个 SSLContext.Options 并填写到 SSLContext.options 字段，再调用 AIAnalysisUnit.config 方法，此时 options.riskAlgorithm 中的配置开始生效。
+​		通过添加自定义的可序列化类，方便快捷地从 外部 yml 配置此对象的各个字段，参考 [Readme.md#编译构建](/Readme-zh.md#编译构建) ，打开生成的 yml 配置文件再找到 SSLContext Unit 中的 options 字段，更改配置并保存，在下次分析时分析器会自动反序列化此 yml 文件成一个 SSLContext.Options 并填写到 SSLContext.options 字段，再调用 AIAnalysisUnit.config 方法，此时 options.riskAlgorithm 中的配置开始生效。
 
 ```kotlin
 object SSLContext : AIAnalysisUnit() { // 必须继承 CheckerUnit
@@ -383,7 +359,7 @@ object SSLContext : AIAnalysisUnit() { // 必须继承 CheckerUnit
 }
 ```
 
-​		完整代码请前往 [weak-ssl.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
+​		完整代码请前往 [weak-ssl.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
 
 
 
@@ -439,7 +415,7 @@ object SSLContext : AIAnalysisUnit() { // 必须继承 CheckerUnit
 
 ### IMethodGrouped
 
-定义的完整源码 [rule/RuleDeclares.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleDeclares.kt)
+定义的完整源码 [rule/RuleDeclares.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleDeclares.kt)
 
 一个接口，继承 `IMethodSignature` 并包含 `group: String ` 字段
 
@@ -451,15 +427,15 @@ object SSLContext : AIAnalysisUnit() { // 必须继承 CheckerUnit
 {"kind":"content-provider","signature":"<javax.swing.text.JTextComponent: java.lang.String getText(int,int)>","subtypes":true,"provenance":"manual","ext":""}
 ```
 
-比如此 rule 文件中: [general.sources.json](../corax-config-general/rules/general.sources.json)
+比如此 rule 文件中: [general.sources.json](/corax-config-general/rules/general.sources.json)
 
 ### RuleManager
 
-定义的完整源码 [rule/RuleManager.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleManager.kt)
+定义的完整源码 [rule/RuleManager.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleManager.kt)
 
 一个配置文件管理器，基于 `kotlinx-serialization` 方便快捷地加载解析文件和序列化一些对象到文件
 
-在 [model/ConfigCenter.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt) 中有一段代码如下
+在 [model/ConfigCenter.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt) 中有一段代码如下
 
 ```kotlin
 val methodAccessPathDataBase: GroupedMethodsManager<MethodAccessPath> by lazy { // 延迟加载，第一次访问时执行
@@ -476,9 +452,9 @@ val methodAccessPathDataBase: GroupedMethodsManager<MethodAccessPath> by lazy { 
 
 ### ConfigCenter
 
-定义的完整源码 [model/ConfigCenter.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt) 
+定义的完整源码 [model/ConfigCenter.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt) 
 
-用来加载 [build/analysis-config/rules](../build/analysis-config/rules) 中的一些文件，包含 `taint (source, sink, summary) json` 配置文件 和 `access-path.json` 配置文件
+用来加载 [build/analysis-config/rules](/build/analysis-config/rules) 中的一些文件，包含 `taint (source, sink, summary) json` 配置文件 和 `access-path.json` 配置文件
 
 分别对应 `ConfigCenter.taintRulesManager` 和 `ConfigCenter.methodAccessPathDataBase`
 
@@ -490,7 +466,7 @@ tips：更多详细示例可以参考  [自定义checker](checker-detail.md)
 
 一个 checker 单元的基类，分为  `PreAnalysisUnit` 和 `AIAnalysisUnit`
 
-![CheckerUnit](./image/CheckerUnit.png)
+![CheckerUnit](../image/CheckerUnit.png)
 
 
 
@@ -579,7 +555,7 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
 
 内置有如下两个对象
 
-![image-20230719135238363](./image/SootInitializeHandler.png)
+![image-20230719135238363](../image/SootInitializeHandler.png)
 
 源码如下
 
@@ -655,5 +631,5 @@ object DefaultSootConfiguration : ISootInitializeHandler {
 
 
 
-完整示例：[community/soot/CustomSootConfiguration.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/soot/CustomSootConfiguration.kt)
+完整示例：`com.feysh.corax.config.builtin.soot.DefaultSootConfiguration`
 

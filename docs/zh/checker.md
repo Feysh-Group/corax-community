@@ -22,7 +22,7 @@
 
 ## 场景一：CoraxJava规则检查器模块粗粒度调整
 
-只需要修改 yaml 配置文件 [analysis-config/default-config.yml](../build/analysis-config/default-config.yml) 即可实现对`CoraxJava规则检查器`模块的粗粒度调整。
+只需要修改 yaml 配置文件 [analysis-config/default-config.yml](/build/analysis-config/default-config.yml) 即可实现对`CoraxJava规则检查器`模块的粗粒度调整。
 
 如开关特定的检查器，可在如下配置中将`enable`设置为`false`。
 ```yml
@@ -49,13 +49,13 @@
           enable: true
 ```
 
-更多可参考[analysis-config/default-config.yml](../build/analysis-config/default-config.yml) 及后续说明。
+更多可参考[analysis-config/default-config.yml](/build/analysis-config/default-config.yml) 及后续说明。
 
 ## 场景二：CoraxJava规则检查器细粒度调整
 
 常见为修改现有规则检查器的source，sink，summary等配置。
 
-以 `sources.json` 为后缀的文件 如 [general.sources.json](../corax-config-general/rules/general.sources.json) 这些 source 被放在一起并使用 `kind` 对这些 source 进行归类, 如：
+以 `sources.json` 为后缀的文件 如 [general.sources.json](/corax-config-general/rules/general.sources.json) 这些 source 被放在一起并使用 `kind` 对这些 source 进行归类, 如：
 
 ```json
 [
@@ -65,7 +65,7 @@
 ]
 ```
 
-同样的`sinks.json`为后缀的文件 如 [community.sinks.json](../corax-config-community/rules/community.sinks.json) 这些 sink 被放在一起并使用 `kind` 对这些 sink 进行归类：
+同样的`sinks.json`为后缀的文件 如 [community.sinks.json](/corax-config-community/rules/community.sinks.json) 这些 sink 被放在一起并使用 `kind` 对这些 sink 进行归类：
 
 ```json
 [
@@ -76,7 +76,7 @@
 
 ```
 
-以 `summaries.json` 为后缀的文件 如 [general.summaries.json](../corax-config-general/rules/general.summaries.json)
+以 `summaries.json` 为后缀的文件 如 [general.summaries.json](/corax-config-general/rules/general.summaries.json)
 
 ```json
 [
@@ -128,15 +128,15 @@
 
    如果需要检查您编写的 checker 里的一些比较直接的bug，可以按如下两个步骤检查
 
-   1. 编辑 [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
+   1. 编辑 [AnalyzerConfigRegistry](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
    2. 添加完后可以执行一次 `gradlw :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`，能够检查部分checker编写错误并提示纠正
 
-5. 前往 [corax-config-tests/src/main/java/testcode](../corax-config-tests/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
+5. 前往 [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
 
-6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](../build/analysis-config)
+6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](/build/analysis-config)
 
-7. 按照  [Readme.md#开始分析](../Readme.md#开始分析) 加载配置开始分析
+7. 按照  [Readme.md#开始分析](/Readme.md#开始分析) 加载配置开始分析
 
-8. 查看报告 [sarif](../build/output/sarif) ，如有误漏报请分析原因，是否需要改正优化检查器，参考[结果输出](usage.md#结果输出)
+8. 查看报告 [sarif](/build/output/sarif) ，如有误漏报请分析原因，是否需要改正优化检查器，参考[结果输出](usage.md#结果输出)
 
 更详细的检测方法可参考 [自定义规则检查器详细说明](checker-detail.md)。

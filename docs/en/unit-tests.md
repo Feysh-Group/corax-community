@@ -1,11 +1,8 @@
 # Unit Test
 
-**Table of Contents**
+**Table of contents**
 
-* [Functional Testing](#functional-testing)
-* [Vulnerability Tagging](#vulnerability-tagging)
-  * [Non-compliant Vulnerability Tagging](#non-compliant-vulnerability-tagging)
-  * [Compliant Code Tagging](#compliant-code-tagging)
+[[_TOC_]]
 
 ## Functional Testing
 
@@ -13,7 +10,7 @@
 
 ## Vulnerability Tagging
 
-Refer to [testcode/cmdi/CommandInjection.java](../corax-config-tests/src/main/java/testcode/cmdi/CommandInjection.java) 
+Refer to [testcode/cmdi/CommandInjection.java](/corax-config-tests/normal/src/main/java/testcode/cmdi/CommandInjection.java) 
 
 Think of it as an exam
 
@@ -23,7 +20,7 @@ Think of it as an exam
 
 After the analysis is completed, the Corax Java analyzer will parse all the source code files it can find, count the tagging data (correct answers), compare it with the reports obtained from the analysis, and then output the scores (score table) to provide feedback to drive our development and improvement.
 
-Please refer to [Misreport Explanation](usage.md#misreport-explanation) for the annotated analysis results.
+Please refer to [Misreport Explanation](usage.md#false-positivenegative-forms) for the annotated analysis results.
 
 ### Non-compliant Vulnerability Tagging
 

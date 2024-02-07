@@ -22,7 +22,7 @@ It is often necessary to customize CoraxJava rule checkers, including several co
 
 ## Scenario One: Coarse-Grained Adjustment of the CoraxJava Rule Checker Module
 
-Simply modify the yaml configuration file [analysis-config/default-config.yml](../build/analysis-config/default-config.yml) to achieve coarse-grained adjustments to the `CoraxJava Rule Checker` module.
+Simply modify the yaml configuration file [analysis-config/default-config.yml](/build/analysis-config/default-config.yml) to achieve coarse-grained adjustments to the `CoraxJava Rule Checker` module.
 
 For example, to enable/disable specific checkers, you can set `enable` to `false` in the following configuration:
 ```yml
@@ -49,13 +49,13 @@ To add options to a checker, including adding `TaintTypes` to the checker
           enable: true
 ```
 
-For more information, refer to [analysis-config/default-config.yml](../build/analysis-config/default-config.yml) and subsequent explanations.
+For more information, refer to [analysis-config/default-config.yml](/build/analysis-config/default-config.yml) and subsequent explanations.
 
 ## Scenario Two: Fine-Grained Adjustment of the CoraxJava Rule Checker
 
 Commonly involves modifying the source, sink, summary, and other configurations of existing rule checkers.
 
-Files with the suffix `sources.json` such as [general.sources.json](../corax-config-general/rules/general.sources.json) contain sources that are grouped together and categorized using `kind`, for example:
+Files with the suffix `sources.json` such as [general.sources.json](/corax-config-general/rules/general.sources.json) contain sources that are grouped together and categorized using `kind`, for example:
 
 ```json
 [
@@ -65,7 +65,7 @@ Files with the suffix `sources.json` such as [general.sources.json](../corax-con
 ]
 ```
 
-Similarly, files with the suffix `sinks.json` such as [community.sinks.json](../corax-config-community/rules/community.sinks.json) contain sinks that are grouped together and categorized using `kind`:
+Similarly, files with the suffix `sinks.json` such as [community.sinks.json](/corax-config-community/rules/community.sinks.json) contain sinks that are grouped together and categorized using `kind`:
 
 ```json
 [
@@ -76,7 +76,7 @@ Similarly, files with the suffix `sinks.json` such as [community.sinks.json](../
 
 ```
 
-Files with the suffix `summaries.json`, such as [general.summaries.json](../corax-config-general/rules/general.summaries.json), contain summaries related to the rules and configurations.
+Files with the suffix `summaries.json`, such as [general.summaries.json](/corax-config-general/rules/general.summaries.json), contain summaries related to the rules and configurations.
 
 ```json
 [
@@ -128,15 +128,15 @@ Developers can compare the types of vulnerabilities they want to detect with the
 
    If you need to check for some more direct bugs in your written checker, you can follow these two steps:
 
-   1. Edit the [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) file and add the newly added checker registration in `preAnalysisImpl` or `aiCheckerImpl`.
+   1. Edit the [AnalyzerConfigRegistry](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) file and add the newly added checker registration in `preAnalysisImpl` or `aiCheckerImpl`.
    2. After adding it, you can run `gradlew :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`, which can check for some checker writing errors and prompt for corrections.
 
-5. Go to [corax-config-tests/src/main/java/testcode](../corax-config-tests/src/main/java/testcode) and write corresponding non-compliant and compliant code to test and ensure analysis accuracy, refer to [Unit Testing](unit-tests.md)
+5. Go to [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) and write corresponding non-compliant and compliant code to test and ensure analysis accuracy, refer to [Unit Testing](unit-tests.md)
 
-6. Run `gradlew build` to compile and package the final configuration [build/analysis-config](../build/analysis-config)
+6. Run `gradlew build` to compile and package the final configuration [build/analysis-config](/build/analysis-config)
 
-7. Follow [Readme.md#Getting Started with Analysis](../Readme.md#开始分析) to load the configuration and start analysis
+7. Follow [Readme.md#Getting Started with Analysis](/Readme.md#开始分析) to load the configuration and start analysis
 
-8. View the report [sarif](../build/output/sarif), if there are any false positives or missed reports, analyze the reasons and consider if corrections or optimizations are needed, refer to [Result Output](usage.md#结果输出)
+8. View the report [sarif](/build/output/sarif), if there are any false positives or missed reports, analyze the reasons and consider if corrections or optimizations are needed, refer to [Result Output](usage.md#结果输出)
 
 For more detailed detection methods, you can refer to [Detailed Explanation of Custom Rule Checker](checker-detail.md).

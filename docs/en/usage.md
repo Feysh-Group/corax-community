@@ -2,15 +2,7 @@
 
 **Table of contents**
 
-
-
-* [Analysis Overview](#analysis-overview)
-* [Prerequisite Knowledge](#prerequisite-knowledge)
-* [Command Line Parameters](#command-line-parameters)
-* [Common Use Cases](#common-use-cases)
-* [Result Output](#result-output)
-* [Common Issues](#common-issues)
-
+[[_TOC_]]
 
 ## Analysis Overview
 
@@ -46,10 +38,10 @@ Firstly, understanding the classification of `class` in CoraxJava is essential. 
 
 The execution of `CoraxJava` involves using the Java runtime to execute the JAR file of the `CoraxJava Core Analysis Engine`, specifying analysis targets, configuration files, etc. The `CoraxJava Core Analysis Engine` will automatically find the corresponding `CoraxJava Rule Checker` plugin based on the configuration file. The main parameters are illustrated below:
 
-<img src="image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
+<img src="../image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
 
 
-For simple usage, refer to [Getting Started](../Readme.md#getting-started). The complete set of parameters is as follows (some less important options have been omitted):
+For simple usage, refer to [Getting Started](/Readme.md#start-analysis). The complete set of parameters is as follows (some less important options have been omitted):
 
 ```YAML
 Usage: CoraxJava [<options>]
@@ -200,7 +192,7 @@ In src-only mode, only the 'src' directory is scanned (e.g., for simple hard-cod
 
 **When --target is android, this parameter is required.**
 
-Points to the Android platform directory (which includes multiple versions of android.jar files). You can clone the project [android-platforms](https://github.com/Sable/android-platforms) and set this parameter to the root directory of the android-platforms project. Alternatively, you can set it to [corax-config-tests/libs/platforms](../corax-config-tests/libs/platforms) (not recommended, only includes android-7).
+Points to the Android platform directory (which includes multiple versions of android.jar files). You can clone the project [android-platforms](https://github.com/Sable/android-platforms) and set this parameter to the root directory of the android-platforms project. Alternatively, you can set it to [corax-config-tests/libs/platforms](/corax-config-tests/libs/platforms) (not recommended, only includes android-7).
 
 
 
@@ -336,12 +328,12 @@ Scan coverage display: `${output}/code-coverage/index.html`
 Effects are as follows:
 
 
-<img src="image/taint-cov-overview.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+<img src="../image/taint-cov-overview.png" style="zoom: 100%;" alt="Main parameter configuration"/>
 
 
 
 
-<img src="image/taint-cov.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+<img src="../image/taint-cov.png" style="zoom: 100%;" alt="Main parameter configuration"/>
 
 
 
@@ -476,7 +468,7 @@ SourceCodeDir: nacos
 
 Some projects, when compiled, directly generate a complete fat JAR file, and may even have an .exe extension. For example, using [jadx 1.4.3](https://github.com/skylot/jadx/releases/download/v1.4.3/jadx-gui-1.4.3-with-jre-win.zip) as an example, after downloading, change the executable file's .exe extension to .jar as shown in the image below:
 
-<img src="image/fat jar-1.png" alt="img" style="zoom:50%;" />
+<img src="../image/fat jar-1.png" alt="img" style="zoom:50%;" />
 
 In such projects, project class files and third-party library class files are completely mixed together. In these cases, you need to use the **--project-scan-config** parameter for further filtering and analysis.
 
@@ -614,7 +606,7 @@ output
 
 ​		Classes whose declaringClass of called methods belongs to phantomClasses, indicating incomplete dependencies on third-party libraries. Efforts should be made to ensure that classes other than those excluded by Soot do not appear in this file. (Soot exclude defaults include: [java.*, sun.*, javax.*, com.sun.*, com.ibm.*, org.xml.*, org.w3c.*, apple.awt.*, com.apple.*]. You can find the specific classes excluded in the command output, or you can customize patterns to exclude classes you don't want to load.)
 
-​		Go to: [`{output}/phantom_dependence_classes.txt`](../build/output/phantom_dependence_classes.txt)
+​		Go to: [`{output}/phantom_dependence_classes.txt`](/build/output/phantom_dependence_classes.txt)
 
 
 
@@ -622,7 +614,7 @@ output
 
 ​		Methods analyzed but where the analyzer cannot find corresponding modeled descriptions in the Corax Java config plugins' method summaries. Not all methods in this file need method summaries (Summary). Only certain types of methods, such as implicit flow transfer, native methods, and those with additional special properties (such as high secret level data, a secrecy level attribute that computers cannot perceive, which requires manual or AI annotation), need to be manually added to the configuration project for summaries. Generally, the method engine can automatically complete the analysis without manually writing method summaries.
 
-​		Go to: [`{output}/undefined_summary_methods.txt`](../build/output/undefined_summary_methods.txt)
+​		Go to: [`{output}/undefined_summary_methods.txt`](/build/output/undefined_summary_methods.txt)
 
 
 ### Detailed Logs

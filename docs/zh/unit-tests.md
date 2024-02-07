@@ -2,10 +2,7 @@
 
 **Table of contents**
 
-* [功能测试](#功能测试)
-* [漏洞标注](#漏洞标注)
-  * [不合规漏洞标注](#不合规漏洞标注)
-  * [合规代码标注](#合规代码标注)
+[[_TOC_]]
 
 ## 功能测试
 
@@ -13,7 +10,7 @@
 
 ## 漏洞标注
 
-参考 [testcode/cmdi/CommandInjection.java](../corax-config-tests/src/main/java/testcode/cmdi/CommandInjection.java) 
+参考 [testcode/cmdi/CommandInjection.java](/corax-config-tests/normal/src/main/java/testcode/cmdi/CommandInjection.java) 
 
 理解为和考试一样
 

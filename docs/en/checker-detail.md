@@ -2,38 +2,14 @@
 
 **Table of contents**
 
-* [Overview](#overview)
-* [Static Code Property Checks](#static-code-property-checks)
-  * [Function Call Checks](#function-call-checks)
-  * [Text Content Parsing Checks](#text-content-parsing-checks)
-  * [Java AST Checks](#java-ast-checks)
-  * [Soot Jimple IR Checks](#soot-jimple-ir-checks)
-  * [Annotation Checks](#annotation-checks)
-* [Framework Modeling Adaptation](#framework-modeling-adaptation)
-  * [MyBatis Configuration Parsing](#mybatis-configuration-parsing)
-  * [Spring Modeling](#spring-modeling)
-* [Rules Data](#rules-data)
-* [Data Flow Modeling](#data-flow-modeling)
-  * [Value Propagation Modeling](#value-propagation-modeling)
-  * [Taint Propagation Modeling](#taint-propagation-modeling)
-  * [Configuration File Modeling](#configuration-file-modeling)
-  * [Attribute Extension](#attribute-extension)
-* [Data Flow Checks](#data-flow-checks)
-  * [Expressions](#expressions)
-  * [Taint Checks](#taint-checks)
-    * [Injection Checks](#injection-checks) 
-    * [Privacy Leakage Checks](#privacy-leakage-checks) 
-  * [Numeric Checks](#numeric-checks)
-  * [Hard-Coded Value Checks](#hard-coded-value-checks)
-  * [Extended Attribute Checks](#extended-attribute-checks)
-  * [Resource Not Released Checks](#resource-not-released-checks)
+[[_TOC_]]
 
 
 ## Overview
 Customization is based on requirements, and there are several methods available:
 
-1. Modify the yml configuration file [analysis-config/default-config.yml](../build/analysis-config/default-config.yml).
-2. Modify the configuration files in the rules folder [analysis-config/rules](../build/analysis-config/rules).
+1. Modify the yml configuration file [analysis-config/default-config.yml](/build/analysis-config/default-config.yml).
+2. Modify the configuration files in the rules folder [analysis-config/rules](/build/analysis-config/rules).
 3. Modify existing checker source code and compile.
 4. Custom develop a new checker and compile.
 
@@ -59,16 +35,16 @@ How to write a checker is the main content of this document.
 
    If you need to check some more direct bugs in your written checker, you can follow these two steps to check:
 
-   1. Edit the [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) file, and add newly registered checkers in `preAnalysisImpl` or `aiCheckerImpl`.
+   1. Edit the [AnalyzerConfigRegistry](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) file, and add newly registered checkers in `preAnalysisImpl` or `aiCheckerImpl`.
    2. After adding, you can execute `gradlew :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`, which can check for some errors in the checker and prompt for correction.
 
-5. Go to [corax-config-tests/src/main/java/testcode](../corax-config-tests/src/main/java/testcode) to write corresponding non-compliant and compliant code for testing and ensuring analysis accuracy, refer to [Unit Testing](unit-tests.md).
+5. Go to [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) to write corresponding non-compliant and compliant code for testing and ensuring analysis accuracy, refer to [Unit Testing](unit-tests.md).
 
-6. Execute `gradlew build` to compile and package the final configuration in [build/analysis-config](../build/analysis-config).
+6. Execute `gradlew build` to compile and package the final configuration in [build/analysis-config](/build/analysis-config).
 
-7. Follow [Readme.md#Getting Started with Analysis](../Readme.md#Getting Started with Analysis) to load the configuration and start analysis.
+7. Follow [Readme.md#Getting Started with Analysis](/Readme.md#Getting Started with Analysis) to load the configuration and start analysis.
 
-8. View the report in [sarif](../build/output/sarif), if there are any false positives or false negatives, analyze the reasons and decide whether corrections or optimizations are needed, refer to [Result Output](usage.md).
+8. View the report in [sarif](/build/output/sarif), if there are any false positives or false negatives, analyze the reasons and decide whether corrections or optimizations are needed, refer to [Result Output](usage.md).
 
 
 
@@ -130,11 +106,11 @@ interface IInvokeCheckPoint : ICheckPoint {
 }
 ```
 
-Complete Example: [weak-ssl.default-http-client](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
+Complete Example: [weak-ssl.default-http-client](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
 
 
 
-### Text Content Parsing Check
+### Text Content Parsing Checks
 
 You can perform checks for:
 
@@ -177,13 +153,13 @@ interface ISourceFileCheckPoint : ICheckPoint {
 }
 ```
 
-Complete Example: [mybatis/MybatisMapperXmlSQLSinkProvider.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkProvider.kt)
+Complete Example: [frameworks/persistence/ibatis/mybatis](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis)
 
 
 
-### Java AST Check
+### Java AST Checks
 
-Edit [corax-config-community/build.gradle.kts](../corax-config-community/build.gradle.kts) and add the dependency:
+Edit [corax-config-community/build.gradle.kts](/corax-config-community/build.gradle.kts) and add the dependency:
 
 ```kotlin
 
@@ -272,7 +248,7 @@ object CompilationUnitAnalysisDataFactory :
 
 
 
-### Soot Jimple IR Check
+### Soot Jimple IR Checks
 
 To check Jimple IR, you need to obtain `SootMethod`, and use the following API for custom checks:
 
@@ -334,7 +310,7 @@ interface IUnitCheckPoint : ICheckPoint {
 
 
 
-### Annotation Check
+### Annotation Checks
 
 Java `Annotation` annotations generally exist in Class, Field, and Method. Use the following API for custom checks:
 
@@ -385,13 +361,13 @@ For checking issues in mybatis `mapper.xml` files where SQL strings are concaten
 Therefore, the detection in this framework needs to be divided into two steps:
 
 1. Implement `PreAnalysisUnit` to parse `xml` files in resources and extract risk method signatures. 
-   See [MybatisMapperXmlSQLSinkProvider](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkProvider.kt).
+   See [mybatis-sql-injection-checker.kt#parseMybatisMapperAndConfig](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/mybatis-sql-injection-checker.kt).
 2. Implement `AIAnalysisUnit` to check for injections. Handle and check if the dangerous parameters in the SQL query methods provided in the previous step are tainted.
-   See [MybatisMapperXmlSQLSinkConsumer](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkConsumer.kt).
+   See [mybatis-sql-injection-checker.kt#checkMybatisStatement](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/mybatis-sql-injection-checker.kt).
 
 
 
-Complete Source Code: [mybatis modeling](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis)
+Complete Source Code: [mybatis modeling](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis)
 
 
 
@@ -399,9 +375,9 @@ Complete Source Code: [mybatis modeling](../corax-config-community/src/main/kotl
 
 Complete source code:
 
-source: [general/model/framework/spring/SpringAnnotationSource.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/javaee/JavaeeAnnotationSource.kt)
+source: [general/model/framework/spring/SpringAnnotationSource.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/javaee/JavaeeAnnotationSource.kt)
 
-sink: [community/checkers/frameworks/spring/ResponseBodyCheck.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/spring/ResponseBodyCheck.kt)
+sink: [community/checkers/frameworks/spring/ResponseBodyCheck.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/spring/ResponseBodyCheck.kt)
 
 
 
@@ -409,11 +385,11 @@ sink: [community/checkers/frameworks/spring/ResponseBodyCheck.kt](../corax-confi
 
 It exists in the following locations within the project:
 
-[corax-config-general/rules](../corax-config-general/rules)
+[corax-config-general/rules](/corax-config-general/rules)
 
-[corax-config-community/rules](../corax-config-community/rules)
+[corax-config-community/rules](/corax-config-community/rules)
 
-After running `gradlew build`, it will be copied to this location: [build/analysis-config/rules](../build/analysis-config/rules)
+After running `gradlew build`, it will be copied to this location: [build/analysis-config/rules](/build/analysis-config/rules)
 
 
 
@@ -641,7 +617,7 @@ listOf(
 
 ​		For taint propagation, source, sink modeling, the format is mostly monotonous, and it may be cumbersome to write in code. It can be more straightforward by writing simple modeling to a file according to a certain format. However, for complex modeling, it is still recommended to use Kotlin hard coding. 
 
-​		The [RuleManager](plugin-infrastructure.md#rulemanager) introduced earlier is responsible for parsing rule files. It loads rules, and then, in [model/taint/TaintModelingConfig.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt), it reads `ConfigCenter.taintRulesManager.sources` and `ConfigCenter.taintRulesManager.summaries`, applying these rules to achieve unified and rapid modeling. All configuration formats, parsing, and management are customizable without any restrictions.
+​		The [RuleManager](plugin-infrastructure.md#rulemanager) introduced earlier is responsible for parsing rule files. It loads rules, and then, in [model/taint/TaintModelingConfig.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt), it reads `ConfigCenter.taintRulesManager.sources` and `ConfigCenter.taintRulesManager.summaries`, applying these rules to achieve unified and rapid modeling. All configuration formats, parsing, and management are customizable without any restrictions.
 
 ```kotlin
 context(AIAnalysisApi)
@@ -663,7 +639,7 @@ override fun config() {
 
 **Source Configuration File Rules**:
 
-​		Files with the suffix `sources.json`, such as [general.sources.json](../corax-config-general/rules/general.sources.json). These sinks are grouped together and classified by `kind`. For example:
+​		Files with the suffix `sources.json`, such as [general.sources.json](/corax-config-general/rules/general.sources.json). These sinks are grouped together and classified by `kind`. For example:
 
 ```json
 [
@@ -673,7 +649,7 @@ override fun config() {
 ]
 ```
 
-​		In the [model/taint/TaintModelingConfig.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) file, the `sourceKindToAppendTaintTypesMap` defines the mapping relationship from `kind` to source taint kinds.
+​		In the [model/taint/TaintModelingConfig.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) file, the `sourceKindToAppendTaintTypesMap` defines the mapping relationship from `kind` to source taint kinds.
 
 ```kotlin
 val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
@@ -685,7 +661,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 ​		For example, the `"kind":"remote"` corresponds to `com.feysh.corax.config.general.checkers.internetSource`. These taint kinds are automatically added to source methods based on their kind when applying these rules.
 
-​		A simpler way is to directly customize and modify the yml main configuration file to define the mapping data without modifying the code. For example, [build/analysis-config/default-config.yml](../build/analysis-config/default-config.yml):
+​		A simpler way is to directly customize and modify the yml main configuration file to define the mapping data without modifying the code. For example, [build/analysis-config/default-config.yml](/build/analysis-config/default-config.yml):
 
 ```yaml
 ...
@@ -715,7 +691,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 **Summary Configuration File Rules**
 
-​		The configuration files with the suffix `summaries.json` are structured like [general.summaries.json](../corax-config-general/rules/general.summaries.json).
+​		The configuration files with the suffix `summaries.json` are structured like [general.summaries.json](/corax-config-general/rules/general.summaries.json).
 
 ```json
 [
@@ -735,7 +711,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 **Sanitizer Configuration**
 
-Open the [`???.summaries.json`](../corax-config-general/rules/supplement.summaries.json) configuration file and add a similar `sanitizer rule` to remove TaintKind:
+Open the [`???.summaries.json`](/corax-config-general/rules/supplement.summaries.json) configuration file and add a similar `sanitizer rule` to remove TaintKind:
 
 ```json
   {"signature":"org.springframework.web.util.HtmlUtils: * htmlEscape(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
@@ -751,9 +727,9 @@ If the analysis engine mistakenly believes that `Argument[0]` will contaminate t
   {"signature":"org.test.Utils: * taintInTaintOut(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""}
 ```
 
-The implementation of the `sanitizer` is in [TaintSanitizerPropagate](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/processor/Propagate.kt).
+The implementation of the `sanitizer` is in [TaintSanitizerPropagate](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/processor/IPropagate.kt).
 
-The definition of **xss** in `"from":"xss"` in the rules is specified in [sanitizerTaintTypesMap](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) and can be customized by modifying the main configuration or editing the code.
+The definition of **xss** in `"from":"xss"` in the rules is specified in [sanitizerTaintTypesMap](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) and can be customized by modifying the main configuration or editing the code.
 
 
 
@@ -786,7 +762,7 @@ object `insecure-cookie`  : AIAnalysisUnit() {
 }
 ```
 
-Complete code in [insecure-cookie.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/insecure-cookie.kt).
+Complete code in [insecure-cookie.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/insecure-cookie.kt).
 
 
 
@@ -921,17 +897,17 @@ Tips:
 
 
 
-### Taint Checking
+### Taint Checks
 
 ​		Previously discussed sources and summaries are used to construct a taint transfer graph. Ultimately, we need to check at some point on this graph whether certain taint types are present.
 
-#### Injection Check
+#### Injection Checks
 
-For example: [checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt)
+For example: [checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt)
 
-1. First, add sink methods to [corax-config-community/rules](../corax-config-community/rules). If it is a common sink, add it to community.sink.json. If it is sinks specific to a Java project, create a new file with a different name, suffixing it with .sinks.json.
+1. First, add sink methods to [corax-config-community/rules](/corax-config-community/rules). If it is a common sink, add it to community.sink.json. If it is sinks specific to a Java project, create a new file with a different name, suffixing it with .sinks.json.
 
-   The sink rule format is similar to the rules in [community.sinks.json](../corax-config-community/rules/community.sinks.json), where sinks are grouped together and categorized by `kind`, like:
+   The sink rule format is similar to the rules in [community.sinks.json](/corax-config-community/rules/community.sinks.json), where sinks are grouped together and categorized by `kind`, like:
 
 ```json
 [
@@ -943,7 +919,7 @@ For example: [checkers/taint-checker.kt](../corax-config-community/src/main/kotl
 
 
 
-2. Add the following code to [checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) under `kind2Checker`:
+2. Add the following code to [checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) under `kind2Checker`:
 
 ```		kotlin
 val kind2Checker: Map<String, CustomSinkDataForCheck> = mapOf(
@@ -993,11 +969,11 @@ This is mainly externalizing the taint check form into the rule folder.
 
 
 
-#### Privacy Leakage Check
+#### Privacy Leakage Checks
 
 The categorization for taint analysis is typically injection and sensitive information leakage. Both fall under taint analysis, so the checks are similar to the injection checks.
 
-Simply add the following to [checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 
+Simply add the following to [checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 
 
 ```kotlin
 val kind2Checker: Map<String, CustomSinkDataForCheck> = mapOf(

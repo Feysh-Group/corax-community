@@ -1,13 +1,6 @@
-**Table of Contents**
+**Table of contents**
 
-
-* [Community Edition & Commercial Edition Diff](#community-edition--commercial-edition-diff)
-* [Open Rules](#open-rules)
-* [SAST Test Set Performance](#sast-test-set-performance)
-  * [BenchmarkJava](#benchmarkjava)
-  * [alipay/sast-java](#alipayant-application-security-testing-benchmarksast-java)
-  * [Java Sec Code](#java-sec-code)
-
+[[_TOC_]]
 
 
 

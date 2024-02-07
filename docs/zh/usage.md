@@ -2,15 +2,7 @@
 
 **Table of contents**
 
-
-
-* [分析概述](#分析概述)
-* [前提知识](#前提知识)
-* [命令行参数](#命令行参数)
-* [常见使用场景](#常见使用场景)
-* [结果输出](#结果输出)
-* [常见问题](#常见问题)
-
+[[_TOC_]]
 
 ## 分析概述
 
@@ -46,10 +38,10 @@ CoraxJava主要由两部分组成，分别是`CoraxJava核心分析引擎`，和
 
 `CoraxJava` 的执行方式是使用Java运行`CoraxJava核心分析引擎` 的JAR包，通过参数指定分析对象、配置文件等，`CoraxJava核心分析引擎`会根据配置文件自动寻找相应的 `CoraxJava规则检查器`插件。主要的几个参数图示如下：
 
-<img src="image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
+<img src="../image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
 
 
-简单的使用可参考  [开始分析](../Readme.md#开始分析) 。完整参数如下所示（对部分不重要选项有删减）：
+简单的使用可参考  [开始分析](/Readme-zh.md#开始分析) 。完整参数如下所示（对部分不重要选项有删减）：
 
 ```YAML
 Usage: CoraxJava [<options>]
@@ -200,7 +192,7 @@ src-only模式：只扫描src（比如一些简单的硬编码检查）, 不加�
 
 **当 --target 为 android 时，此参数为必填项**
 
-指向 android platform 目录 (包含多个版本的 android.jar 文件)，可以 克隆 此项目 [android-platforms](https://github.com/Sable/android-platforms) 并将本参数指向 android-platforms 项目根目录。或者指向 [corax-config-tests/libs/platforms](../corax-config-tests/libs/platforms) （不建议，只有 android-7）
+指向 android platform 目录 (包含多个版本的 android.jar 文件)，可以 克隆 此项目 [android-platforms](https://github.com/Sable/android-platforms) 并将本参数指向 android-platforms 项目根目录。或者指向 [corax-config-tests/libs/platforms](/corax-config-tests/libs/platforms) （不建议，只有 android-7）
 
 
 
@@ -338,12 +330,12 @@ flag option。 此选项默认关闭
 
 效果如下：
 
-<img src="image/taint-cov-overview.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+<img src="../image/taint-cov-overview.png" style="zoom: 100%;" alt="Main parameter configuration"/>
 
 
 
 
-<img src="image/taint-cov.png" style="zoom: 100%;" alt="Main parameter configuration"/>
+<img src="../image/taint-cov.png" style="zoom: 100%;" alt="Main parameter configuration"/>
 
 
 
@@ -476,7 +468,7 @@ SourceCodeDir: nacos
 
 某些项目编译后直接得到一个完整的 fat jar 文件，甚至是exe后缀的，比如以 [jadx 1.4.3](https://github.com/skylot/jadx/releases/download/v1.4.3/jadx-gui-1.4.3-with-jre-win.zip)为例，下载后将执行程序的 .exe 后缀改为 .jar 如下图所示：
 
-<img src="image/fat jar-1.png" alt="img" style="zoom:50%;" />
+<img src="../image/fat jar-1.png" alt="img" style="zoom:50%;" />
 
 此类项目的项目类文件和三方库类文件完全混合到一起，这种时候就需要使用 **--project-scan-config** 参数进一步筛选分析目标。
 
@@ -614,7 +606,7 @@ output
 
 ​		被调用方法的 declaringClass 属于 phantomClasses，这表明依赖的三方库不完整，应该尽力保证除了 soot exclude 掉的类都不会出现在此文件中。（soot exclude 默认有：[java.*, sun.*, javax.*, com.sun.*, com.ibm.*, org.xml.*, org.w3c.*, apple.awt.*, com.apple.*]，具体排除加载了哪些类可以到命令输出中找到，也可以自定义 pattern 排除不想加载的类）
 
-​		前往查看 here: [`{output}/phantom_dependence_classes.txt`](../build/output/phantom_dependence_classes.txt)
+​		前往查看 here: [`{output}/phantom_dependence_classes.txt`](/build/output/phantom_dependence_classes.txt)
 
 
 
@@ -622,7 +614,7 @@ output
 
 ​		被分析到且分析器无法从 corax java config plugins 中的方法 summaries 数据中找到对应建模描述的方法。并不是所有此文件中所有的方法都需要方法摘要（Summary），只有 隐式流传递，native method 和 具有附加特殊属性（比如高密级数据这个秘密等级属性是计算机无法感知的，需要人工或者 AI 额外标注）等等几类方法才需要手动到配置项目中添加摘要，一般的方法引擎能够自动完成分析，无需手动额外编写方法摘要。
 
-​		前往查看 here: [`{output}/undefined_summary_methods.txt`](../build/output/undefined_summary_methods.txt)
+​		前往查看 here: [`{output}/undefined_summary_methods.txt`](/build/output/undefined_summary_methods.txt)
 
 
 ### 详细日志

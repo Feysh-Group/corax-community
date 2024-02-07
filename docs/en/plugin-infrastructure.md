@@ -4,31 +4,8 @@
 
 **Table of contents**
 
-* [Plugin Project Architecture](#plugin-project-architecture)
-* [Basic Types](#basic-types)
-  * [IStandard](#istandard)
-  * [IRule](#irule)
-  * [IBugCategory](#ibugcategory)
-  * [IChecker](#ichecker)
-  * [CheckType](#checktype)
-  	*  [Language](#language)
-  	*  [BugMessage](#bugmessage)
-  * [SAOptions](#saoptions)
-  * [IMethodMatch](#imethodmatch)
-    * [SootSignatureMatch](#sootsignaturematch)
-    * [RawSignatureMatch](#rawsignaturematch)
-  * [IMethodDecl](#imethoddecl)
-    * [ISootMethodDecl](#isootmethoddecl)
-    * [IRawMethodDecl](#irawmethoddecl)
-  * [IMethodGrouped](#imethodgrouped)
-  * [RuleManager](#rulemanager)
-  * [ConfigCenter](#configcenter)
-  * [CheckerUnit](#checkerunit)
-  	* [PreAnalysisUnit](#preanalysisunit)
-      * [PreAnalysisApi](#preanalysisapi)
-  	* [AIAnalysisUnit](#aianalysisunit)
-  	  * [AIAnalysisApi](#aianalysisapi)
-  * [ISootInitializeHandler](#isootinitializehandler)
+[[_TOC_]]
+
 
 ## Plugin Project Architecture
 
@@ -36,7 +13,7 @@
 
 (Abbreviated) The architecture of the community edition is depicted in the following diagram:
 
-![Architecture Diagram](./image/infrastructure.jpg)
+![Architecture Diagram](../image/infrastructure.jpg)
 
 
 
@@ -187,7 +164,7 @@ enum class BuiltinCWERules(
 }
 ```
 
-You can extend the definition of these rules as follows: [CWERules.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/standard/CWERules.kt)
+You can extend the definition of these rules as follows: [CWERules.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/standard/CWERules.kt)
 
 
 
@@ -231,7 +208,7 @@ enum class BuiltinBugCategory(
 
 ```
 
-You can extend the definition of these categories as follows: [BugCategory.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/category/BugCategory.kt)
+You can extend the definition of these categories as follows: [BugCategory.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/category/BugCategory.kt)
 
 
 
@@ -253,7 +230,7 @@ object SqliChecker : IChecker {
 }
 ```
 
-You can extend the definition of this checker by referring to [CheckerDeclarations.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt).
+You can extend the definition of this checker by referring to [CheckerDeclarations.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt).
 
 
 
@@ -277,7 +254,7 @@ object SqliChecker : IChecker {
  }
 ```
 
-​		You can extend the definition of this checker by referring to [CheckerDeclarations.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt).
+​		You can extend the definition of this checker by referring to [CheckerDeclarations.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/CheckerDeclarations.kt).
 
 
 
@@ -367,7 +344,7 @@ msgGenerator { "Using ${args["type"]} in $callee may be vulnerable to SQL inject
 
 ### SAOptions
 
-​		Facilitates the external configuration of this object through a custom serializable class. Refer to [Readme.md#编译构建](../Readme.md#编译构建) for details. Open the generated YAML configuration file, find the `options` field in the SSLContext unit, modify the configuration, and save. The analyzer will automatically deserialize this YAML file into an `SSLContext.Options` and fill in the `SSLContext.options` field during the next analysis. Then, the configurations in `options.riskAlgorithm` become effective when calling the `AIAnalysisUnit.config` method.
+​		Facilitates the external configuration of this object through a custom serializable class. Refer to [Readme.md#Compilation-and-Build](/Readme.md#compilation-and-build) for details. Open the generated YAML configuration file, find the `options` field in the SSLContext unit, modify the configuration, and save. The analyzer will automatically deserialize this YAML file into an `SSLContext.Options` and fill in the `SSLContext.options` field during the next analysis. Then, the configurations in `options.riskAlgorithm` become effective when calling the `AIAnalysisUnit.config` method.
 
 ```kotlin
 object SSLContext : AIAnalysisUnit() { // Must inherit from CheckerUnit
@@ -386,7 +363,7 @@ object SSLContext : AIAnalysisUnit() { // Must inherit from CheckerUnit
 }
 ```
 
-​		Refer to [weak-ssl.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt) for the complete code.
+​		Refer to [weak-ssl.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt) for the complete code.
 
 
 
@@ -442,7 +419,7 @@ Additionally, soot signatures do not support variable names. This may be support
 
 ### IMethodGrouped
 
-The complete source code is defined in [rule/RuleDeclares.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleDeclares.kt).
+The complete source code is defined in [rule/RuleDeclares.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleDeclares.kt).
 
 It is an interface that inherits from `IMethodSignature` and includes a field `group: String`. This represents a `group kind` along with a method's `signature { signature, subtypes, provenance, ext }`.
 
@@ -452,15 +429,15 @@ For instance, the following rule is a combination of a `kind` field and a comple
 {"kind":"content-provider","signature":"<javax.swing.text.JTextComponent: java.lang.String getText(int,int)>","subtypes":true,"provenance":"manual","ext":""}
 ```
 
-An example file containing such rules is [general.sources.json](../corax-config-general/rules/general.sources.json).
+An example file containing such rules is [general.sources.json](/corax-config-general/rules/general.sources.json).
 
 ### RuleManager
 
-The complete source code is defined in [rule/RuleManager.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleManager.kt).
+The complete source code is defined in [rule/RuleManager.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/rule/RuleManager.kt).
 
 It is a configuration file manager based on `kotlinx-serialization` for easy loading, parsing files, and serializing some objects to files.
 
-In [model/ConfigCenter.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt), you can find code like this:
+In [model/ConfigCenter.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt), you can find code like this:
 
 ```kotlin
 val methodAccessPathDataBase: GroupedMethodsManager<MethodAccessPath> by lazy {
@@ -479,9 +456,9 @@ You can use a similar approach to conveniently customize loading and saving data
 
 ### ConfigCenter
 
-The complete source code is defined in [model/ConfigCenter.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt).
+The complete source code is defined in [model/ConfigCenter.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/ConfigCenter.kt).
 
-It is used to load files from [build/analysis-config/rules](../build/analysis-config/rules), including `taint (source, sink, summary) json` configuration files and `access-path.json` configuration files. 
+It is used to load files from [build/analysis-config/rules](/build/analysis-config/rules), including `taint (source, sink, summary) json` configuration files and `access-path.json` configuration files. 
 
 These correspond to `ConfigCenter.taintRulesManager` and `ConfigCenter.methodAccessPathDataBase`, respectively.
 
@@ -491,7 +468,7 @@ Tips: For more detailed examples, refer to [Custom Checker](checker-detail.md).
 
 It is a base class for a checker unit, divided into `PreAnalysisUnit` and `AIAnalysisUnit`.
 
-![CheckerUnit](./image/CheckerUnit.png)
+![CheckerUnit](../image/CheckerUnit.png)
 
 #### PreAnalysisUnit
 
@@ -574,7 +551,7 @@ Used to customize the configuration of the soot Scene-related parameters.
 
 Two built-in objects are provided:
 
-![image-20230719135238363](./image/SootInitializeHandler.png)
+![image-20230719135238363](../image/SootInitializeHandler.png)
 
 Source code:
 
@@ -644,5 +621,5 @@ object DefaultSootConfiguration : ISootInitializeHandler {
 
 `DefaultSootConfiguration` is the default soot scene configuration for the analyzer. If not manually specified, the analyzer will default to using this configuration.
 
-Complete example: [community/soot/CustomSootConfiguration.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/soot/CustomSootConfiguration.kt)
+Complete example: `com.feysh.corax.config.builtin.soot.DefaultSootConfiguration`
    

@@ -1,0 +1,77 @@
+# Prerequisites:
+# We categorize all runtime classes into three types: application class (core classes that users expect to scan), library class (third-party dependencies for enhanced analysis precision), and phantom class (class not found, possibly due to not being compiled or missing libraries)
+# For semantic analysis of general programs, an explicit or implicit entry function/method must be provided as the analysis target, which should reside within the user's code (application classes).
+# If the analysis entry point includes library code, it can lead to too many analysis targets, consuming significant resources and making it inefficient to scan the code we care about.
+
+# Usage
+## Add parameter: --output ${output} before the corax analysis parameter --extra-args
+## Add parameter: --project-scan-config project-scan-config.yml at the end of the command
+
+# Other Information
+# You can test regular expressions at https://regex101.com and select FLAVOR as java
+# Note that "\." matches "." while a single "." matches any character (except line terminators)
+
+# Class Classification Rules
+process-class-regex: #                            Regular expression for class package names. Note that matching is done in an ordered manner from top to bottom, pay attention to the order
+    - (-)\.R\$\w+$                                    # E.g., com.android.R$id
+    - (+)org\.owasp\.benchmark\.testcode              # E.g., org.owasp.benchmark.testcode.Test001, org.owasp.benchmark.testcode.xss.Xss001
+    - (+)org\.owasp\.benchmark(-)org\.owasp\.benchmark\.utils # Scan (Process) classes under org.owasp.benchmark excluding those under org.owasp.benchmark.utils
+                                                      # Supports multiple regexes connected with (+) or (-)
+    - (-)org\.owasp(+)org\.owasp\.benchmark           # Exclude (Skip) all classes under org.owasp except those under org.owasp.benchmark, e.g., org.owasp.comp.Test will be excluded (Skip), but org.owasp.benchmark and org.foo will not be excluded (proceed to next rule)
+
+    # ⇲ Add your required package name regex(es) here ↙
+    - (+)org\.example
+
+    - (-others) # Equivalent to (-).+, meaning do not scan classes not covered by the above regexes, or [+others]; if not written, keep the original classification (Keep) (where --process and --auto-app-classes point to application classes, and --class-path points to library classes).
+
+# Resource File Classification Rules
+process-res-regex: #                              Regular expression for resource file paths
+    - (+)/.+_jsp.java$                                # E.g., build/jsp-classes/org/**/View_jsp.java will be parsed by AST or scanned as plain text
+                                                      # However, placing this regex after (-)/build/ would cause build/**/*_jsp.java to never be parsed by AST or scanned as plain text
+    # files                                       Regular expressions for resource paths
+    - (-)/\.R\.java$                                  # E.g., com/android/.R.java
+
+    # directories                                 Regular expressions for resource directories. Note that matching is done in an ordered manner, pay attention to the order
+    - (-)/out/
+    - (-)/output/
+    - (-)/tmp/
+    - (-)/temp/
+    - (-)/log/                                        # Preferably add "/" to directory path regexes to match folder paths, otherwise all files containing 'log' will also be excluded
+    - (-)/logs/
+    - (-)/build/
+    - (-)/target/
+    - (-)/\.git/
+    - (-)/\.idea/
+    - (-)/\.gradle/
+    - (-)/\.mvn
+    - (-)/\.run/
+
+    - (+others) # Equivalent to (+).+, meaning scan resources not covered by the above regexes, or [-others]; if not written, maintain the original classification (Keep), where originally --source-path and --auto-app-classes pointed resources will be scanned.
+
+# The actual filtering and classification information based on this configuration file can be viewed after the analysis completes in ${output}/scan-classifier-info.yml
+# ScanAction has the following types:
+#    Process: indicates the item will be scanned
+#    Keep: keeps the original classification
+#    Skip: indicates the item will not be directly scanned as a primary entry point, but methods in classes marked Skip that can be reached through inter-procedural calls will still be analyzed in dependency scanning
+
+# Examples:
+# - "library -> Process: com.example.JavaAnnotationTest" means the originally classified library class (not directly analyzed) com.example.JavaAnnotationTest is marked as Process after matching the regex in project-scan-config.yml and will be directly analyzed.
+# - "application -> Skip: com.foo.Test" means the originally classified application class (directly analyzed) com.foo.Test is marked as Skip after regex matching and will not be directly analyzed.
+# - "phantom -> Skip: com.not.exists.Test" means the originally classified phantom class (a class referenced in the analysis but only its name could be obtained without the class file) com.not.exists.Test cannot be analyzed regardless of its ScanAction change because it does not exist. Check whether --auto-app-classes, --process, and --class-path parameters include the complete class.
+
+# Therefore, for a class you want to scan, such as com.example.foo.ApplicationTest, the following cases indicate issues with parameters, configurations, or input resources:
+# - "library -> Keep: com.example.foo.ApplicationTest"               Reason: not covered by project-scan-config.yml and either exists in --class-path but not --process, or the source code for the class in the path pointed by --auto-app-classes does not exist (will be classified as a library class)
+# - "application -> Skip: com.example.foo.ApplicationTest"           Reason: incorrectly excluded by the regex following (-) in project-scan-config.yml; please check your regex
+# - "phantom -> Process|Keep|Skip: com.example.foo.ApplicationTest"  Reason: class not found! Check whether it was compiled and whether it was specified in --auto-app-classes, --process, --class-path
+#   Correct classifications are:
+# - "library -> Process: com.example.foo.ApplicationTest"
+# - "application -> Process|Keep: com.example.foo.ApplicationTest"
+
+# Similarly, for classes you don't want to directly scan (e.g., third-party libraries, non-project code like org.spring.AbstractRequest), the following cases indicate issues with parameters, configurations, or input resources:
+# - "library -> Process: org.spring.AbstractRequest"                Reason: incorrectly included by the regex following (+) in project-scan-config.yml; please check your regex
+# - "application -> Keep: org.spring.AbstractRequest"               Reason: no regex related to this class in project-scan-config.yml; please check your regex
+# - "application -> Process: org.spring.AbstractRequest"            Reason: incorrectly included by the regex following (+) in project-scan-config.yml, and --auto-app-classes or --process points to this class
+# - "phantom -> Process|Keep|Skip: org.spring.AbstractRequest"      Reason: class not found! Check whether it was compiled and whether it was specified in --auto-app-classes, --process, --class-path
+#   Correct classifications are:
+# - "library -> Skip|Keep: org.spring.AbstractRequest"
+# - "application -> Skip: org.spring.AbstractRequest"
