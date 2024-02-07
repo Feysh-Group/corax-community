@@ -1,10 +1,35 @@
-
-
 # 插件项目结构
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
+
+- [插件项目架构](#%E6%8F%92%E4%BB%B6%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84)
+  * [System Overview](#system-overview)
+  * [插件结构](#%E6%8F%92%E4%BB%B6%E7%BB%93%E6%9E%84)
+- [基础类型](#%E5%9F%BA%E7%A1%80%E7%B1%BB%E5%9E%8B)
+  * [IStandard](#istandard)
+  * [IRule](#irule)
+  * [IBugCategory](#ibugcategory)
+  * [IChecker](#ichecker)
+  * [CheckType](#checktype)
+    + [Language](#language)
+    + [BugMessage](#bugmessage)
+  * [SAOptions](#saoptions)
+  * [IMethodMatch](#imethodmatch)
+    + [SootSignatureMatch](#sootsignaturematch)
+    + [RawSignatureMatch](#rawsignaturematch)
+  * [IMethodGrouped](#imethodgrouped)
+  * [RuleManager](#rulemanager)
+  * [ConfigCenter](#configcenter)
+  * [CheckerUnit](#checkerunit)
+    + [PreAnalysisUnit](#preanalysisunit)
+      - [PreAnalysisApi](#preanalysisapi)
+    + [AIAnalysisUnit](#aianalysisunit)
+      - [AIAnalysisApi](#aianalysisapi)
+  * [ISootInitializeHandler](#isootinitializehandler)
+
+<!-- tocstop -->
 
 ## 插件项目架构
 

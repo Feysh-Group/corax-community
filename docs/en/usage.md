@@ -2,7 +2,43 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
+
+- [Analysis Overview](#analysis-overview)
+- [Prerequisite Knowledge](#prerequisite-knowledge)
+  * [`class` Classification](#class-classification)
+- [Command Line Parameters](#command-line-parameters)
+  * [--target [java|android|src-only]](#--target-javaandroidsrc-only)
+  * [--android-platform-dir](#--android-platform-dir)
+  * [--auto-app-classes](#--auto-app-classes)
+  * [--process](#--process)
+  * [--class-path](#--class-path)
+  * [--source-path](#--source-path)
+  * [--disable-analyze-library-classes](#--disable-analyze-library-classes)
+  * [--project-scan-config](#--project-scan-config)
+  * [--serialize-cg](#--serialize-cg)
+  * [--enable-coverage](#--enable-coverage)
+  * [--make-scorecard](#--make-scorecard)
+- [Common Use Cases](#common-use-cases)
+  * [Java Sec Code](#java-sec-code)
+    + [Step One: Compile](#step-one-compile)
+    + [Step Two: Observe the types of compilation output](#step-two-observe-the-types-of-compilation-output)
+    + [Step Three: Write analysis command](#step-three-write-analysis-command)
+  * [Alibaba: Nacos](#alibaba-nacos)
+    + [Step 1: Compilation](#step-1-compilation)
+    + [Step 2: Observe the Compilation Output Types](#step-2-observe-the-compilation-output-types)
+    + [Step 3: Write Analysis Command](#step-3-write-analysis-command)
+  * [Fat Jar](#fat-jar)
+  * [Gradle Projects](#gradle-projects)
+- [Android App](#android-app)
+- [Results Output](#results-output)
+  * [False Positive/Negative Forms](#false-positivenegative-forms)
+  * [Missing Dependencies](#missing-dependencies)
+  * [Unmodeled Methods](#unmodeled-methods)
+  * [Detailed Logs](#detailed-logs)
+- [Frequently Asked Questions](#frequently-asked-questions)
+
+<!-- tocstop -->
 
 ## Analysis Overview
 

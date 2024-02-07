@@ -1,8 +1,15 @@
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
 
+- [Community Edition & Commercial Edition Diff](#community-edition--commercial-edition-diff)
+- [Open Rules](#open-rules)
+- [SAST Test Set Performance](#sast-test-set-performance)
+  * [BenchmarkJava](#benchmarkjava)
+  * [alipay/ant-application-security-testing-benchmark/sast-java](#alipayant-application-security-testing-benchmarksast-java)
+  * [Java Sec Code](#java-sec-code)
 
+<!-- tocstop -->
 
 # Community Edition & Commercial Edition Diff
 

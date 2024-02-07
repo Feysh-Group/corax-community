@@ -2,8 +2,37 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
 
+- [Overview](#overview)
+- [Static Code Property Checks](#static-code-property-checks)
+  * [Function Call Checks](#function-call-checks)
+  * [Text Content Parsing Checks](#text-content-parsing-checks)
+  * [Java AST Checks](#java-ast-checks)
+  * [Soot Jimple IR Checks](#soot-jimple-ir-checks)
+  * [Annotation Checks](#annotation-checks)
+- [Framework Modeling Adaptation](#framework-modeling-adaptation)
+  * [MyBatis Configuration Parsing](#mybatis-configuration-parsing)
+  * [Spring Modeling](#spring-modeling)
+- [Rules Data](#rules-data)
+- [Data Flow Modeling](#data-flow-modeling)
+  * [Value Transmission Modeling](#value-transmission-modeling)
+    + [TODO: To be implemented](#todo-to-be-implemented)
+  * [Taint Propagation Modeling](#taint-propagation-modeling)
+  * [Configuration File Modeling](#configuration-file-modeling)
+  * [Attribute Extension](#attribute-extension)
+- [Data Flow Analysis](#data-flow-analysis)
+  * [Expressions](#expressions)
+  * [Taint Checks](#taint-checks)
+    + [Injection Checks](#injection-checks)
+    + [Privacy Leakage Checks](#privacy-leakage-checks)
+  * [Numerical Checks](#numerical-checks)
+  * [Hardcoding Checks](#hardcoding-checks)
+  * [Attribute Extension Checks](#attribute-extension-checks)
+  * [Resource Not Released Checks](#resource-not-released-checks)
+    + [TODO To be implemented](#todo-to-be-implemented)
+
+<!-- tocstop -->
 
 ## Overview
 Customization is based on requirements, and there are several methods available:

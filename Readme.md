@@ -21,9 +21,21 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
 
+- [Project Introduction](#project-introduction)
+- [Quick Start](#quick-start)
+  * [Environment Requirements](#environment-requirements)
+  * [Compilation and Build](#compilation-and-build)
+  * [Start Analysis](#start-analysis)
+  * [CoraxJava+Docker](#coraxjavadocker)
+- [View Report](#view-report)
+- [Test Suite Performance](#test-suite-performance)
+- [Custom Rule Checker](#custom-rule-checker)
+- [Communication and Feedback](#communication-and-feedback)
+- [Recruitment](#recruitment)
 
+<!-- tocstop -->
 
 ## Project Introduction
 

@@ -1,11 +1,35 @@
-
-
 # Plugin Project Structure
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
 
+- [Plugin Project Architecture](#plugin-project-architecture)
+  * [System Overview](#system-overview)
+  * [Plugin Structure](#plugin-structure)
+- [Basic Types](#basic-types)
+  * [IStandard](#istandard)
+  * [IRule](#irule)
+  * [IBugCategory](#ibugcategory)
+  * [IChecker](#ichecker)
+  * [CheckType](#checktype)
+    + [Language](#language)
+    + [BugMessage](#bugmessage)
+  * [SAOptions](#saoptions)
+  * [IMethodMatch](#imethodmatch)
+    + [SootSignatureMatch](#sootsignaturematch)
+    + [RawSignatureMatch](#rawsignaturematch)
+  * [IMethodGrouped](#imethodgrouped)
+  * [RuleManager](#rulemanager)
+  * [ConfigCenter](#configcenter)
+  * [CheckerUnit](#checkerunit)
+    + [PreAnalysisUnit](#preanalysisunit)
+      - [PreAnalysisApi](#preanalysisapi)
+    + [AIAnalysisUnit](#aianalysisunit)
+      - [AIAnalysisApi](#aianalysisapi)
+  * [ISootInitializeHandler](#isootinitializehandler)
+
+<!-- tocstop -->
 
 ## Plugin Project Architecture
 
@@ -622,4 +646,3 @@ object DefaultSootConfiguration : ISootInitializeHandler {
 `DefaultSootConfiguration` is the default soot scene configuration for the analyzer. If not manually specified, the analyzer will default to using this configuration.
 
 Complete example: `com.feysh.corax.config.builtin.soot.DefaultSootConfiguration`
-   

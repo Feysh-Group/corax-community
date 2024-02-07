@@ -2,7 +2,14 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
+
+- [Functional Testing](#functional-testing)
+- [Vulnerability Tagging](#vulnerability-tagging)
+  * [Non-compliant Vulnerability Tagging](#non-compliant-vulnerability-tagging)
+  * [Compliant Code Tagging](#compliant-code-tagging)
+
+<!-- tocstop -->
 
 ## Functional Testing
 

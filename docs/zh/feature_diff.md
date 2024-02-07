@@ -3,10 +3,16 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
 
+- [社区版&商业版 Diff](#%E7%A4%BE%E5%8C%BA%E7%89%88%E5%95%86%E4%B8%9A%E7%89%88-diff)
+- [已开放规则](#%E5%B7%B2%E5%BC%80%E6%94%BE%E8%A7%84%E5%88%99)
+- [SAST测试集表现](#sast%E6%B5%8B%E8%AF%95%E9%9B%86%E8%A1%A8%E7%8E%B0)
+  * [BenchmarkJava](#benchmarkjava)
+  * [alipay/ant-application-security-testing-benchmark/sast-java](#alipayant-application-security-testing-benchmarksast-java)
+  * [Java Sec Code](#java-sec-code)
 
-
+<!-- tocstop -->
 
 #  社区版&商业版 Diff
 

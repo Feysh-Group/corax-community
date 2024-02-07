@@ -2,7 +2,42 @@
 
 **Table of contents**
 
-[[_TOC_]]
+<!-- toc -->
+
+- [分析概述](#%E5%88%86%E6%9E%90%E6%A6%82%E8%BF%B0)
+- [前提知识](#%E5%89%8D%E6%8F%90%E7%9F%A5%E8%AF%86)
+  * [`class` 分类](#class-%E5%88%86%E7%B1%BB)
+- [命令行参数](#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0)
+  * [--target [java|android|src-only]](#--target-javaandroidsrc-only)
+  * [--android-platform-dir](#--android-platform-dir)
+  * [--auto-app-classes](#--auto-app-classes)
+  * [--process](#--process)
+  * [--class-path](#--class-path)
+  * [--source-path](#--source-path)
+  * [--disable-analyze-library-classes](#--disable-analyze-library-classes)
+  * [--project-scan-config](#--project-scan-config)
+  * [--serialize-cg](#--serialize-cg)
+  * [--enable-coverage](#--enable-coverage)
+  * [--make-scorecard](#--make-scorecard)
+- [常见使用场景](#%E5%B8%B8%E8%A7%81%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF)
+  * [Java Sec Code](#java-sec-code)
+    + [第一步：编译](#%E7%AC%AC%E4%B8%80%E6%AD%A5%E7%BC%96%E8%AF%91)
+    + [第二步：观察编译输出的产物类型](#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E8%A7%82%E5%AF%9F%E7%BC%96%E8%AF%91%E8%BE%93%E5%87%BA%E7%9A%84%E4%BA%A7%E7%89%A9%E7%B1%BB%E5%9E%8B)
+    + [第三步：编写分析命令](#%E7%AC%AC%E4%B8%89%E6%AD%A5%E7%BC%96%E5%86%99%E5%88%86%E6%9E%90%E5%91%BD%E4%BB%A4)
+  * [Alibaba:nacos](#alibabanacos)
+    + [第一步：编译](#%E7%AC%AC%E4%B8%80%E6%AD%A5%E7%BC%96%E8%AF%91-1)
+    + [第二步：观察编译输出的产物类型](#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E8%A7%82%E5%AF%9F%E7%BC%96%E8%AF%91%E8%BE%93%E5%87%BA%E7%9A%84%E4%BA%A7%E7%89%A9%E7%B1%BB%E5%9E%8B-1)
+    + [第三步：编写分析命令](#%E7%AC%AC%E4%B8%89%E6%AD%A5%E7%BC%96%E5%86%99%E5%88%86%E6%9E%90%E5%91%BD%E4%BB%A4-1)
+  * [Fat jar](#fat-jar)
+  * [Gradle项目](#gradle%E9%A1%B9%E7%9B%AE)
+- [Android App](#android-app)
+- [结果输出](#%E7%BB%93%E6%9E%9C%E8%BE%93%E5%87%BA)
+  * [误漏报表单](#%E8%AF%AF%E6%BC%8F%E6%8A%A5%E8%A1%A8%E5%8D%95)
+  * [缺失的依赖](#%E7%BC%BA%E5%A4%B1%E7%9A%84%E4%BE%9D%E8%B5%96)
+  * [未建模的方法](#%E6%9C%AA%E5%BB%BA%E6%A8%A1%E7%9A%84%E6%96%B9%E6%B3%95)
+  * [详细日志](#%E8%AF%A6%E7%BB%86%E6%97%A5%E5%BF%97)
+
+<!-- tocstop -->
 
 ## 分析概述
 
