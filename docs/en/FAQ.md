@@ -1,4 +1,4 @@
-### Q&A
+# Q&A
 
 **Q: What factors affect analysis accuracy?**
 
@@ -16,9 +16,19 @@ A: Analysis accuracy is influenced not only by the analysis algorithm of the `co
 
 **Q: Why does analysis require the compiled output of source code?**
 
-A: In terms of static analysis technology implementation, pure source code analysis often requires converting it into an AST (Abstract Syntax Tree). For languages running on the JVM (Java, Kotlin, JSP, Scala, and Groovy, etc.), designing a one-to-one language front end to parse is required. AST contains various complex language features and syntax sugars across different versions, significantly increasing the burden on the analysis engine. This is not the focus of static analysis, so Java static analysis often directly or indirectly analyzes JVM bytecode (various forms of compiled artifacts class) to obtain the program's operational semantic information.
-On the other hand, source code analysis requires various language environments and dependencies. For example, with `import package.a.*;` if the environment does not have the `package.a` package, all references to declarations under that package will fail to resolve due to incomplete necessary dependency information, leading to loss of analysis accuracy. Therefore, analyzing classes usually yields more accurate reports than analyzing source code.
-Additionally, using source code analysis would greatly limit the use cases of static analysis, for example, analyzing a binary package without source code.
+A:  Here is the translated content in English:
+
+**Q: Why is it necessary to analyze the output of compiled source code?**
+
+A:  In terms of implementing static analysis techniques, pure source code analysis often requires it to be first converted into an Abstract Syntax Tree (AST). For languages running on the JVM (such as Java, Kotlin, JSP, Scala, and Groovy), a one-to-one language front-end needs to be designed for parsing. The AST contains various complex language features and syntax sugars from different versions, which significantly increases the burden on the analysis engine. Moreover, this is not the focus of static analysis. Therefore, static analysis of Java often directly or indirectly analyzes the JVM bytecode (i.e., various forms of compiled output such as class files) to obtain program operational semantic information.
+
+​	On one hand, source code analysis requires various language environments and dependencies. For example, if there is an `import package.a.*;` statement but the environment does not have the package `package.a`, then all references to declarations in that package will fail to parse or result in loss of analysis accuracy due to incomplete dependency information.
+
+​	On the other hand, using source code analysis will greatly limit the usage scenarios of static analysis. For example, if you want to analyze a binary package without the accompanying source code.
+
+​	Ultimately, source code analysis can only analyze source code. However, the vast majority of third-party libraries do not have source code. Analyzers that depend on source code will encounter broken analysis chains when analyzing cross-module calls (i.e., inter-procedural calls) due to the absence of source code. For example, when methods for sources, sinks, or propagation of tainted data are in third-party libraries, analysis schemes that rely on source code will result in a large number of false negatives.
+
+​	Therefore, analyzing classes often yields more accurate reports than analyzing source code.
 
 **Q: Why is source code necessary for analysis?**
 

@@ -36,6 +36,7 @@
   * [缺失的依赖](#%E7%BC%BA%E5%A4%B1%E7%9A%84%E4%BE%9D%E8%B5%96)
   * [未建模的方法](#%E6%9C%AA%E5%BB%BA%E6%A8%A1%E7%9A%84%E6%96%B9%E6%B3%95)
   * [详细日志](#%E8%AF%A6%E7%BB%86%E6%97%A5%E5%BF%97)
+- [常见问题](#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)
 
 <!-- tocstop -->
 
@@ -661,5 +662,50 @@ output
 上次分析的分析日志：`${sys:user.home}/logs/corax/last.log`
 
 最近累计的分析日志：`${sys:user.home}/logs/corax/rolling.log` (大小限制为20MB，无需担心)
+
+
+## 常见问题
+
+
+1：指定分析对象的路径不存在。
+
+```
+01:40:10.583 | ERROR | CoraxJava | An error occurred: java.lang.IllegalStateException: autoAppClasses option: "test\xxx" is invalid or target not exists
+Exception in thread "main" java.lang.IllegalStateException: autoAppClasses option: "test\xxx" is invalid or target not exists
+```
+
+2：找不到类。一般因为 `--process` 或 `--auto-app-classes` 参数指定的路径下并不存在可以加载的类，一般是没有编译导致。或 `--auto-app-classes`  指定的路径下存在编译产物但是不存在对应源码。
+
+```
+Exception in thread "main" java.lang.IllegalStateException: application classes must not be empty. check your --process, --auto-app-classes path
+```
+
+3：报告数量均为 0。可能因为规则分析器或者引擎的错误导致抛出异常，且分析终止，请检查是否出现进度条，且没有 Error 关键字 或 异常栈打印。
+
+```
+ReportConverter | Started: Flushing 0 reports ... 
+```
+
+4：分析被长时间阻塞在某一步骤。
+
+- 可以考虑检查 ApplicationClasses 数量对比 libraryClasses 数量是否过多，可能没有配置好 `--process` 参数，该参数错误包含了三方库。
+
+- 查看 共计 classes 数量 是否很大（比如超过2w），如果类数量太多，加载时间和内存消耗会相应变多。
+
+- 内存到达瓶颈。
+
+    - 分析规模太大而物理机内存资源不足。可以通过 windows 任务管理器 或者 `linux htop` 命令等查看内存和 CPU 状态。如果卡在进度条可以关注这些信息：比如 剩余物理内存（phy）低于 1gb 或者 jvmMemoryCommitted 数值 非常趋近 jvmMemoryMax 数值 时（单位gb）均表现为内存不足。
+
+  \>   15% │███████▏                                     │ 15/94e (0:00:00 / 0:00:02) ?e/s 6/7.9/7.9/8.0 phy: 0.5 cpu:  99%
+
+  比如此进度条表示
+
+  \>  分析进度 │███████▏   │ 已分析入口方法数量/总分析入口方法数量 (耗时 / 预测剩余时间) 任务处理速度 jvmMemoryUsed/maxUsedMemory/jvmMemoryCommitted/jvmMemoryMax phy:剩余真实物理内存 cpu:  负载百分比
+
+    - 算法实现问题 导致内存耗费异常高
+
+- cpu负载长时间为 0，可能因为某些原因导致协程相互阻塞挂起，暂未发现。
+
+- 可能的引擎算法 bug，欢迎提交 issue。
 
 
