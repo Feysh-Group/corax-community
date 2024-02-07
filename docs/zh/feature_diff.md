@@ -1,12 +1,9 @@
 **Table of contents**
 
 
-* [社区版&商业版 Diff](#社区版商业版-diff)
-* [已开放规则](#已开放规则)
-* [SAST测试集表现](#sast测试集表现)
-  * [BenchmarkJava](#benchmarkjava)
-  * [alipay/sast-java](#alipayant-application-security-testing-benchmarksast-java)
-  * [Java Sec Code](#java-sec-code)
+**Table of contents**
+
+[[_TOC_]]
 
 
 

@@ -2,38 +2,14 @@
 
 **Table of contents**
 
-* [概要](#概要)
-* [静态代码属性检查](#静态代码属性检查)
-  * [函数调用检查](#函数调用检查)
-  * [文本内容解析检查](#文本内容解析检查)
-  * [Java AST 检查](#Java-ast-检查)
-  * [Soot Jimple IR 检查](#soot-jimple-ir-检查)
-  * [注解检查](#注解检查)
-* [框架建模适配](#框架建模适配)
-  * [mybatis配置解析](#mybatis配置解析)
-  * [spring建模](#spring建模)
-* [rules数据](#rules数据)
-* [数据流建模](#数据流建模)
-  * [值传递建模](#值传递建模)
-  * [taint传播建模](#taint传播建模)
-  * [配置文件建模](#配置文件建模)
-  * [属性扩展](#属性扩展)
-* [数据流检查](#数据流检查)
-  * [表达式](#表达式)
-  * [污点检查](#污点检查)
-    * [注入检查](#注入检查) 
-    * [隐私泄露检查](#隐私泄露检查) 
-  * [数值检查](#数值检查)
-  * [硬编码检查](#硬编码检查)
-  * [扩展属性检查](#扩展属性检查)
-  * [资源未释放检查](#资源未释放检查)
+[[_TOC_]]
 
 
 ## 概要
 自定义按照需求而定，现有如下几种方法（有序）：
 
-1. 修改 yml 配置文件 [analysis-config/default-config.yml](../build/analysis-config/default-config.yml)
-2. 修改 rules 文件夹中的配置文件 [analysis-config/rules](../build/analysis-config/rules)
+1. 修改 yml 配置文件 [analysis-config/default-config.yml](/build/analysis-config/default-config.yml)
+2. 修改 rules 文件夹中的配置文件 [analysis-config/rules](/build/analysis-config/rules)
 3. 修改现有 checker 源码并编译
 4. 自定义开发新的 checker 并编译
 
@@ -59,16 +35,16 @@
 
    如果需要检查您编写的 checker 里的一些比较直接的bug，可以按如下两个步骤检查
 
-   1. 编辑 [AnalyzerConfigRegistry](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
+   1. 编辑 [AnalyzerConfigRegistry](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
    2. 添加完后可以执行一次 `gradlw :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`，能够检查部分checker编写错误并提示纠正
 
-5. 前往 [corax-config-tests/src/main/java/testcode](../corax-config-tests/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
+5. 前往 [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
 
-6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](../build/analysis-config)
+6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](/build/analysis-config)
 
-7. 按照  [Readme.md#开始分析](../Readme.md#开始分析) 加载配置开始分析
+7. 按照  [Readme.md#开始分析](/Readme.md#开始分析) 加载配置开始分析
 
-8. 查看报告 [sarif](../build/output/sarif) ，如有误漏报请分析原因，是否需要改正优化检查器，参考[结果输出](usage.md#结果输出)
+8. 查看报告 [sarif](/build/output/sarif) ，如有误漏报请分析原因，是否需要改正优化检查器，参考[结果输出](usage.md#结果输出)
 
 
 
@@ -130,7 +106,7 @@ interface IInvokeCheckPoint : ICheckPoint {
 }
 ```
 
-完整示例 [weak-ssl.default-http-client](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
+完整示例 [weak-ssl.default-http-client](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/weak-ssl.kt)
 
 
 
@@ -177,13 +153,13 @@ interface ISourceFileCheckPoint : ICheckPoint {
 }
 ```
 
-完整示例 [mybatis/MybatisMapperXmlSQLSinkProvider.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkProvider.kt)
+完整示例 [mybatis/MybatisMapperXmlSQLSinkProvider.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkProvider.kt)
 
 
 
 ### Java AST 检查
 
-先编辑 [corax-config-community/build.gradle.kts](../corax-config-community/build.gradle.kts) 然后添加依赖
+先编辑 [corax-config-community/build.gradle.kts](/corax-config-community/build.gradle.kts) 然后添加依赖
 
 ```kotlin
 
@@ -385,13 +361,13 @@ mybatis 的 `mapper.xml` 文件中存在 sql 字符串拼接（如`$`拼接）�
 所以该框架的检测需要分为两步：
 
 1. 实现 `PreAnalysisUnit` 来解析资源文件中的 `xml` 后缀文件获得危险方法及参数。
-   参考 [MybatisMapperXmlSQLSinkProvider](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkProvider.kt)
+   参考 [mybatis-sql-injection-checker.kt#parseMybatisMapperAndConfig](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/mybatis-sql-injection-checker.kt).
 2. 实现 `AIAnalysisUnit` 来检查注入，需要 handle 并检查上一步提供的 sql query 方法的危险参数是否存在污染。
-   参考[MybatisMapperXmlSQLSinkConsumer](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/MybatisMapperXmlSQLSinkConsumer.kt)
+   参考 [mybatis-sql-injection-checker.kt#checkMybatisStatement](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis/mybatis-sql-injection-checker.kt).
 
 
 
-完整源码：[mybatis modeling](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis)
+完整源码：[frameworks/persistence/ibatis/mybatis](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/persistence/ibatis/mybatis)
 
 
 
@@ -399,9 +375,9 @@ mybatis 的 `mapper.xml` 文件中存在 sql 字符串拼接（如`$`拼接）�
 
 完整源码：
 
-source: [general/model/framework/spring/SpringAnnotationSource.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/javaee/JavaeeAnnotationSource.kt)
+source: [general/model/framework/spring/SpringAnnotationSource.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/javaee/JavaeeAnnotationSource.kt)
 
-sink：[community/checkers/frameworks/spring/ResponseBodyCheck.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/spring/ResponseBodyCheck.kt)
+sink：[community/checkers/frameworks/spring/ResponseBodyCheck.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/frameworks/spring/ResponseBodyCheck.kt)
 
 
 
@@ -409,11 +385,11 @@ sink：[community/checkers/frameworks/spring/ResponseBodyCheck.kt](../corax-conf
 
 存在项目中的如下位置：
 
-[corax-config-general/rules](../corax-config-general/rules)
+[corax-config-general/rules](/corax-config-general/rules)
 
-[corax-config-community/rules](../corax-config-community/rules)
+[corax-config-community/rules](/corax-config-community/rules)
 
-`gradlew build` 后会被拷贝到这个位置：[build/analysis-config/rules](../build/analysis-config/rules)
+`gradlew build` 后会被拷贝到这个位置：[build/analysis-config/rules](/build/analysis-config/rules)
 
 
 
@@ -642,7 +618,7 @@ public final class URL implements java.io.Serializable {
 
 ​		对于 taint 传递和 source, sink 这种污点建模来说，其格式大部分比较单一，写在代码中可能比较臃肿，可以按照一定的格式将简单的建模写到文件中，复杂的仍然使用 kotlin 硬编码方式 来建模。
 
-​		前边介绍过的 [RuleManager](plugin-infrastructure.md#rulemanager) 就是在做规则文件解析事情，它被用来加载规则，然后在  [model/taint/TaintModelingConfig.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) 中读取 `ConfigCenter.taintRulesManager.sources` 和 `ConfigCenter.taintRulesManager.summaries` 并应用这些规则，即可达到统一快速建模目的。所有的配置格式、解析、管理均可以自定义无任何限制。
+​		前边介绍过的 [RuleManager](plugin-infrastructure.md#rulemanager) 就是在做规则文件解析事情，它被用来加载规则，然后在  [model/taint/TaintModelingConfig.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) 中读取 `ConfigCenter.taintRulesManager.sources` 和 `ConfigCenter.taintRulesManager.summaries` 并应用这些规则，即可达到统一快速建模目的。所有的配置格式、解析、管理均可以自定义无任何限制。
 
 ```kotlin
     context (AIAnalysisApi)
@@ -664,7 +640,7 @@ public final class URL implements java.io.Serializable {
 
 **source 配置文件的规则**：
 
-​		以 `sources.json` 为后缀的文件 如 [general.sources.json](../corax-config-general/rules/general.sources.json) 这些 sinks 被放在一起并使用 `kind` 对这些 sinks 进行归类, 如：
+​		以 `sources.json` 为后缀的文件 如 [general.sources.json](/corax-config-general/rules/general.sources.json) 这些 sinks 被放在一起并使用 `kind` 对这些 sinks 进行归类, 如：
 
 ```json
 [
@@ -674,7 +650,7 @@ public final class URL implements java.io.Serializable {
 ]
 ```
 
-​		在 [model/taint/TaintModelingConfig.kt](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) 文件中的 `sourceKindToAppendTaintTypesMap` 定义了 kind 到 source taint kinds 的映射关系
+​		在 [model/taint/TaintModelingConfig.kt](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) 文件中的 `sourceKindToAppendTaintTypesMap` 定义了 kind 到 source taint kinds 的映射关系
 
 ```kotlin
 val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
@@ -686,7 +662,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 ​		比如上面的 `"kind":"remote" ` 对应 `com.feysh.corax.config.general.checkers.internetSource` 这些 taint kinds，在应用这些 rules 时候会根据 kind 自动对 source 方法加上对应的 taint 属性。
 
-​		当然简单的方式是直接自定义修改 yml 主配置文件来定义映射数据无需修改代码（由于是 `SAOptions` 的子类，可以在文件中快速自定义配置）。比如 [build/analysis-config/default-config.yml](../build/analysis-config/default-config.yml)
+​		当然简单的方式是直接自定义修改 yml 主配置文件来定义映射数据无需修改代码（由于是 `SAOptions` 的子类，可以在文件中快速自定义配置）。比如 [build/analysis-config/default-config.yml](/build/analysis-config/default-config.yml)
 
 ```yaml
   ....
@@ -716,7 +692,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 **summary 配置文件的规则**
 
-​		以 `summaries.json` 为后缀的文件 如 [general.summaries.json](../corax-config-general/rules/general.summaries.json)
+​		以 `summaries.json` 为后缀的文件 如 [general.summaries.json](/corax-config-general/rules/general.summaries.json)
 
 ```json
 [
@@ -736,7 +712,7 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
 
 **sanitizer 配置**
 
-打开 [`???.summaries.json`](../corax-config-general/rules/supplement.summaries.json) 配置文件并添加如下类似的 `sanitizer rule` 去除 TaintKind:
+打开 [`???.summaries.json`](/corax-config-general/rules/supplement.summaries.json) 配置文件并添加如下类似的 `sanitizer rule` 去除 TaintKind:
 
 ```json
   {"signature":"org.springframework.web.util.HtmlUtils: * htmlEscape(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
@@ -752,9 +728,9 @@ val sourceKindToAppendTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
   {"signature":"org.test.Utils: * taintInTaintOut(**)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"empty","provenance":"manual","ext":""}
 ```
 
-`sanitizer` 实现在 [TaintSanitizerPropagate](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/processor/Propagate.kt) 
+`sanitizer` 实现在 [TaintSanitizerPropagate](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/processor/IPropagate.kt) 
 
-其中规则中的 `"from":"xss"` 中的 **xss** 定义在 [sanitizerTaintTypesMap](../corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) ，可以通过修改主配置或者编辑代码方式进行自定义扩展
+其中规则中的 `"from":"xss"` 中的 **xss** 定义在 [sanitizerTaintTypesMap](/corax-config-general/src/main/kotlin/com/feysh/corax/config/general/model/taint/TaintModelingConfig.kt) ，可以通过修改主配置或者编辑代码方式进行自定义扩展
 
 
 
@@ -787,7 +763,7 @@ object `insecure-cookie`  : AIAnalysisUnit() {
 }
 ```
 
-完整代码 [insecure-cookie.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/insecure-cookie.kt)
+完整代码 [insecure-cookie.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/insecure-cookie.kt)
 
 
 
@@ -928,11 +904,11 @@ Tips:
 
 #### 注入检查
 
-比如：[checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt)
+比如：[checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt)
 
-1. 首先添加 sink 方法到 [corax-config-community/rules](../corax-config-community/rules) ，如果是通用的sink请添加到 community.sink.json 中，如果是某一 java 项目特有的 sinks, 请另起名字并以 `.sinks.json` 为后缀创建新的文件。
+1. 首先添加 sink 方法到 [corax-config-community/rules](/corax-config-community/rules) ，如果是通用的sink请添加到 community.sink.json 中，如果是某一 java 项目特有的 sinks, 请另起名字并以 `.sinks.json` 为后缀创建新的文件。
 
-   sink rule 格式上就如 [community.sinks.json](../corax-config-community/rules/community.sinks.json) 中的规则，这些 sinks 被放在一起并使用 `kind` 对这些 sinks 进行归类, 如：
+   sink rule 格式上就如 [community.sinks.json](/corax-config-community/rules/community.sinks.json) 中的规则，这些 sinks 被放在一起并使用 `kind` 对这些 sinks 进行归类, 如：
 
 ```json
 [
@@ -944,7 +920,7 @@ Tips:
 
 
 
-2. 再到 [checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 中的 `kind2Checker` 加入如下代码:
+2. 再到 [checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 中的 `kind2Checker` 加入如下代码:
 
 ```		kotlin
 val kind2Checker: Map<String, CustomSinkDataForCheck> = mapOf(
@@ -998,7 +974,7 @@ object `cmdi-sinks` : AIAnalysisUnit() {
 
 污点分析的分类有 注入 和 敏感信息泄露类，都属于 taint , 所以检查和上面的注入检查是一致的。
 
-直接在 [checkers/taint-checker.kt](../corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 中加入
+直接在 [checkers/taint-checker.kt](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/checkers/taint-checker.kt) 中加入
 
 ```kotlin
 val kind2Checker: Map<String, CustomSinkDataForCheck> = mapOf(
