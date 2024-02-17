@@ -206,7 +206,7 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 提交误报漏报：
 - github issue    
-- 发送邮件至bug@corax.com
+- 发送邮件至bug@feysh.com
 
 交流群：
 

@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        :bulb: You can also send an email to bug@corax.com
+        :bulb: You can also send an email to bug@feysh.com
   - type: textarea
     attributes:
       label: Describe the bug

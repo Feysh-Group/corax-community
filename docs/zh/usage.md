@@ -228,7 +228,7 @@ src-only模式：只扫描src（比如一些简单的硬编码检查）, 不加�
 
 **当 --target 为 android 时，此参数为必填项**
 
-指向 android platform 目录 (包含多个版本的 android.jar 文件)，可以 克隆 此项目 [android-platforms](https://github.com/Sable/android-platforms) 并将本参数指向 android-platforms 项目根目录。或者指向 [corax-config-tests/libs/platforms](/corax-config-tests/libs/platforms) （不建议，只有 android-7）
+指向 android platform 目录 (包含多个版本的 android.jar 文件)，可以 克隆 此项目 [android-platforms](https://github.com/Sable/android-platforms) 并将本参数指向 android-platforms 项目根目录。或者指向 [corax-config-tests/libs/platforms](/corax-config-tests/android10x/dist/platforms) （不建议，只有 android-7）
 
 
 
@@ -625,7 +625,7 @@ output
 
 ### 误漏报表单
 
-- [ ] Positive   (TP,FN)   <=>  阳性数量  =（真阳性数量  + 假阴性数量 ）<=> 不合格代码数量  =（真不合格数量  + 漏报数量 ）
+- [ ] Positive   (TP,FN)   <=>  阳性数量  =（真阳性数量  + 假阴性数量 ）<=> 不合规代码数量  =（真不合规数量  + 漏报数量 ）
 
 - [ ] Negative  (TN,FP)  <=>  阴性数量 =（真阴性数量  + 假阳性数量 ） <=>    合规代码数量  =（     真合规数量  + 误报数量 ）
 

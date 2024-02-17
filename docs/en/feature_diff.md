@@ -104,7 +104,7 @@ Corax Static Analysis Tool demonstrates its excellent analysis capability and fa
 | xss          | 79    | 246  | 0    | 209  | 0    | 455   | 1    | 0    | 1     |
 | Total        |       | 1375 | 40   | 1232 | 93   | 2740  | 0.97 | 0.07 | 0.9   |
 
-Explanation and calculation formulas for `TP/FN/TN/FP/TPR/FPR` can be found [here](usage.md#misreport-explanation)
+Explanation and calculation formulas for `TP/FN/TN/FP/TPR/FPR` can be found [here](usage.md#false-positivenegative-forms)
 
 1. Additionally, a `testcase java` source file in `BenchmarkJava` contains either one or no non-compliant issue, and the code is automatically synthesized.
 2. The `crypto` category has false positives due to the fact that other vulnerabilities of the same type are included in this testcase due to code synthesis. The tool produced reports in other locations, leading to being considered false positives!

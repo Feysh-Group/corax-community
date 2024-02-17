@@ -131,7 +131,7 @@
    1. 编辑 [AnalyzerConfigRegistry](/corax-config-community/src/main/kotlin/com/feysh/corax/config/community/AnalyzerConfigRegistry.kt) 文件，在 `preAnalysisImpl` 或 `aiCheckerImpl` 添加新加的 checker 注册。
    2. 添加完后可以执行一次 `gradlw :corax-config-community:test --tests "com.feysh.corax.config.tests.ConfigValidate.validate"`，能够检查部分checker编写错误并提示纠正
 
-5. 前往 [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) 编写对应的不合格和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
+5. 前往 [corax-config-tests/normal/src/main/java/testcode](/corax-config-tests/normal/src/main/java/testcode) 编写对应的不合规和合规代码用来测试和保障分析精度，参考 [单元测试](unit-tests.md) 
 
 6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](/build/analysis-config)
 

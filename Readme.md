@@ -175,11 +175,11 @@ It is recommended to use `VSCode` to view the `SARIF` format report. You can ins
 
 ## Test Suite Performance
 
-**Read [Corax Community Edition Feature Comparison](docs/en/feature_diff.md#SAST Test Suite Performance) to understand the performance of this Java community edition tool on SAST test suites.**
+**Read [Corax Community Edition Feature Comparison](docs/en/feature_diff.md#sast-test-set-performance) to understand the performance of this Java community edition tool on SAST test suites.**
 
 ## Custom Rule Checker
 
-**Read [Corax Community Edition Feature Comparison](docs/en/feature_diff.md#Open Rules) to understand the open rules of this Java community edition tool.**
+**Read [Corax Community Edition Feature Comparison](docs/en/feature_diff.md#open-rules) to understand the open rules of this Java community edition tool.**
 
 **If you need to implement a custom `CoraxJava rule checker`, refer to [CoraxJava Rule Checker](docs/en/checker.md) for more details.**
 
@@ -187,7 +187,7 @@ It is recommended to use `VSCode` to view the `SARIF` format report. You can ins
 
 To report false positives or false negatives:
 - GitHub issue
-- Send an email to bug@corax.com
+- Send an email to bug@feysh.com
 
 Community group:
 

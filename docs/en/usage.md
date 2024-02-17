@@ -228,7 +228,7 @@ In src-only mode, only the 'src' directory is scanned (e.g., for simple hard-cod
 
 **When --target is android, this parameter is required.**
 
-Points to the Android platform directory (which includes multiple versions of android.jar files). You can clone the project [android-platforms](https://github.com/Sable/android-platforms) and set this parameter to the root directory of the android-platforms project. Alternatively, you can set it to [corax-config-tests/libs/platforms](/corax-config-tests/libs/platforms) (not recommended, only includes android-7).
+Points to the Android platform directory (which includes multiple versions of android.jar files). You can clone the project [android-platforms](https://github.com/Sable/android-platforms) and set this parameter to the root directory of the android-platforms project. Alternatively, you can set it to [corax-config-tests/libs/platforms](/corax-config-tests/android10x/dist/platforms) (not recommended, only includes android-7).
 
 
 
@@ -263,7 +263,7 @@ Running the above command will execute the analysis in the root directory of the
 
    > Note: It is not recommended to directly include the system's third-party library directory (e.g., /User/xxx/.m2/) in the analysis because the quantity is too large, resulting in low analysis efficiency. It is recommended to include only the third-party libraries that the project depends on.
 
-   - Gradle: Refer to [Gradle Project](#Gradle Project)
+   - Gradle: Refer to [Gradle Project](#gradle-projects)
 
 3. Start the analysis
 
