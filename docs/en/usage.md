@@ -77,7 +77,7 @@ The execution of `CoraxJava` involves using the Java runtime to execute the JAR 
 <img src="../image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
 
 
-For simple usage, refer to [Getting Started](/Readme.md#start-analysis). The complete set of parameters is as follows (some less important options have been omitted):
+For simple usage, refer to [Readme.md#Configure-Parameters](/Readme.md#configure-parameters). The complete set of parameters is as follows (some less important options have been omitted):
 
 ```YAML
 Usage: CoraxJava [<options>]

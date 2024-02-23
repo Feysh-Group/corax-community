@@ -77,7 +77,7 @@ CoraxJava主要由两部分组成，分别是`CoraxJava核心分析引擎`，和
 <img src="../image/Main parameter configuration.jpg" style="zoom: 50%;" alt="Main parameter configuration"/>
 
 
-简单的使用可参考  [开始分析](/Readme-zh.md#开始分析) 。完整参数如下所示（对部分不重要选项有删减）：
+简单的使用可参考  [Readme.md#参数配置](/Readme-zh.md#参数配置) 。完整参数如下所示（对部分不重要选项有删减）：
 
 ```YAML
 Usage: CoraxJava [<options>]

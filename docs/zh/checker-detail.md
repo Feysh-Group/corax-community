@@ -71,7 +71,7 @@
 
 6. 执行 `gradlew build` 编译并打包出最终的配置 [build/analysis-config](/build/analysis-config)
 
-7. 按照  [Readme.md#开始分析](/Readme.md#开始分析) 加载配置开始分析
+7. 按照  [Readme.md#参数配置](/Readme-zh.md#参数配置) 加载配置开始分析
 
 8. 查看报告 [sarif](/build/output/sarif) ，如有误漏报请分析原因，是否需要改正优化检查器，参考[结果输出](usage.md#结果输出)
 

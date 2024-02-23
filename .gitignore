@@ -4,6 +4,7 @@ temp/
 logs/
 build/
 target/
+output/
 .idea/
 .gradle/
 *.log

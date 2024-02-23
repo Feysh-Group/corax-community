@@ -25,11 +25,14 @@
 
 - [Project Introduction](#project-introduction)
 - [Quick Start](#quick-start)
+  * [Step 1: Prepare your analysis target](#step-1-prepare-your-analysis-target)
+  * [Step 2: Analyze Quickly](#step-2-analyze-quickly)
+  * [Step 3: View Report](#step-3-view-report)
+- [Set up a development environment](#set-up-a-development-environment)
   * [Environment Requirements](#environment-requirements)
   * [Compilation and Build](#compilation-and-build)
-  * [Start Analysis](#start-analysis)
+  * [Configure parameters](#configure-parameters)
   * [CoraxJava+Docker](#coraxjavadocker)
-- [View Report](#view-report)
 - [Test Suite Performance](#test-suite-performance)
 - [Custom Rule Checker](#custom-rule-checker)
 - [Communication and Feedback](#communication-and-feedback)
@@ -58,6 +61,71 @@ CoraxJava has the following features:
 ## Quick Start
 
 This repository is for the `CoraxJava Rule Checker` module, which also includes test cases [corax-config-tests](corax-config-tests). After the project is built, the `CoraxJava Rule Checker` module will be in the form of a plugin (a separate zip package). It is to be used in combination with the `CoraxJava Core Engine` module to perform Java static code analysis. The test cases can be used for rapid testing and validation of CoraxJava's detection results.
+
+
+
+### Step 1: Prepare your analysis target
+
+- [x] It should include a project with Java source code, preferably complete and not compressed.
+- [x] You need complete project build artifacts and as many third-party library JARs as possible: (If there are no pre-built artifacts, manually build using commands like `mvn package -Dmaven.test.skip.exec=true -DskipTests` or `gradle build -x test`. Avoid using `mvn compile/jar` or `gradle compile/jar` as these commands often do not pull the project's dependent third-party library JARs and the build artifacts are incomplete.)
+  - [x] For example, the project source code corresponds to a folder containing a large number of `.class` files (`target/classes`, `build/classes`).
+  - [x] Project build artifacts corresponding to `.jar`/`.war`/`.zip` files, or any folder path containing them.
+  - [x] The folder containing the third-party library JARs (provide as many as possible, if not available, use the `mvn dependency:copy-dependencies -DoutputDirectory=target\libs` command to manually pull them).
+
+
+
+### Step 2: Analyze Quickly
+
+**One-line command for analysis**
+
+When running for the first time, the script will download JDK and Corax release as needed, unpack them to the corresponding locations, and will not disrupt the original environment~
+
+- For Linux and macOS:
+  - Download [coraxjw.sh](coraxjw.sh)
+  - Copy and run the following command:
+    ```bash
+    chmod +x ./coraxjw.sh
+    ./coraxjw.sh --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+    ```
+
+- For Windows:
+  - Download [coraxjw.ps1](coraxjw.ps1)
+  
+  - Command Prompt (cmd):
+    ```shell
+    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1 --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+  ```
+  
+  - PowerShell:
+    ```PowerShell
+    Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+    ```
+
+General parameter explanation: [General Configuration Parameters](#configure-parameters)
+
+Detailed parameter explanation: [Command Line Parameter Details](docs/en/usage.md#command-line-parameters)
+
+To uninstall, simply run `./coraxjw.sh uninstall`
+
+
+
+### Step 3: View Report
+
+Currently, CoraxJava supports generating results reports in [SARIF](https://sarifweb.azurewebsites.net/) format. The report generation path is specified by the `--output` parameter. Under this path, a `sarif/` directory will be generated, with each `java` source code file having a separate `sarif` format result file.
+
+It is recommended to use `VSCode` to view the `SARIF` format report. You can install the `Sarif Viewer` plugin for convenient visual inspection and navigation.
+
+**Sarif Viewer** Usage:
+
+1. Install [Visual Studio Code](https://code.visualstudio.com/)
+2. Install the VSCode: Sarif Viewer extension
+   - Open the webpage [sarif-viewer](https://marketplace.visualstudio.com/items?itemName=MS-SarifVSCode.sarif-viewer) and click the install button
+   - Alternatively, install via command line `code --install-extension MS-SarifVSCode.sarif-viewer`
+3. Viewing SARIF format reports
+   1. In VSCode, open any .sarif file in the sarif folder within the corax analysis output directory, and the report preview window should automatically pop up. If the window doesn't appear, you can press `Ctrl+Shift+P`, search for "sarif," and click "Sarif: Show Panel."
+   2. In the SARIF Results window of Sarif Viewer, click the folder icon in the top right corner to select and open multiple SARIF files for viewing.
+
+## Set up a development environment
 
 ### Environment Requirements
 
@@ -119,24 +187,16 @@ After a successful build, multiple zip files of plugins and configuration files 
 
 
 
-### Start Analysis
+### Configure parameters
 
-**Step 1: Prepare your analysis target**
-
-- [x] It should include a project with Java source code, preferably complete and not compressed.
-- [x] You need complete project build artifacts and as many third-party library JARs as possible: (If there are no pre-built artifacts, manually build using commands like `mvn package -Dmaven.test.skip.exec=true -DskipTests` or `gradle build -x test`. Avoid using `mvn compile/jar` or `gradle compile/jar` as these commands often do not pull the project's dependent third-party library JARs and the build artifacts are incomplete.)
-  - [x] For example, the project source code corresponds to a folder containing a large number of `.class` files (`target/classes`, `build/classes`).
-  - [x] Project build artifacts corresponding to `.jar`/`.war`/`.zip` files, or any folder path containing them.
-  - [x] The folder containing the third-party library JARs (provide as many as possible, if not available, use the `mvn dependency:copy-dependencies -DoutputDirectory=target\libs` command to manually pull them).
-
-**Step 2: Loading the Analysis Engine**
+**Step 1: Loading the Analysis Engine**
 
 The analysis engine needs to load the `CoraxJava rule checker plugin` (e.g., `analysis-config/plugins/feysh-config-*-plugin-*.*.*.zip`) and some dependent configuration files (e.g., `analysis-config/rules`). Therefore, you need to prepare the `analysis-config` (rule configuration folder):
 
 - You can download and unzip the pre-generated `analysis-config` directory from the [release](https://github.com/Feysh-Group/corax-community/releases): `{corax-java-cli-community-2.6.zip extraction location}/analysis-config/`
 - Or use the [build/analysis-config](build%2Fanalysis-config) directory generated in the [Compilation and Build](#compilation-and-build) step: `./build/analysis-config/`
 
-**Step 3: Start Analysis! Manually configure `CoraxJava` with the following essential parameters:**
+**Step 2: Start Analysis! Manually configure `CoraxJava` with the following essential parameters:**
 
 - Analyzer startup command `java -jar corax-cli-x.x.x.jar` (Download and unzip `CoraxJava core engine` (`corax-cli-x.x.x.jar`) from the [release](https://github.com/Feysh-Group/corax-community/releases))
 - Set output directory `--output build/output`
@@ -166,12 +226,6 @@ The final report will be generated in the folder path specified by `--output`.
 ### CoraxJava+Docker
 
 **If you want to experience scanning with Docker, read [CoraxJava+Docker Scanning Tutorial](docs/en/coraxdocker-usage.md) for complete usage details.**
-
-## View Report
-
-Currently, CoraxJava supports generating results reports in [SARIF](https://sarifweb.azurewebsites.net/) format. The report generation path is specified by the `--output` parameter. Under this path, a `sarif/` directory will be generated, with each `java` source code file having a separate `sarif` format result file.
-
-It is recommended to use `VSCode` to view the `SARIF` format report. You can install the `Sarif Viewer` plugin for convenient visual inspection and navigation.
 
 ## Test Suite Performance
 

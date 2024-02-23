@@ -71,7 +71,7 @@ How to write a checker is the main content of this document.
 
 6. Execute `gradlew build` to compile and package the final configuration in [build/analysis-config](/build/analysis-config).
 
-7. Follow [Readme.md#Getting Started with Analysis](/Readme.md#start-analysis) to load the configuration and start analysis.
+7. Follow [Readme.md#Configure-Parameters](/Readme.md#configure-parameters) to load the configuration and start analysis.
 
 8. View the report in [sarif](/build/output/sarif), if there are any false positives or false negatives, analyze the reasons and decide whether corrections or optimizations are needed, refer to [Result Output](usage.md).
 

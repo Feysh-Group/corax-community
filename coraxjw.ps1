@@ -1,0 +1,227 @@
+<# PowerShell equivalent of the bash script #>
+# Install with cmd.exe
+#   @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1
+# Install with PowerShell.exe
+#   Set-ExecutionPolicy Bypass -Scope Process -Force; .\coraxjw.ps1
+
+$CORAX_VERSION = "2.6"
+$CORAX_JAVA_ARTIFACT_NAME = "corax-java-cli-community-$CORAX_VERSION"
+$CORAX_JAVA_ARTIFACT_ZIP = "$CORAX_JAVA_ARTIFACT_NAME.zip"
+$CORAX_JAVA_CLI_NAME = "corax-cli-community-${CORAX_VERSION}.jar"
+$JDK_TARGET_DIR = $env:USERPROFILE + "\java"
+$CORAX_TARGET_DIR = $env:USERPROFILE + "\.corax"
+$JVM_VERSION = "jdk-17.0.3.1"
+
+$app_path = $MyInvocation.MyCommand.Path
+$APP_NAME = "CoraxJava"
+$APP_BASE_NAME = $MyInvocation.MyCommand.Name
+$DEFAULT_JVM_OPTS=""
+
+
+$uninstall=0
+$BUILD_DIR = $env:TEMP + "\corax_temp"
+
+
+function _is_china {
+    $ipInfo = (Invoke-WebRequest -Uri "http://myip.ipip.net").Content
+    return ($ipInfo.Contains('中国'))
+}
+
+
+function _download_extract {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$name,
+
+        [Parameter(Mandatory=$true)]
+        [string]$url,
+
+        [Parameter(Mandatory=$true)]
+        [string]$dest,
+
+        [Parameter(Mandatory=$true)]
+        [string]$temp_file_name
+    )
+
+    $temp_file="$BUILD_DIR\$temp_file_name"
+    $download_flag="$BUILD_DIR\$temp_file_name.flag"
+    Write-Host $download_flag
+    try {
+        New-Item -ItemType Directory -Path "$BUILD_DIR" -ErrorAction SilentlyContinue
+        if (-not (Test-Path -Path "$download_flag")) {
+            Remove-Item "$temp_file" -ErrorAction SilentlyContinue
+            Write-Host "[Downloading] Downloading $name : $url to $temp_file"
+
+            #            $client = New-Object Net.WebClient
+            #            $client.DownloadFile($url, $temp_file)
+            # 启用进度条显示
+            $ProgressPreference = 'Continue'
+
+            # 若要更详细地控制进度报告，可以使用 Start-BitsTransfer（仅适用于Windows系统）
+            if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) {
+                Start-BitsTransfer -Source $url -Destination $temp_file
+            } else {
+                # 使用 Invoke-WebRequest 下载并显示进度
+                Invoke-WebRequest -Uri $url -OutFile $temp_file -Verbose
+            }
+            Set-Content -Path "$download_flag" -Value $url
+        }
+
+        Write-Host "Extracting $temp_file to $dest"
+        Remove-Item "$dest" -Recurse -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$dest" -ErrorAction SilentlyContinue
+
+        Expand-Archive "$temp_file" -DestinationPath "$dest"
+
+    } catch {
+        throw
+    }
+}
+
+function _detect_jdk() {
+    $JVM_TARGET_DIR="$JDK_TARGET_DIR\jdk-$JVM_VERSION"
+
+    $flag = "jdk.$JVM_VERSION.flag"
+    if ($uninstall) {
+        Write-Host "[uninstall] remove $JVM_TARGET_DIR/$flag"
+        Write-Host "[uninstall] remove $JVM_TARGET_DIR"
+        Remove-Item "$JVM_TARGET_DIR/$flag" -ErrorAction SilentlyContinue
+        Remove-Item "$JVM_TARGET_DIR" -Recurse -ErrorAction SilentlyContinue
+        return
+    }
+    if ((Test-Path "$JVM_TARGET_DIR\$flag") -and (Get-ChildItem "$JVM_TARGET_DIR")) {
+        # Everything is up-to-date in $JVM_TARGET_DIR, do nothing
+    }
+    else {
+        $ARCHIVE_NAME="jdk.zip"
+        $JVM_URL = if (_is_china) {"http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D" }
+        else {"https://download.oracle.com/java/17/archive/${JVM_VERSION}_windows-x64_bin.zip" }
+
+        _download_extract "JDK" $JVM_URL $JVM_TARGET_DIR $ARCHIVE_NAME
+        Set-Content -Path "$JVM_TARGET_DIR\$flag" -Value $JVM_URL
+    }
+
+    $JAVA_HOME = ""
+    foreach ($dir in (Get-ChildItem -Path $JVM_TARGET_DIR -Directory)) {
+        if (Test-Path -Path "$($dir.FullName)\bin\java.exe") {
+            $JAVA_HOME = $dir.FullName
+            break
+        }
+    }
+
+    if (-not (Test-Path -Path "$JAVA_HOME\bin\java.exe")) {
+        Write-Host "Unable to find java.exe under $($JVM_TARGET_DIR)"
+        throw "Failed to locate java.exe"
+    }
+
+    Write-Host "[Version] JDK: $JAVA_HOME (version: $JVM_VERSION)"
+
+    $env:JAVA_HOME = $JAVA_HOME
+
+    if ($JAVA_HOME) {
+        if (Test-Path -Path "$JAVA_HOME\jre\sh\java.exe" -PathType Leaf) {
+            # IBM's JDK on AIX uses strange locations for the executables
+            $JAVACMD = "$JAVA_HOME\jre\sh\java.exe"
+        } else {
+            $JAVACMD = "$JAVA_HOME\bin\java.exe"
+        }
+
+        if (-not (Test-Path -Path "$JAVACMD" -PathType Leaf)) {
+            throw "ERROR: JAVA_HOME is set to an invalid directory: $($JAVA_HOME)"
+        }
+    } else {
+        throw "ERROR: JAVA_HOME is not set"
+    }
+    $global:JAVACMD=$JAVACMD
+}
+
+
+function _detect_corax() {
+    $CJ_TARGET_DIR = "$CORAX_TARGET_DIR\corax-$CORAX_VERSION" # CORAX_JAVA TARGET_DIR
+
+    $flag = "corax.$JVM_VERSION.flag"
+    if ($uninstall) {
+        Write-Host "[uninstall] remove $CJ_TARGET_DIR/$flag"
+        Write-Host "[uninstall] remove $CJ_TARGET_DIR"
+        Remove-Item "$CJ_TARGET_DIR/$flag" -ErrorAction SilentlyContinue
+        Remove-Item "$CJ_TARGET_DIR" -Recurse -ErrorAction SilentlyContinue
+        return
+    }
+    if ((Test-Path "$CJ_TARGET_DIR\$flag") -and (Get-ChildItem "$CJ_TARGET_DIR")) {
+        # Everything is up-to-date in $CJ_TARGET_DIR, do nothing
+    }
+    else {
+        $ARCHIVE_NAME=$CORAX_JAVA_ARTIFACT_ZIP
+        $CORAX_JAVA_RELEASE_URL = if (_is_china)
+        {"https://release.feysh.com/corax%2Fcorax-java-cli-community-2.6.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1738550438&Signature=gerVvL1taJfRCuxTaw6B1f2yx6g%3D" }
+        else
+        {"https://github.com/Feysh-Group/corax-community/releases/download/v$CORAX_VERSION/$CORAX_JAVA_ARTIFACT_ZIP" }
+
+        _download_extract "Corax Java" $CORAX_JAVA_RELEASE_URL $CJ_TARGET_DIR $ARCHIVE_NAME
+        Set-Content -Path "$CJ_TARGET_DIR\$flag" -Value $CORAX_JAVA_RELEASE_URL
+    }
+    $CORAX_HOME = ""
+    foreach ($dir in (Get-ChildItem -Path $CJ_TARGET_DIR -Directory)) {
+        if (Test-Path -Path "$($dir.FullName)\$CORAX_JAVA_CLI_NAME") {
+            $CORAX_HOME=$dir.FullName
+            break
+        }
+    }
+    Write-Host "[Version] Corax Java: $CORAX_HOME (version: $CORAX_VERSION)"
+
+    $env:CORAX_HOME = $CORAX_HOME
+
+    if ($CORAX_HOME) {
+        $CORAX_JAR = "$CORAX_HOME\$CORAX_JAVA_CLI_NAME"
+        if (-not (Test-Path -PathType Leaf -Path $CORAX_JAR)) {
+            throw "ERROR: CORAX_HOME is set to an invalid directory: $($CORAX_HOME)"
+        }
+    } else {
+        throw "ERROR: CORAX_HOME could not be found in $CJ_TARGET_DIR."
+    }
+    $global:CORAX_JAR=$CORAX_JAR
+}
+
+function _delegate_corax_run() {
+    # 收集java命令的所有参数
+    $arguments = @(
+        '-jar', "$global:CORAX_JAR",
+        '--enable-data-flow', 'true'
+    )
+    $arguments+=$args
+    if (-not ($args -contains '--config'))
+    {
+        $arguments += @(
+          '--config', "default-config.yml@${env:CORAX_HOME}\analysis-config"
+        )
+    }
+
+    Write-Host "[cmd] " $global:JAVACMD $DEFAULT_JVM_OPTS $env:JAVA_OPTS $arguments
+    # 然后执行 java 命令
+    Start-Process `
+      -FilePath "$JAVACMD" `
+      -ArgumentList "$DEFAULT_JVM_OPTS $env:JAVA_OPTS $arguments" `
+      -NoNewWindow `
+      -Wait
+}
+
+function main() {
+    (_detect_jdk)
+    (_detect_corax)
+    if ($uninstall) {
+        Write-Host "[uninstall] remove $BUILD_DIR"
+        Remove-Item "$BUILD_DIR" -Recurse -ErrorAction SilentlyContinue
+        return
+    }
+    _delegate_corax_run @args
+}
+
+if ($args.Count -eq 1 -and $args[0] -eq "uninstall") {
+    $uninstall = $true
+}
+
+(main @args)
+
+
+
+
