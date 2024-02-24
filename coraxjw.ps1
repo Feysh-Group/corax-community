@@ -196,13 +196,26 @@ function _delegate_corax_run() {
         )
     }
 
-    Write-Host "[cmd] " $global:JAVACMD $DEFAULT_JVM_OPTS $env:JAVA_OPTS $arguments
+    $JAVA_OPTS=$env:JAVA_OPTS
+    Write-Host "[cmd] " $global:JAVACMD $DEFAULT_JVM_OPTS $JAVA_OPTS $arguments
+    if ([string]::IsNullOrEmpty($DEFAULT_JVM_OPTS)) {
+        $_DEFAULT_JVM_OPTS=@()
+    } else {
+        $_DEFAULT_JVM_OPTS=iex "echo $DEFAULT_JVM_OPTS"
+    }
+
+    if ([string]::IsNullOrEmpty($JAVA_OPTS)) {
+        $_JAVA_OPTS=@()
+    } else {
+        $_JAVA_OPTS=iex "echo $JAVA_OPTS"
+    }
+
     # »ª∫Û÷¥–– java √¸¡Ó
-    Start-Process `
-      -FilePath "$JAVACMD" `
-      -ArgumentList "$DEFAULT_JVM_OPTS $env:JAVA_OPTS $arguments" `
-      -NoNewWindow `
-      -Wait
+    & "$global:JAVACMD" `
+	  @_DEFAULT_JVM_OPTS `
+	  @_JAVA_OPTS `
+	  @arguments `
+	  | Out-Default
 }
 
 function main() {
