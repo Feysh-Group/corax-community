@@ -85,7 +85,7 @@ When running for the first time, the script will download JDK and Corax release 
   - Copy and run the following command:
     ```bash
     chmod +x ./coraxjw.sh
-    ./coraxjw.sh --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+    ./coraxjw.sh --target java --auto-app-classes "{project root directory (including source code and compiled artifacts)}" --output corax_reports
     ```
 
 - For Windows:
@@ -93,13 +93,15 @@ When running for the first time, the script will download JDK and Corax release 
   
   - Command Prompt (cmd):
     ```shell
-    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1 --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
-  ```
+    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1 --target java --auto-app-classes "{project root directory (including source code and compiled artifacts)}" --output corax_reports
+    ```
   
   - PowerShell:
     ```PowerShell
-    Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+    Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes "{project root directory (including source code and compiled artifacts)}" --output corax_reports
     ```
+
+Note: The downloaded script contains a fixed version of the CoraxJava analyzer and rule package. If you need to update the analysis tool later, please find the script you downloaded before, then execute "uninstall" and delete the script. Then, follow the steps above to download the latest version (Master stable branch) of the CoraxJava analyzer.
 
 General parameter explanation: [General Configuration Parameters](#configure-parameters)
 
@@ -107,7 +109,7 @@ Detailed parameter explanation: [Command Line Parameter Details](docs/en/usage.m
 
 To uninstall, simply run `./coraxjw.sh uninstall`
 
-
+Recommendation: It is advisable to have more than 12GB of remaining memory. Otherwise, when analyzing large projects, there is a higher risk of encountering Out Of Memory (OOM) errors.
 
 ### Step 3: View Report
 

@@ -87,25 +87,29 @@ CoraxJava具有以下特点：
   - 复制并运行以下命令：
     ```bash
     chmod +x ./coraxjw.sh
-    ./coraxjw.sh --target java --auto-app-classes {项目根目录（包含源码和编译产物）} --output corax_reports
+    ./coraxjw.sh --target java --auto-app-classes "{项目根目录 (包含源码和编译产物) }" --output corax_reports
     ```
 - windows
   - 下载 [coraxjw.ps1](coraxjw.ps1)
   - cmd:
     ```shell
-    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1 --target java --auto-app-classes {项目根目录（包含源码和编译产物）} --output corax_reports
+    @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -File coraxjw.ps1 --target java --auto-app-classes "{项目根目录 (包含源码和编译产物) }" --output corax_reports
     ```
 
   - Powershell:
     ```PowerShell
-    Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes {project root directory (including source code and compiled artifacts)} --output corax_reports
+    Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes "{项目根目录 (包含源码和编译产物) }" --output corax_reports
     ```
+
+注：下载的脚本中包含的固定版本的CoraxJava分析器和规则包，后续需要更新分析工具，请找到您之前已经下载的脚本，然后执行uninstall并删除脚本，再次按照上面步骤下载即获得最新版（Master稳定分支）的 CoraxJava分析器
 
 一般参数说明： [一般配置参数](#参数配置)
 
 详细参数说明：[命令行参数详解](docs/zh/usage.md#命令行参数)
 
 如需卸载，直接运行 `./coraxjw.sh uninstall` 即可
+
+建议剩余内存大于12g, 否则分析大型项目时容易出现OOM（Out Of Memory）错误
 
 ### 3. 查看报告
 
