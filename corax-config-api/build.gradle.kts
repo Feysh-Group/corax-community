@@ -1,5 +1,5 @@
-val apiInnerJar: FileTree by rootProject.extra
+val coraxConfigApiJar: File by rootProject.extra
 
 dependencies {
-    api(files(apiInnerJar))
+    api(files(coraxConfigApiJar))
 }

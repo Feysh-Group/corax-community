@@ -1,10 +1,29 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.general.model.javaee
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
+import com.feysh.corax.config.api.utils.superClasses
 import com.feysh.corax.config.general.checkers.internetSource
 import com.feysh.corax.config.general.model.ConfigCenter
-import com.feysh.corax.config.general.model.type.HandlerTypeVisitor
 import com.feysh.corax.config.general.model.type.HandlerTypeVisitorInTaint
 import com.feysh.corax.config.general.model.type.TypeHandler
 import kotlinx.serialization.Serializable
@@ -101,38 +120,55 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
             method(matchSoot(requestMappingHandler.signature))
                 .modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCallee }) {
                     val p = parameter(i)
-                    val visitor = object : HandlerTypeVisitor(this, p) {
+                    val visitor = object : HandlerTypeVisitorInTaint(this) {
 
-                        override fun visit(accessPath: ILocalT<*>, paramType: Type) {
+                        var recursiveTaintCount: Int = 0
+
+                        override fun process(accessPath: ILocalT<*>, paramType: Type) {
+                            if (!ConfigCenter.isEnableTaintFlowType(paramType)) {
+                                return
+                            }
                             // (TAINT IN): add taint source kinds
                             accessPath.taint += taintOf(internetSource)
                         }
 
-                        override fun visit(t: TypeHandler.PrimitiveType) {
+                        override fun visit(v: ILocalT<*>, t: TypeHandler.PrimitiveType) {
                             if (!ConfigCenter.option.taintPrimTypeValue) {
                                 return
                             }
-                            super.visit(t)
+                            super.visit(v, t)
                         }
 
-                        override fun visit(t: TypeHandler.BoxedPrimitiveType) {
+                        override fun visit(v: ILocalT<*>, t: TypeHandler.BoxedPrimitiveType) {
                             if (!ConfigCenter.option.taintPrimTypeValue) {
                                 return
                             }
-                            return super.visit(t)
+                            return super.visit(v, t)
                         }
 
-                        override fun visit(t: TypeHandler.OtherClassType) {
+                        override fun visit(v: ILocalT<*>, t: TypeHandler.OtherClassType) {
                             if (!isWebModelClassType(t)) {
                                 return
                             }
                             // taint object instance base
-                            visit(param, t.type)
+                            process(v, t.type)
+                            // taint all the class declaring fields by subFields
+                            process(v.subFields, t.type)
                             // taint all the class declaring fields
-                            visit(param.subFields, t.type)
+                            try {
+                                val modelingClasses = t.type.sootClass.superClasses.filter { !it.isJavaLibraryClass }
+                                val modelingFields = modelingClasses.flatMap { it.fields }
+                                for (field in modelingFields) {
+                                    if (++recursiveTaintCount < 100) {
+                                        TypeHandler.getHandlerType(field.type).visit(v.field(field), this)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                logger.warn(e) { "Failed to taint subfields" }
+                            }
                         }
                     }
-                    hType.visit(visitor)
+                    hType.visit(p, visitor)
                 }
         }
     }
@@ -150,7 +186,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
 
         val hTypes = TypeHandler.getHandlerType(m)
         for ((i, hType) in hTypes) {
-            val taintFrom = HandlerTypeVisitorInTaint.TaintFrom(this@bdr, parameter(i)).getExpr(hType)
+            val taintFrom = HandlerTypeVisitorInTaint.TaintFrom(this@bdr).getExpr(parameter(i), hType)
             if (taintFrom != null) {
                 `this`.taint += taintFrom
             }
@@ -171,7 +207,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
         }
 
         val returnHType = TypeHandler.getHandlerType(`return`.type)
-        val taintOut = HandlerTypeVisitorInTaint.TaintOut(this@bdr, `return`).get(returnHType)
+        val taintOut = HandlerTypeVisitorInTaint.TaintOut(this@bdr).get(`return`, returnHType)
 
         for (out in taintOut) {
             out.taint += `this`.taint
@@ -210,9 +246,9 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
         }
 
 
-        val visitor = object : TypeHandler.Visitor<TypeHandler.OtherClassType?> {
-            override fun visitDefault(t: TypeHandler.HType) = null
-            override fun visit(t: TypeHandler.OtherClassType): TypeHandler.OtherClassType? {
+        val visitor = object : TypeHandler.Visitor<Unit, TypeHandler.OtherClassType?> {
+            override fun visitDefault(v: Unit, t: TypeHandler.HType) = null
+            override fun visit(v: Unit,t: TypeHandler.OtherClassType): TypeHandler.OtherClassType? {
                 if (isWebModelClassType(t)) {
                     return t
                 }
@@ -224,7 +260,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
             requestMappingHandlers.await().flatMapTo(mutableSetOf()) { (_, requestMappingHandler) ->
                 val hTypes = TypeHandler.getHandlerType(requestMappingHandler)
                 hTypes.mapNotNull { indexedValue ->
-                    indexedValue.value.visit(visitor)?.type
+                    indexedValue.value.visit(Unit, visitor)?.type
                 }
             }
 

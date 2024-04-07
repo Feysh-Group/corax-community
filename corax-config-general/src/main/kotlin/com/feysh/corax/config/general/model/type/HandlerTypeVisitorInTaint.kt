@@ -1,3 +1,22 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.general.model.type
 
 import com.feysh.corax.config.api.ILocalT
@@ -10,60 +29,58 @@ import soot.Type
 
 abstract class HandlerTypeVisitorInTaint(
     builder: IOperatorFactory,
-    param: ILocalT<*>,
     open val taintPrimTypeValue: Boolean = ConfigCenter.option.taintPrimTypeValue
-) : HandlerTypeVisitor(builder, param) {
+) : HandlerTypeVisitor(builder) {
 
-    override fun visit(t: TypeHandler.PrimitiveType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.PrimitiveType) {
         if (!taintPrimTypeValue) {
             return
         }
-        super.visit(t)
+        super.visit(v, t)
     }
 
-    override fun visit(t: TypeHandler.BoxedPrimitiveType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.BoxedPrimitiveType) {
         if (!taintPrimTypeValue) {
             return
         }
-        return super.visit(t)
+        return super.visit(v, t)
     }
 
-    override fun visit(t: TypeHandler.OtherClassType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.OtherClassType) {
         if (t.type.isVoidType) return
-        super.visit(t)
+        super.visit(v, t)
     }
 
 
     open class TaintFrom(
         builder: IOperatorFactory,
-        param: ILocalT<*>,
         taintPrimTypeValue: Boolean = ConfigCenter.option.taintPrimTypeValue
-    ) : HandlerTypeVisitorInTaint(builder, param, taintPrimTypeValue) {
+    ) : HandlerTypeVisitorInTaint(builder, taintPrimTypeValue) {
         private val taintFrom = mutableListOf<ILocalT<*>>() // Rhs
-        override fun visit(accessPath: ILocalT<*>, paramType: Type) {
+        override fun process(accessPath: ILocalT<*>, paramType: Type) {
             taintFrom += accessPath
         }
 
-        override fun visit(t: TypeHandler.OtherClassType) {
+        override fun visit(v: ILocalT<*>, t: TypeHandler.OtherClassType) {
             if (!JavaeeAnnotationSource.isWebModelClassType(t)) {
                 return
             }
             with(builder) {
                 // taint from object instance base
-                visit(param, t.type)
+                process(v, t.type)
                 // taint from all the declaring fields
-                visit(param.subFields, t.type)
+                process(v.subFields, t.type)
             }
         }
 
-        fun get(hType: TypeHandler.HType): List<ILocalT<*>> {
+        fun get(v: ILocalT<*>, hType: TypeHandler.HType): List<ILocalT<*>> {
             taintFrom.clear()
-            hType.visit(this)
+            hType.visit(v, this)
             return taintFrom
         }
 
-        fun getExpr(hType: TypeHandler.HType): ITaintSet? {
-            val from = get(hType)
+        fun getExpr(v: ILocalT<*>, hType: TypeHandler.HType): ITaintSet? {
+            val from = get(v, hType)
             return with(builder) {
                 from.fold(null as ITaintSet?) { acc, argFrom ->
                     acc?.let { it + argFrom.taint } ?: argFrom.taint
@@ -75,28 +92,27 @@ abstract class HandlerTypeVisitorInTaint(
 
     open class TaintOut(
         builder: IOperatorFactory,
-        param: ILocalT<*>,
         taintPrimTypeValue: Boolean = ConfigCenter.option.taintPrimTypeValue
-    ) : HandlerTypeVisitorInTaint(builder, param, taintPrimTypeValue) {
+    ) : HandlerTypeVisitorInTaint(builder, taintPrimTypeValue) {
         private val taintOut = mutableListOf<ILocalT<*>>() // Lhs
-        override fun visit(accessPath: ILocalT<*>, paramType: Type) {
+        override fun process(accessPath: ILocalT<*>, paramType: Type) {
             taintOut += accessPath
         }
-        override fun visit(t: TypeHandler.OtherClassType) {
+        override fun visit(v: ILocalT<*>, t: TypeHandler.OtherClassType) {
             if (!JavaeeAnnotationSource.isWebModelClassType(t)) {
                 return
             }
             with(builder) {
                 // taint to object instance base
-                visit(param, t.type)
+                process(v, t.type)
                 // taint to all the declaring fields
-                visit(param.subFields, t.type)
+                process(v.subFields, t.type)
             }
         }
 
-        fun get(hType: TypeHandler.HType): List<ILocalT<*>> {
+        fun get(v: ILocalT<*>, hType: TypeHandler.HType): List<ILocalT<*>> {
             taintOut.clear()
-            hType.visit(this)
+            hType.visit(v, this)
             return taintOut
         }
     }

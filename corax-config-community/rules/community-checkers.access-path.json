@@ -1,4 +1,5 @@
 [
+  "CoraxJava - a Java Static Analysis Framework\\n Copyright (C) 2024.  Feysh-Tech Group\\n \\n This library is free software; you can redistribute it and/or\\n modify it under the terms of the GNU Lesser General Public\\n License as published by the Free Software Foundation; either\\n version 2.1 of the License, or (at your option) any later version.\\n \\n This library is distributed in the hope that it will be useful,\\n but WITHOUT ANY WARRANTY; without even the implied warranty of\\n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\\n Lesser General Public License for more details.\\n \\n You should have received a copy of the GNU Lesser General Public\\n License along with this library; if not, write to the Free Software\\n Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA\\n",
   {"kind":"hostname-verification","signature":"javax.net.ssl.HttpsURLConnection: * setDefaultHostnameVerifier(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
   {"kind":"hostname-verification","signature":"javax.net.ssl.HttpsURLConnection: * setHostnameVerifier(**)","subtypes":true,"arg":"Argument[0]","provenance":"manual","ext":""},
 
@@ -478,5 +479,16 @@
 
 
   {"kind":"cipher:transformation","signature":"javax.crypto.Cipher: javax.crypto.Cipher getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
-  {"kind":"cipher:transformation","signature":"javax.crypto.KeyGenerator: javax.crypto.KeyGenerator getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""}
+  {"kind":"cipher:transformation","signature":"javax.crypto.KeyGenerator: javax.crypto.KeyGenerator getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"javax.crypto.spec.SecretKeySpec: * <init>(byte[],String)","subtypes":true,"arg":"Argument[1]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"javax.crypto.spec.SecretKeySpec: * <init>(byte[],int,int,String)","subtypes":true,"arg":"Argument[3]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"javax.crypto.KeyAgreement: javax.crypto.KeyAgreement getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.MessageDigest: java.security.MessageDigest getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.MessageDigest: * <init>(String)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.MessageDigest: * <init>(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.Signature: * <init>(String)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.Signature: java.security.Signature getInstance(String)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.KeyPairGenerator: java.security.KeyPairGenerator getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:transformation","signature":"java.security.AlgorithmParameterGenerator: java.security.AlgorithmParameterGenerator getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""}
 ]

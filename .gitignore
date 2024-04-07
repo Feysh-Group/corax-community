@@ -4,7 +4,6 @@ temp/
 logs/
 build/
 target/
-output/
 .idea/
 .gradle/
 *.log
@@ -12,3 +11,7 @@ output/
 *.zip
 .run
 gradle-local.properties
+/Canary/*logs/
+/Canary/analysis-config/*logs/
+/Canary/checker_info.json
+/Canary/analysis-config/checker_info.json

@@ -1,4 +1,7 @@
-[{"kind":"content-provider","signature":"android.content.ContentInterface: * call(String,String,String,Bundle)","subtypes":true,"arg":"Parameter[0..3]","provenance":"manual","ext":""},
+[
+  "CoraxJava - a Java Static Analysis Framework\\n Copyright (C) 2024.  Feysh-Tech Group\\n \\n This library is free software; you can redistribute it and/or\\n modify it under the terms of the GNU Lesser General Public\\n License as published by the Free Software Foundation; either\\n version 2.1 of the License, or (at your option) any later version.\\n \\n This library is distributed in the hope that it will be useful,\\n but WITHOUT ANY WARRANTY; without even the implied warranty of\\n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\\n Lesser General Public License for more details.\\n \\n You should have received a copy of the GNU Lesser General Public\\n License along with this library; if not, write to the Free Software\\n Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA\\n",
+
+  {"kind":"content-provider","signature":"android.content.ContentInterface: * call(String,String,String,Bundle)","subtypes":true,"arg":"Parameter[0..3]","provenance":"manual","ext":""},
   {"kind":"content-provider","signature":"android.content.ContentInterface: * delete(Uri,Bundle)","subtypes":true,"arg":"Parameter[0..1]","provenance":"manual","ext":""},
   {"kind":"content-provider","signature":"android.content.ContentInterface: * getType(Uri)","subtypes":true,"arg":"Parameter[0]","provenance":"manual","ext":""},
   {"kind":"content-provider","signature":"android.content.ContentInterface: * insert(Uri,ContentValues,Bundle)","subtypes":true,"arg":"Parameter[0]","provenance":"manual","ext":""},

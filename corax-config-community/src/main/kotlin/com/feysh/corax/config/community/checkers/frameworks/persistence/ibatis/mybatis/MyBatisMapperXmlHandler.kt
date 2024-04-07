@@ -1,3 +1,22 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis
 
 import com.feysh.corax.config.community.checkers.frameworks.xml.BasedXmlHandler
@@ -68,13 +87,34 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
         return false
     }
 
-    fun compute(filePath: Path): MybatisEntry? {
+    fun compute(filePath: Path, configuration: Configuration): MybatisEntry? {
         logger.debug("process mybatis mapper file: {}", filePath.toUri())
-        return streamToSqls(filePath)
+        return streamToSqls(filePath, configuration)
     }
 
-    fun streamToSqls(resource: Path): MybatisEntry? {
-        val configuration = createConfiguration()
+    fun newBuilderAssistant(configuration: Configuration, context: XNode, resource: String): MapperBuilderAssistant {
+        val builderAssistant = MapperBuilderAssistant(configuration, resource)
+        val namespace: String? = context.getStringAttribute("namespace")
+        if (namespace == null || namespace == "") {
+            logger.debug { "Mapper's namespace cannot be empty. resource: $resource" }
+            return builderAssistant
+        }
+        builderAssistant.currentNamespace = namespace
+        return builderAssistant
+    }
+
+    fun initSqlFragments(resource: Path, configuration: Configuration) {
+        resource.inputStream().use { inputSource ->
+            val parser = XPathParser(inputSource, true, configuration.variables, XMLMapperEntityResolver())
+            val context = parser.evalNode("/mapper") ?: return@use null
+            val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
+            // create inside <sql> for inline
+            val sqlNodes = parser.evalNodes("/mapper/sql")
+            parseSqlStatement(sqlNodes, builderAssistant, configuration)
+        }
+    }
+
+    fun streamToSqls(resource: Path, configuration: Configuration): MybatisEntry? {
         return resource.inputStream().use { inputSource ->
             val parser = XPathParser(inputSource, true, configuration.variables, XMLMapperEntityResolver())
 
@@ -82,16 +122,12 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
 
             val mybatisEntry = MybatisEntry(resource = resource, namespace = context.getStringAttribute("namespace"))
 
-            val builderAssistant = MapperBuilderAssistant(configuration, resource.pathString)
-
-            // create inside <sql> for inline
-            val sqlNodes = context.evalNodes("/mapper/sql")
-            parseSqlStatement(sqlNodes, builderAssistant, configuration)
+            val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
 
             try {
                 mybatisEntry.methodSqlList += buildCrudSqlMap(mybatisEntry.namespace, context, configuration, builderAssistant)
             } catch (e: Exception) {
-                logger.warn(e) { "parse $sqlNodes. ${e.message} " }
+                logger.warn(e) { "Failed to parse mybatis mapper sqls: ${e.message} " }
             }
             return@use mybatisEntry
         }
@@ -148,7 +184,9 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
         sqlNodes.forEach {
             var id = it.getStringAttribute("id") ?: return@forEach
             id = builderAssistant.applyCurrentNamespace(id, false)
-            configuration.sqlFragments[id] = it
+            synchronized(configuration) {
+                configuration.sqlFragments.putIfAbsent(id, it)
+            }
         }
     }
 
@@ -169,12 +207,6 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
         }
     }
 
-    private fun createConfiguration(): Configuration {
-        val configuration = Configuration()
-        configuration.defaultResultSetType = ResultSetType.SCROLL_INSENSITIVE
-        configuration.isShrinkWhitespacesInSql = true
-        return configuration
-    }
 
     private fun parseSelectKeyNode(
         id: String,

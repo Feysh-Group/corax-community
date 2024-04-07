@@ -1,7 +1,26 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis
 
 import com.feysh.corax.commons.delegateField
-import org.apache.ibatis.builder.SqlSourceBuilder
+import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.WSqlSourceBuilder
 import org.apache.ibatis.mapping.BoundSql
 import org.apache.ibatis.mapping.SqlSource
 import org.apache.ibatis.parsing.GenericTokenParser
@@ -136,15 +155,9 @@ interface ExpressionEvaluator {
         val accessPath = expr.split(".")
         val first = accessPath.first()
         val bindings = dynamicContext.bindings
-        val parent = if (!bindings.containsKey(first)) {
-            MethodParameter(expr).also {
-                dynamicContext.bind(first, it)
-            }
-        } else {
-            bindings[first] ?: (MethodParameter(expr).also {
-                dynamicContext.bind(first, it)
-            })
-        }
+        val parent = bindings[first] ?: (MethodParameter(first).also {
+            dynamicContext.bind(first, it)
+        })
         return if (accessPath.size == 1) {
             parent
         } else {
@@ -545,7 +558,7 @@ open class MyBatisTransform(private val factory: SqlNodeTranslatorFactory) {
         flatSqlNode.apply(dynamicContext)
 
         val sql = dynamicContext.sql
-        val sqlSourceParser = SqlSourceBuilder(configuration)
+        val sqlSourceParser = WSqlSourceBuilder(configuration)
         val sqlSource = sqlSourceParser.parse(sql, Any::class.java, dynamicContext.bindings.mapValues { Any() })
 
         return Statement(namespace, xNode, node, flatSqlNode, dynamicContext, translator, sqlSource)

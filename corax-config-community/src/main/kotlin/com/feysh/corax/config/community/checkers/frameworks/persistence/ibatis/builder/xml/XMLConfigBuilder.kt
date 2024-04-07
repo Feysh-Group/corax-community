@@ -1,11 +1,32 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.xml
 
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.io.Resources
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.type.TypeAliasRegistry
 import org.apache.ibatis.builder.BuilderException
 import org.apache.ibatis.builder.xml.XMLMapperEntityResolver
+import org.apache.ibatis.mapping.ResultSetType
 import org.apache.ibatis.parsing.XNode
 import org.apache.ibatis.parsing.XPathParser
+import org.apache.ibatis.session.Configuration
 import soot.RefType
 import soot.Scene
 import java.io.InputStream
@@ -14,6 +35,7 @@ import java.util.*
 
 /**
  * @author NotifyBiBi
+ * @Link org.apache.ibatis.builder.xml.XMLConfigBuilder
  */
 class XMLConfigBuilder private constructor(
     private val scene: Scene,
@@ -21,6 +43,7 @@ class XMLConfigBuilder private constructor(
 ) {
     val typeAliasRegistry = TypeAliasRegistry()
     private var parsed: Boolean = false
+    val configuration: Configuration = Configuration()
 
     constructor(scene: Scene, reader: Reader, props: Properties? = null) : this(
         scene, XPathParser(reader, true, props, XMLMapperEntityResolver())
@@ -72,4 +95,12 @@ class XMLConfigBuilder private constructor(
         }
     }
 
+    companion object {
+        fun createConfiguration(): Configuration {
+            val configuration = Configuration()
+            configuration.defaultResultSetType = ResultSetType.SCROLL_INSENSITIVE
+            configuration.isShrinkWhitespacesInSql = true
+            return configuration
+        }
+    }
 }

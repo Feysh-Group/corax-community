@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 public class InsecureCookieSamples {
 
     void unsafeCookie() {
-        boolean unsafe = false;
+        boolean unsafe = true;
         Cookie newCookie = new Cookie("test1","1234");
         newCookie.setSecure(false);          // $InsecureCookie
         newCookie.setSecure(unsafe);         // $InsecureCookie

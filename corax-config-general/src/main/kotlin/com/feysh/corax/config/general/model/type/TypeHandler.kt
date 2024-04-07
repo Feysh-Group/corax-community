@@ -1,3 +1,22 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.general.model.type
 
 import com.feysh.corax.config.api.*
@@ -13,55 +32,55 @@ import soot.Type
 
 class TypeHandler {
 
-    interface Visitor<R> {
-        fun visit(t: StringType) = visitDefault(t)
-        fun visit(t: PrimitiveType) = visitDefault(t)
-        fun visit(t: BoxedPrimitiveType) = visitDefault(t)
-        fun visit(t: MapType) = visitDefault(t)
-        fun visit(t: CollectionType) = visitDefault(t)
-        fun visit(t: OptionalType) = visitDefault(t)
-        fun visit(t: OtherClassType) = visitDefault(t)
-        fun visit(t: UnknownType) = visitDefault(t)
-        fun visitDefault(t: HType): R
+    interface Visitor<Obj, R> {
+        fun visit(v: Obj, t: StringType) = visitDefault(v, t)
+        fun visit(v: Obj, t: PrimitiveType) = visitDefault(v, t)
+        fun visit(v: Obj, t: BoxedPrimitiveType) = visitDefault(v, t)
+        fun visit(v: Obj, t: MapType) = visitDefault(v, t)
+        fun visit(v: Obj, t: CollectionType) = visitDefault(v, t)
+        fun visit(v: Obj, t: OptionalType) = visitDefault(v, t)
+        fun visit(v: Obj, t: OtherClassType) = visitDefault(v, t)
+        fun visit(v: Obj, t: UnknownType) = visitDefault(v, t)
+        fun visitDefault(v: Obj, t: HType): R
     }
 
     sealed class HType {
-        abstract fun <R> visit(v: Visitor<R>): R
+        abstract fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>): R
     }
 
     data class StringType(val type: Type) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     data class PrimitiveType(val type: PrimType) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     data class BoxedPrimitiveType(val type: RefType) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
 
     data class MapType(val type: Type, val elementDeclaredType: Type? = null, val isMultiValueMap: Boolean = false) :
         HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
 
     data class CollectionType(val type: Type) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     data class OptionalType(val type: Type) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     data class OtherClassType(val type: RefType) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     data class UnknownType(val type: Type) : HType() {
-        override fun <R> visit(v: Visitor<R>) = v.visit(this)
+        override fun <Obj, R> visit(obj: Obj, v: Visitor<Obj, R>) = v.visit(obj,this)
     }
 
     companion object {
@@ -83,56 +102,53 @@ class TypeHandler {
 }
 
 
-abstract class HandlerTypeVisitor(val builder: IOperatorFactory, open val param: ILocalT<*>) :
-    TypeHandler.Visitor<Unit> {
-    abstract fun visit(accessPath: ILocalT<*>, paramType: Type)
+abstract class HandlerTypeVisitor(val builder: IOperatorFactory) :
+    TypeHandler.Visitor<ILocalT<*>, Unit> {
+    abstract fun process(accessPath: ILocalT<*>, paramType: Type)
 
-    override fun visit(t: TypeHandler.StringType) {
-        visit(param, t.type)
+    override fun visit(v: ILocalT<*>, t: TypeHandler.StringType) {
+        process(v, t.type)
     }
 
-    override fun visit(t: TypeHandler.BoxedPrimitiveType) {
-        visit(param, t.type)
+    override fun visit(v: ILocalT<*>, t: TypeHandler.BoxedPrimitiveType) {
+        process(v, t.type)
     }
 
-    override fun visit(t: TypeHandler.OtherClassType) {
-        visit(param, t.type)
+    override fun visit(v: ILocalT<*>, t: TypeHandler.OtherClassType) {
+        process(v, t.type)
     }
 
-    override fun visit(t: TypeHandler.CollectionType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.CollectionType) {
         with(builder) {
             val elementType = if (t.type is ArrayType) {
                 t.type.elementType
             } else {
                 Scene.v().objectType
             }
-            visit(param.field(Elements), elementType)
+            process(v.field(Elements), elementType)
         }
     }
 
-    override fun visit(t: TypeHandler.MapType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.MapType) {
         with(builder) {
-            visit(param.field(MapKeys), Scene.v().objectType)
+            process(v.field(MapKeys), Scene.v().objectType)
             if (t.isMultiValueMap) {
-                visit(param.field(MapValues).field(Elements), Scene.v().objectType)
+                process(v.field(MapValues).field(Elements), Scene.v().objectType)
             } else {
-                visit(param.field(MapValues), Scene.v().objectType)
+                process(v.field(MapValues), Scene.v().objectType)
             }
         }
     }
 
-    override fun visit(t: TypeHandler.PrimitiveType) {
+    override fun visit(v: ILocalT<*>, t: TypeHandler.PrimitiveType) {
+        process(v, t.type)
+    }
+
+    override fun visit(v: ILocalT<*>, t: TypeHandler.OptionalType) {
         with(builder) {
-            visit(param.field(MapKeys), Scene.v().objectType)
-            visit(param.field(MapValues), Scene.v().objectType)
+            process(v.field(Elements), Scene.v().objectType)
         }
     }
 
-    override fun visit(t: TypeHandler.OptionalType) {
-        with(builder) {
-            visit(param.field(Elements), Scene.v().objectType)
-        }
-    }
-
-    override fun visitDefault(t: TypeHandler.HType) {}
+    override fun visitDefault(v: ILocalT<*>, t: TypeHandler.HType) {}
 }

@@ -1,3 +1,22 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 @file:Suppress("ClassName")
 
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis
@@ -10,6 +29,7 @@ import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.IbatisParamNameResolver
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.xml.MybatisConfiguration
+import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.xml.XMLConfigBuilder
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.checkers.internetControl
 import mu.KotlinLogging
@@ -22,6 +42,7 @@ import kotlinx.serialization.Serializable
 import soot.SootMethod
 import soot.Type
 import java.nio.file.Path
+
 
 
 /**
@@ -59,18 +80,25 @@ private class TraverseExpr(
                 } else { // single parameter
                     val aliasClass = if (parameterTypeInStatement != null) typeAliasRegistry.resolveAlias(parameterTypeInStatement) else null
                     val parameterTypeActual = method.getParameterType(0)
-                    if (aliasClass != null && aliasClass != parameterTypeActual.typename) {
-                        logger.warn { "type mismatch: xml at $aliasClass, ${method.signature} at parameter0" }
+                    var parameterTypeActualName = parameterTypeActual.typename ?: return null
+                    if (aliasClass != null) {
+                        if (aliasClass != parameterTypeActual.typename) {
+                            logger.warn { "type mismatch: xml at $aliasClass, ${method.signature} at parameter0" }
+                        } else {
+                            parameterTypeActualName = aliasClass
+                        }
+                    }
+
+                    if (parameterTypeInStatement != null && !parameterTypeActualName.endsWith(parameterTypeInStatement)) {
+                        logger.warn { "type mismatch: parameterTypeInStatement: $parameterTypeInStatement and parameter0 of $method" }
                     }
 //                    val parameterTypeActualName = parameterTypeActual.typename ?: return null
                     if (isStringType(parameterTypeActual) || ConfigCenter.isMapClassType(parameterTypeActual) || ConfigCenter.isCollectionClassType(parameterTypeActual)){
                         listOf(AccessPath(parameter(0), parameterTypeActual))
-                    } else if (aliasClass == null && parameterTypeInStatement != null) { // custom entity
-                        val parameterType = Scene.v().getOrAddRefType(parameterTypeInStatement)
-                        val fieldDeclareType = parameterType.sootClass.getFieldByNameUnsafe(value.name)?.type ?: Scene.v().objectType
-                        listOf(AccessPath(parameter(0).field(declaringClass = parameterType.className, value.name), fieldDeclareType)) // TODO: it should be actual type
-                    } else {
-                        null
+                    } else { // custom entity
+                        val parameterTypeClass = Scene.v().getSootClassUnsafe(parameterTypeActualName, false) ?: return null
+                        val fieldDeclareType = parameterTypeClass.superClasses.firstNotNullOfOrNull { it.getFieldByNameUnsafe(value.name) }?.type ?: Scene.v().objectType
+                        listOf(AccessPath(parameter(0).field(declaringClass = parameterTypeClass.name, value.name), fieldDeclareType)) // TODO: it should be actual type
                     }
                 }
             }
@@ -90,8 +118,13 @@ private class TraverseExpr(
                             when (fieldName) {
                                 "key" -> listOf(AccessPath(base.value.field(MapKeys), type = unknownType))
                                 "value" -> listOf(AccessPath(base.value.field(MapValues), type = unknownType))
-                                else -> emptyList()
-                            }
+                                else -> listOf(
+                                    // for RuoYi 4.5.0 RuoYi\ruoyi-system\src\main\resources\mapper\system\SysRoleMapper.xml selectRoleList ${params.dataScope}
+                                    // dataScope is a map key not a class field
+                                    AccessPath(base.value.field(MapKeys), type = unknownType),
+                                    AccessPath(base.value.field(MapValues), type = unknownType)
+                                )
+                            } + AccessPath(base.value, type = base.type)
                         } else if (ConfigCenter.isCollectionClassType(base.type)) {
                             when {
                                 baseIsForEach ->  listOf(AccessPath(base.value.field(Elements).field(declaringClass = null, fieldName = fieldName), unknownType) )
@@ -115,7 +148,7 @@ private class TraverseExpr(
             }
 
             else -> {
-                logger.warn { "unsupported value: $value" }
+                logger.warn { "unsupported value: $value in $statement" }
                 null
             }
         }
@@ -199,15 +232,30 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     }
 
     context (PreAnalysisApi)
-    private fun parseMybatisMapperAndConfig(): MybatisParseResult {
-        val mybatisEntries = atAnySourceFile(extension = "xml") {
-            XmlParser.parseMybatisMapper(path)
-        }
+    private suspend fun parseMybatisMapperAndConfig(): MybatisParseResult {
 
-        val mybatisConfiguration = atAnySourceFile(extension = "xml") {
+        val mybatisConfiguration = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
             val configuration = XmlParser.parseMybatisConfiguration(Scene.v(), path) ?: return@atAnySourceFile null
             configuration
         }.nonNull()
+
+        val myBatisSqlFragments = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
+            val config = XMLConfigBuilder.createConfiguration()
+            if (XmlParser.parseMyBatisSqlFragments(path, config)) {
+                path to config
+            } else {
+                null
+            }
+        }.nonNull()
+
+        val configurationMerge = myBatisSqlFragments.await().fold(XMLConfigBuilder.createConfiguration()) { acc, element ->
+            acc.also { it.sqlFragments.putAll(element.second.sqlFragments) }
+        }
+
+        val mybatisEntries = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
+            val configuration = XMLConfigBuilder.createConfiguration().also { it.sqlFragments.putAll(configurationMerge.sqlFragments) }
+            XmlParser.parseMybatisMapper(path, configuration)
+        }
 
         return MybatisParseResult(mybatisEntries.nonNull(), mybatisConfiguration)
     }

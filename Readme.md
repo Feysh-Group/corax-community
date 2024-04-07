@@ -81,7 +81,7 @@ This repository is for the `CoraxJava Rule Checker` module, which also includes 
 When running for the first time, the script will download JDK and Corax release as needed, unpack them to the corresponding locations, and will not disrupt the original environment~
 
 - For Linux and macOS:
-  - Download [coraxjw.sh](coraxjw.sh)
+  - Download [coraxjw.sh](coraxjw.sh) (To avoid potential encoding errors, please click the download button instead of copying and pasting.)
   - Copy and run the following command:
     ```bash
     chmod +x ./coraxjw.sh
@@ -100,6 +100,7 @@ When running for the first time, the script will download JDK and Corax release 
     ```PowerShell
     Set-ExecutionPolicy Bypass -Scope Process -Force; ./coraxjw.ps1 --target java --auto-app-classes "{project root directory (including source code and compiled artifacts)}" --output corax_reports
     ```
+Note: The output directory specified by the `--output` parameter should not be set within the folder being analyzed; otherwise, the engine will refuse to perform the analysis.
 
 Note: The downloaded script contains a fixed version of the CoraxJava analyzer and rule package. If you need to update the analysis tool later, please find the script you downloaded before, then execute "uninstall" and delete the script. Then, follow the steps above to download the latest version (Master stable branch) of the CoraxJava analyzer.
 
@@ -175,17 +176,17 @@ After a successful build, multiple zip files of plugins and configuration files 
 │   │                                                      // Only when the modified main configuration file has some missing configurations or some configurations cannot be mapped to existing plugins,
 │   ├── default-config.normalize.yml                       // and when there are style issues, the engine will automatically repair and normalize the main configuration and output it to this file
 │   ├── plugins                                            // Plugin storage directory
-│   │   ├── feysh-config-community-plugin-2.6               // Automatically unzipped after the first analysis run, delete as needed
-│   │   ├── feysh-config-community-plugin-2.6.zip           // Compilation artifact, rule checker plugin generated after compiling corax-config-community module
-│   │   ├── feysh-config-general-plugin-2.6                 // Automatically unzipped after the first analysis run, delete as needed
-│   │   └── feysh-config-general-plugin-2.6.zip             // Compilation artifact, rule checker plugin generated after compiling corax-config-general module
+│   │   ├── feysh-config-community-plugin-2.8               // Automatically unzipped after the first analysis run, delete as needed
+│   │   ├── feysh-config-community-plugin-2.8.zip           // Compilation artifact, rule checker plugin generated after compiling corax-config-community module
+│   │   ├── feysh-config-general-plugin-2.8                 // Automatically unzipped after the first analysis run, delete as needed
+│   │   └── feysh-config-general-plugin-2.8.zip             // Compilation artifact, rule checker plugin generated after compiling corax-config-general module
 │   └── rules                                              // Some static data of rule checker, users can customize configuration
 │       ├── **.sources.json                                   // taint sources
 │       ├── **.summaries.json                                 // taint summaries, sanitizers
 │       ├── **.sinks.json                                     // taint sinks
 │       ├── **.access-path.json                               // method signature and sink data
 ```
-> Note: `feysh-config-community-plugin-2.6.zip` is the rule checker plugin generated after compiling the `corax-config-community` module, mainly containing the implementation of custom rule checkers. `feysh-config-general-plugin-2.6.zip` is the rule checker plugin generated after compiling the `corax-config-general` module, mainly containing some common built-in checker models that generally do not need to be modified.
+> Note: `feysh-config-community-plugin-2.8.zip` is the rule checker plugin generated after compiling the `corax-config-community` module, mainly containing the implementation of custom rule checkers. `feysh-config-general-plugin-2.8.zip` is the rule checker plugin generated after compiling the `corax-config-general` module, mainly containing some common built-in checker models that generally do not need to be modified.
 
 
 
@@ -195,7 +196,7 @@ After a successful build, multiple zip files of plugins and configuration files 
 
 The analysis engine needs to load the `CoraxJava rule checker plugin` (e.g., `analysis-config/plugins/feysh-config-*-plugin-*.*.*.zip`) and some dependent configuration files (e.g., `analysis-config/rules`). Therefore, you need to prepare the `analysis-config` (rule configuration folder):
 
-- You can download and unzip the pre-generated `analysis-config` directory from the [release](https://github.com/Feysh-Group/corax-community/releases): `{corax-java-cli-community-2.6.zip extraction location}/analysis-config/`
+- You can download and unzip the pre-generated `analysis-config` directory from the [release](https://github.com/Feysh-Group/corax-community/releases): `{corax-java-cli-community-2.8.zip extraction location}/analysis-config/`
 - Or use the [build/analysis-config](build%2Fanalysis-config) directory generated in the [Compilation and Build](#compilation-and-build) step: `./build/analysis-config/`
 
 **Step 2: Start Analysis! Manually configure `CoraxJava` with the following essential parameters:**
@@ -208,18 +209,18 @@ The analysis engine needs to load the `CoraxJava rule checker plugin` (e.g., `an
 - Set the path of the analysis target. For example, for this project's test cases: `--auto-app-classes ./corax-config-tests`, this parameter requires that the path or subdirectory must contain project source code and compiled bytecode artifacts (class files or jar files).
 
 - Specify the configuration parameters in the format `--config (yaml file name.yml)@(rule configuration folder)`, where the yaml file name can be arbitrary. The `(rule configuration folder)` is the path to the previously prepared `analysis-config`. For example:
-- `--config default-config.yml@{corax-java-cli-community-2.6.zip extraction location}/analysis-config/`
+- `--config default-config.yml@{corax-java-cli-community-2.8.zip extraction location}/analysis-config/`
 - `--config default-config.yml@./build/analysis-config/`
 
 Analysis command template:
 
 ```bash
-$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes {project root directory (containing source code and build artifacts)} --config default-config.yml@{corax-java-cli-community-2.6.zip extraction location}/analysis-config/
+$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes {project root directory (containing source code and build artifacts)} --config default-config.yml@{corax-java-cli-community-2.8.zip extraction location}/analysis-config/
 ```
 
 **Tips**: If there are no build artifacts in the project root directory, you can add any number of `--auto-app-classes` parameters pointing to the location or folder of the build artifacts.
 
-When executing this command, if the analysis engine cannot find a yaml file named `default-config.yml` in the specified `{corax-java-cli-community-2.6.zip extraction location}/analysis-config/` directory, it will automatically generate a default yaml main configuration file with the same name based on default parameters in the plugin in the rules configuration folder: `{corax-java-cli-community-2.6.zip extraction location}/analysis-config/default-config.yml`. If you need to change the configuration, copy the entire `analysis-config` folder to your working directory and customize the configuration according to your requirements. Specify the parameters `--config configuration file name.yml@new rule configuration folder` before the next analysis to make it effective.
+When executing this command, if the analysis engine cannot find a yaml file named `default-config.yml` in the specified `{corax-java-cli-community-2.8.zip extraction location}/analysis-config/` directory, it will automatically generate a default yaml main configuration file with the same name based on default parameters in the plugin in the rules configuration folder: `{corax-java-cli-community-2.8.zip extraction location}/analysis-config/default-config.yml`. If you need to change the configuration, copy the entire `analysis-config` folder to your working directory and customize the configuration according to your requirements. Specify the parameters `--config configuration file name.yml@new rule configuration folder` before the next analysis to make it effective.
 
 The final report will be generated in the folder path specified by `--output`.
 

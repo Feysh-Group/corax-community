@@ -11,6 +11,7 @@ val coroutinesVersion: String by project
 val immutableCollectionsVersion: String by project
 val pf4jVersion: String by project
 val sootVersion: String by rootProject
+val cpgVersion: String by rootProject
 val junit4Version: String by project
 val junit4PlatformVersion: String by project
 val commonsLangVersion: String by rootProject
@@ -19,9 +20,9 @@ val kotlinSerializationVersion: String by rootProject
 val kamlVersion: String by rootProject
 val guavaVersion: String by rootProject
 val semVer: String? by project
-val configDir by extra { file("$buildDir/analysis-config") }
-val pluginDir by extra { file("$buildDir/analysis-config/plugins") }
-version = semVer ?: "2.6"
+val configDir by extra { file("${layout.buildDirectory.get()}/analysis-config") }
+val pluginDir by extra { file("${layout.buildDirectory.get()}/analysis-config/plugins") }
+version = semVer ?: "2.8"
 
 plugins {
     `java-library`
@@ -217,9 +218,9 @@ configure(
         compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-bom", version = kotlinVersion)
         compileOnly(group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable-jvm", version = immutableCollectionsVersion)
 
-        compileOnly(sootVersion) {
-            exclude(group="com.google.guava", module="guava")
-        }
+        compileOnly(sootVersion) { exclude(group="com.google.guava", module="guava") }
+        compileOnly(group = "de.fraunhofer.aisec", name = "cpg-core", version = cpgVersion) { exclude(group = "org.apache.logging.log4j") }
+        compileOnly(group = "de.fraunhofer.aisec", name = "cpg-language-java", version = cpgVersion) { exclude(group = "org.apache.logging.log4j") }
 
         compileOnly(group = "com.charleskorn.kaml", name = "kaml", version = kamlVersion)
         compileOnly(group = "io.github.microutils", name = "kotlin-logging", version = kotlinLoggingVersion)
@@ -228,6 +229,8 @@ configure(
         kapt(group = "org.pf4j",  name = "pf4j", version = pf4jVersion)
 
         testImplementation(sootVersion)
+        testImplementation(group = "de.fraunhofer.aisec", name = "cpg-core", version = cpgVersion) { exclude(group = "org.apache.logging.log4j") }
+        testImplementation(group = "de.fraunhofer.aisec", name = "cpg-language-java", version = cpgVersion) { exclude(group = "org.apache.logging.log4j") }
 
         testImplementation(group = "org.pf4j", name = "pf4j", version = pf4jVersion)
         testImplementation(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = coroutinesVersion)
@@ -310,7 +313,7 @@ configure(
         dependsOn("processResources")
         dependsOn("processTestResources")
         doLast {
-            val file = File("$buildDir/resources/test/project.properties")
+            val file = File("${layout.buildDirectory.get()}/resources/test/project.properties")
             file.parentFile.takeIf { !it.exists() }?.createDirectory()
             val engineJar: File? by rootProject.extra
             file.bufferedWriter().use { writer ->

@@ -1,12 +1,13 @@
 val junit4Version: String by rootProject
 val kotlinVersion: String by project
+val mybatisApacheVersion: String by rootProject
 
 
 dependencies {
 
     compileOnly("com.google.guava:guava:19.0"){ isTransitive = false }
 
-    compileOnly("org.mybatis:mybatis:3.4.5")
+    compileOnly(group = "org.mybatis", name = "mybatis", version = mybatisApacheVersion)
 
     compileOnly("org.springframework.boot:spring-boot-starter-web:1.5.1.RELEASE") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
@@ -52,6 +53,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.struts/struts-core
     compileOnly("org.apache.struts:struts-core:1.3.10"){ isTransitive = false }
+
+//    https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compileOnly("org.apache.commons:commons-lang3:3.14.0"){ isTransitive = false}
 
     // https://mvnrepository.com/artifact/org.apache.commons/commons-email
     compileOnly("org.apache.commons:commons-email:1.5"){ isTransitive = false }

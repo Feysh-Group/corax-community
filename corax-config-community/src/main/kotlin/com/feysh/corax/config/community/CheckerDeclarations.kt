@@ -1,16 +1,33 @@
+/*
+ *  CoraxJava - a Java Static Analysis Framework
+ *  Copyright (C) 2024.  Feysh-Tech Group
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.feysh.corax.config.community
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.community.standard.CWERules
-import com.feysh.corax.config.community.category.BugCategory
 import com.feysh.corax.config.community.standard.CERTRules
 
 object PredictRandomChecker : IChecker {
-    override val report: IRule = CWERules.CWE330_InsufficientlyRandom
-    override val category: IBugCategory = BugCategory.PredictRandom
+    override val report: IRule = CWERules.CWE330
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE330_InsufficientlyRandom,
-        CERTRules.MSC02_J_GEN
+        CWERules.CWE330,
+        CERTRules.MSC02_J
     )
 
     object PredictRandom : CheckType() {
@@ -23,16 +40,15 @@ object PredictRandomChecker : IChecker {
 }
 
 object SqliChecker : IChecker {
-    override val report: IRule =  CWERules.CWE89_SQLI
-    override val category: IBugCategory = BugCategory.Sqli
+    override val report: IRule =  CWERules.CWE89
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE89_SQLI,
-        CERTRules.IDS00_J_SQLI
+        CWERules.CWE89,
+        CERTRules.IDS00_J
     )
 
     object SqlInjection : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "使用  ${args["type"]} 中的 `$callee` 可能容易受到 SQL 注入的攻击.${args["msg"]?.let { " $it" } ?: ""}"},
+            Language.ZH to msgGenerator { "使用  ${args["type"]} 中的 `$callee` 可能容易受到 SQL 注入的攻击.${args["msg"]?.let { " $it" } ?: ""}" },
             Language.EN to msgGenerator { "This use of `$callee` can be vulnerable to SQL injection in the ${args["type"]}.${args["msg"]?.let { " $it" } ?: ""}" }
         )
         override val checker: IChecker = SqliChecker
@@ -40,7 +56,7 @@ object SqliChecker : IChecker {
 
     object MybatisSqlInjectionSinkHint : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "找到 SQL 注入 sink 点 ${args["numSinks"]} 个 . 存在风险的 Mybatis SQL 查询语句为: `${args["boundSql"]}`"},
+            Language.ZH to msgGenerator { "找到 SQL 注入 sink 点 ${args["numSinks"]} 个 . 存在风险的 Mybatis SQL 查询语句为: `${args["boundSql"]}`" },
             Language.EN to msgGenerator { "Found `${args["numSinks"]}` SQL injection sinks in the risk Mybatis SQL statement: `${args["boundSql"]}`" }
         )
         override val checker: IChecker = SqliChecker
@@ -48,10 +64,9 @@ object SqliChecker : IChecker {
 }
 
 object InsecureCookieChecker : IChecker {
-    override val report: IRule = CWERules.CWE614_SensitiveCookie
-    override val category: IBugCategory = BugCategory.InsecureCookie
+    override val report: IRule = CWERules.CWE614
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE614_SensitiveCookie,
+        CWERules.CWE614,
 //      CERTRules.,
     )
 
@@ -65,10 +80,9 @@ object InsecureCookieChecker : IChecker {
 }
 
 object HttponlyCookieChecker : IChecker {
-    override val report: IRule = CWERules.CWE1004_SensitiveCookie
-    override val category: IBugCategory = BugCategory.HttponlyCookie
+    override val report: IRule = CWERules.CWE1004
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE1004_SensitiveCookie,
+        CWERules.CWE1004,
 //      CERTRules.,
     )
 
@@ -82,11 +96,10 @@ object HttponlyCookieChecker : IChecker {
 }
 
 object PathTraversalChecker : IChecker {
-    override val report: IRule = CWERules.CWE22_PathTraversal
-    override val category: IBugCategory = BugCategory.PathTraversal
+    override val report: IRule = CWERules.CWE22
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE22_PathTraversal,
-        CERTRules.FIO16_J_PATH,
+        CWERules.CWE22,
+        CERTRules.FIO16_J,
     )
 
     object PathTraversal : CheckType() {
@@ -106,11 +119,10 @@ object PathTraversalChecker : IChecker {
 }
 
 object UnrestrictedFileUploadChecker : IChecker {
-    override val report: IRule = CWERules.CWE434_UnrestrictedFileUpload
-    override val category: IBugCategory = BugCategory.UnrestrictedFileUpload
+    override val report: IRule = CWERules.CWE434
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE434_UnrestrictedFileUpload,
-        CERTRules.IDS56_J_FUF
+        CWERules.CWE434,
+        CERTRules.IDS56_J
     )
 
     object UnrestrictedFileUpload : CheckType() {
@@ -124,11 +136,10 @@ object UnrestrictedFileUploadChecker : IChecker {
 
 
 object CmdiChecker : IChecker {
-    override val report: IRule = CWERules.CWE78_CMDI
-    override val category: IBugCategory = BugCategory.Cmdi
+    override val report: IRule = CWERules.CWE78
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE78_CMDI,
-        CERTRules.IDS07_J_CMDI,
+        CWERules.CWE78,
+        CERTRules.IDS07_J,
     )
 
     object CommandInjection : CheckType() {
@@ -142,10 +153,9 @@ object CmdiChecker : IChecker {
 
 
 object WeakHashChecker : IChecker {
-    override val report: IRule = CWERules.CWE328_WeakHash
-    override val category: IBugCategory = BugCategory.WeakHash
+    override val report: IRule = CWERules.CWE328
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE328_WeakHash
+        CWERules.CWE328
     )
 
     object WeakMessageDigestMd5 : CheckType() {
@@ -173,11 +183,10 @@ object WeakHashChecker : IChecker {
     }
 }
 object InsecureCipherChecker : IChecker {
-    override val report: IRule = CWERules.CWE327_RiskyCrypto
-    override val category: IBugCategory = BugCategory.InsecureCipher
+    override val report: IRule = CWERules.CWE327
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE327_RiskyCrypto,
-        CERTRules.MSC61_J_ALGO
+        CWERules.CWE327,
+        CERTRules.MSC61_J
     )
 
     object DesUsage : CheckType() {
@@ -213,10 +222,9 @@ object InsecureCipherChecker : IChecker {
     }
 }
 object XxeChecker : IChecker {
-    override val report: IRule = CWERules.CWE611_XXE
-    override val category: IBugCategory = BugCategory.Xxe
+    override val report: IRule = CWERules.CWE611
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE611_XXE,
+        CWERules.CWE611,
 //        CERTRules.,
     )
 
@@ -237,10 +245,9 @@ object XxeChecker : IChecker {
 }
 
 object XpathiChecker : IChecker {
-    override val report: IRule = CWERules.CWE643_XPathI
-    override val category: IBugCategory = BugCategory.Xpathi
+    override val report: IRule = CWERules.CWE643
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE643_XPathI,
+        CWERules.CWE643,
 //        CERTRules.,
     )
 
@@ -254,10 +261,9 @@ object XpathiChecker : IChecker {
 }
 
 object CsrfChecker : IChecker {
-    override val report: IRule = CWERules.CWE352_CSRF
-    override val category: IBugCategory = BugCategory.Csrf
+    override val report: IRule = CWERules.CWE352
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE352_CSRF
+        CWERules.CWE352
     )
 
     object SpringCsrfProtectionDisabled : CheckType() {
@@ -278,11 +284,10 @@ object CsrfChecker : IChecker {
 }
 
 object LdapiChecker : IChecker {
-    override val report: IRule = CWERules.CWE90_LDAP
-    override val category: IBugCategory = BugCategory.Ldapi
+    override val report: IRule = CWERules.CWE90
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE90_LDAP,
-        CERTRules.IDS54_J_LDAP,
+        CWERules.CWE90,
+        CERTRules.IDS54_J,
     )
 
     object LdapInjection : CheckType() {
@@ -294,10 +299,9 @@ object LdapiChecker : IChecker {
     }
 }
 object CodeInjectionChecker : IChecker {
-    override val report: IRule = CWERules.CWE94_CodeInjection
-    override val category: IBugCategory = BugCategory.CodeInject
+    override val report: IRule = CWERules.CWE94
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE94_CodeInjection,
+        CWERules.CWE94,
 //        CERTRules.,
     )
 
@@ -326,10 +330,9 @@ object CodeInjectionChecker : IChecker {
     }
 }
 object TemplateIChecker : IChecker {
-    override val report: IRule = CWERules.CWE1336_TemplateEngine
-    override val category: IBugCategory = BugCategory.Templatei
+    override val report: IRule = CWERules.CWE1336
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE1336_TemplateEngine,
+        CWERules.CWE1336,
 //        CERTRules.,
         // TODO:
     )
@@ -343,10 +346,9 @@ object TemplateIChecker : IChecker {
     }
 }
 object HttpRespSplitChecker : IChecker {
-    override val report: IRule = CWERules.CWE113_HttpRespSplit
-    override val category: IBugCategory = BugCategory.HttpRespSplit
+    override val report: IRule = CWERules.CWE113
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE113_HttpRespSplit,
+        CWERules.CWE113,
 //        CERTRules.,
         // TODO:
     )
@@ -360,11 +362,26 @@ object HttpRespSplitChecker : IChecker {
     }
 }
 
-object HardcodeCredentialChecker : IChecker {
-    override val report: IRule = CWERules.CWE798_HardCodedCredentials
-    override val category: IBugCategory = BugCategory.HardcodeCredential
+object CrlfiLogChecker : IChecker {
+    override val report: IRule = CWERules.CWE117
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE798_HardCodedCredentials,
+        CWERules.CWE117,
+        CERTRules.IDS03_J,
+        // TODO:
+    )
+
+    object CrlfInjectionLogs : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "使用 `$callee` 可能会导致 CRLF 字符出现在日志消息中" },
+            Language.EN to msgGenerator { "This use of `$callee` might be used to include CRLF characters into log messages" }
+        )
+        override val checker: IChecker = CrlfiLogChecker
+    }
+}
+object HardcodeCredentialChecker : IChecker {
+    override val report: IRule = CWERules.CWE798
+    override val standards: Set<IRule> = setOf(
+        CWERules.CWE798,
 //        CERTRules.,
         // TODO
     )
@@ -398,10 +415,9 @@ object HardcodeCredentialChecker : IChecker {
 
 
 object HardcodeKeyChecker : IChecker {
-    override val report: IRule = CWERules.CWE321_HardCodedKey
-    override val category: IBugCategory = BugCategory.HardcodeKey
+    override val report: IRule = CWERules.CWE321
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE321_HardCodedKey
+        CWERules.CWE321
     )
 
     object HardCodeKey : CheckType() {
@@ -414,11 +430,10 @@ object HardcodeKeyChecker : IChecker {
     }
 }
 object XssChecker : IChecker {
-    override val report: IRule = CWERules.CWE79_XSSI
-    override val category: IBugCategory = BugCategory.Xss
+    override val report: IRule = CWERules.CWE79
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE79_XSSI,
-        CERTRules.IDS51_J_XSSI,
+        CWERules.CWE79,
+        CERTRules.IDS51_J,
 //      CERTRules.,
     )
 
@@ -443,10 +458,9 @@ object XssChecker : IChecker {
 
 
 object OpenRedirectChecker : IChecker {
-    override val report: IRule = CWERules.CWE601_URLRedirection
-    override val category: IBugCategory = BugCategory.OpenRedirect
+    override val report: IRule = CWERules.CWE601
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE601_URLRedirection,
+        CWERules.CWE601,
 //        CERTRules.,
         // TODO
     )
@@ -461,10 +475,9 @@ object OpenRedirectChecker : IChecker {
 
 }
 object DeserializationChecker : IChecker {
-    override val report: IRule = CWERules.CWE502_UntrustedData
-    override val category: IBugCategory = BugCategory.Deserialization
+    override val report: IRule = CWERules.CWE502
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE502_UntrustedData,
+        CWERules.CWE502,
 //        CERTRules.,
         // TODO
     )
@@ -479,10 +492,9 @@ object DeserializationChecker : IChecker {
 }
 
 object TrustBoundaryChecker : IChecker {
-    override val report: IRule = CWERules.CWE501_TrustBoundaryViolation
-    override val category: IBugCategory = BugCategory.TrustBoundary
+    override val report: IRule = CWERules.CWE501
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE501_TrustBoundaryViolation,
+        CWERules.CWE501,
 //        CERTRules.,
         // TODO
     )
@@ -496,10 +508,9 @@ object TrustBoundaryChecker : IChecker {
     }
 }
 object SensitiveDataExposeChecker : IChecker {
-    override val report: IRule = CWERules.CWE200_SensitiveInformation
-    override val category: IBugCategory = BugCategory.SensitiveDataExpose
+    override val report: IRule = CWERules.CWE200
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE200_SensitiveInformation,
+        CWERules.CWE200,
 //      CERTRules.,
     )
 
@@ -513,10 +524,9 @@ object SensitiveDataExposeChecker : IChecker {
 }
 
 object IncompleteModelOfEndpointFeatures : IChecker {
-    override val report: IRule = CWERules.CWE347_IncompleteModelOfEndpointFeatures
-    override val category: IBugCategory = BugCategory.IncompleteModelOfEndpointFeatures
+    override val report: IRule = CWERules.CWE347
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE347_IncompleteModelOfEndpointFeatures,
+        CWERules.CWE347,
     )
 
     object HasMissingJwtSignatureCheck : CheckType() {
@@ -529,10 +539,12 @@ object IncompleteModelOfEndpointFeatures : IChecker {
 }
 
 object Log4jChecker : IChecker {
-    override val report: IRule = CWERules.CWE502_UntrustedData
-    override val category: IBugCategory = BugCategory.Log4j
+    override val report: IRule = CWERules.CWE502
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE502_UntrustedData
+        CWERules.CWE502,
+        CWERules.CWE400,
+        CWERules.CWE74,
+        CWERules.CWE20
 //        CERTRules.,
         // TODO
     )
@@ -547,10 +559,9 @@ object Log4jChecker : IChecker {
 }
 
 object SsrfChecker : IChecker {
-    override val report: IRule = CWERules.CWE918_SSRF
-    override val category: IBugCategory = BugCategory.Ssrf
+    override val report: IRule = CWERules.CWE918
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE918_SSRF
+        CWERules.CWE918
     )
 
     object RequestForgery : CheckType() {
@@ -562,10 +573,9 @@ object SsrfChecker : IChecker {
     }
 }
 object PermissiveCorsChecker : IChecker {
-    override val report: IRule = CWERules.CWE942_UntrustedDomains
-    override val category: IBugCategory = BugCategory.PermissiveCors
+    override val report: IRule = CWERules.CWE942
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE942_UntrustedDomains,
+        CWERules.CWE942,
 //        CERTRules.,
         // TODO
     )
@@ -579,10 +589,9 @@ object PermissiveCorsChecker : IChecker {
     }
 }
 object WeakSslChecker : IChecker {
-    override val report: IRule = CWERules.CWE757_AlgorithmDowngrade
-    override val category: IBugCategory = BugCategory.WeakSsl
+    override val report: IRule = CWERules.CWE757
     override val standards: Set<IRule> = setOf(
-        CWERules.CWE757_AlgorithmDowngrade,
+        CWERules.CWE757,
 //      CERTRules.,
     )
 
