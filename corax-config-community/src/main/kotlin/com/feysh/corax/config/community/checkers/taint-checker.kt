@@ -44,7 +44,7 @@ object `taint-checker` : AIAnalysisUnit() {
         val kind2Checker: List<Pair<String, CustomSinkDataForCheck>> = listOf(
             "log4j-injection" to CustomSinkDataForCheck(control, reportType = Log4jChecker.Log4jInjection),
 
-            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = PathTraversalChecker.PathTraversal),
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = PathTraversalChecker.PathTraversalIn),
             "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = UnrestrictedFileUploadChecker.UnrestrictedFileUpload),
             "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.ZIP_ENTRY_NAME, reportType = PathTraversalChecker.ZipSlip),
 

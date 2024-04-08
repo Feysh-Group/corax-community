@@ -22,9 +22,10 @@ package com.feysh.corax.config.community
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.community.standard.CWERules
 import com.feysh.corax.config.community.standard.CERTRules
+import com.feysh.corax.config.community.standard.FeyshRules
 
 object PredictRandomChecker : IChecker {
-    override val report: IRule = CWERules.CWE330
+    override val report: IRule = FeyshRules.PredictRandom
     override val standards: Set<IRule> = setOf(
         CWERules.CWE330,
         CERTRules.MSC02_J
@@ -40,7 +41,7 @@ object PredictRandomChecker : IChecker {
 }
 
 object SqliChecker : IChecker {
-    override val report: IRule =  CWERules.CWE89
+    override val report: IRule = FeyshRules.Sqli
     override val standards: Set<IRule> = setOf(
         CWERules.CWE89,
         CERTRules.IDS00_J
@@ -64,7 +65,7 @@ object SqliChecker : IChecker {
 }
 
 object InsecureCookieChecker : IChecker {
-    override val report: IRule = CWERules.CWE614
+    override val report: IRule = FeyshRules.InsecureCookie
     override val standards: Set<IRule> = setOf(
         CWERules.CWE614,
 //      CERTRules.,
@@ -80,7 +81,7 @@ object InsecureCookieChecker : IChecker {
 }
 
 object HttponlyCookieChecker : IChecker {
-    override val report: IRule = CWERules.CWE1004
+    override val report: IRule = FeyshRules.HttponlyCookie
     override val standards: Set<IRule> = setOf(
         CWERules.CWE1004,
 //      CERTRules.,
@@ -96,13 +97,13 @@ object HttponlyCookieChecker : IChecker {
 }
 
 object PathTraversalChecker : IChecker {
-    override val report: IRule = CWERules.CWE22
+    override val report: IRule = FeyshRules.PathTraversal
     override val standards: Set<IRule> = setOf(
         CWERules.CWE22,
         CERTRules.FIO16_J,
     )
 
-    object PathTraversal : CheckType() {
+    object PathTraversalIn : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
             Language.ZH to msgGenerator { "此 API `$callee` 读取的可能是由用户输入指定的文件" },
             Language.EN to msgGenerator { "This API `$callee` reads a file whose location might be specified by user input" }
@@ -119,7 +120,7 @@ object PathTraversalChecker : IChecker {
 }
 
 object UnrestrictedFileUploadChecker : IChecker {
-    override val report: IRule = CWERules.CWE434
+    override val report: IRule = FeyshRules.UnrestrictedFileUpload
     override val standards: Set<IRule> = setOf(
         CWERules.CWE434,
         CERTRules.IDS56_J
@@ -136,7 +137,7 @@ object UnrestrictedFileUploadChecker : IChecker {
 
 
 object CmdiChecker : IChecker {
-    override val report: IRule = CWERules.CWE78
+    override val report: IRule = FeyshRules.Cmdi
     override val standards: Set<IRule> = setOf(
         CWERules.CWE78,
         CERTRules.IDS07_J,
@@ -153,7 +154,7 @@ object CmdiChecker : IChecker {
 
 
 object WeakHashChecker : IChecker {
-    override val report: IRule = CWERules.CWE328
+    override val report: IRule = FeyshRules.WeakHash
     override val standards: Set<IRule> = setOf(
         CWERules.CWE328
     )
@@ -183,7 +184,7 @@ object WeakHashChecker : IChecker {
     }
 }
 object InsecureCipherChecker : IChecker {
-    override val report: IRule = CWERules.CWE327
+    override val report: IRule = FeyshRules.InsecureCipher
     override val standards: Set<IRule> = setOf(
         CWERules.CWE327,
         CERTRules.MSC61_J
@@ -222,7 +223,7 @@ object InsecureCipherChecker : IChecker {
     }
 }
 object XxeChecker : IChecker {
-    override val report: IRule = CWERules.CWE611
+    override val report: IRule = FeyshRules.Xxe
     override val standards: Set<IRule> = setOf(
         CWERules.CWE611,
 //        CERTRules.,
@@ -245,7 +246,7 @@ object XxeChecker : IChecker {
 }
 
 object XpathiChecker : IChecker {
-    override val report: IRule = CWERules.CWE643
+    override val report: IRule = FeyshRules.Xpathi
     override val standards: Set<IRule> = setOf(
         CWERules.CWE643,
 //        CERTRules.,
@@ -261,7 +262,7 @@ object XpathiChecker : IChecker {
 }
 
 object CsrfChecker : IChecker {
-    override val report: IRule = CWERules.CWE352
+    override val report: IRule = FeyshRules.Csrf
     override val standards: Set<IRule> = setOf(
         CWERules.CWE352
     )
@@ -284,7 +285,7 @@ object CsrfChecker : IChecker {
 }
 
 object LdapiChecker : IChecker {
-    override val report: IRule = CWERules.CWE90
+    override val report: IRule = FeyshRules.Ldapi
     override val standards: Set<IRule> = setOf(
         CWERules.CWE90,
         CERTRules.IDS54_J,
@@ -299,7 +300,7 @@ object LdapiChecker : IChecker {
     }
 }
 object CodeInjectionChecker : IChecker {
-    override val report: IRule = CWERules.CWE94
+    override val report: IRule = FeyshRules.CodeInject
     override val standards: Set<IRule> = setOf(
         CWERules.CWE94,
 //        CERTRules.,
@@ -330,7 +331,7 @@ object CodeInjectionChecker : IChecker {
     }
 }
 object TemplateIChecker : IChecker {
-    override val report: IRule = CWERules.CWE1336
+    override val report: IRule = FeyshRules.Templatei
     override val standards: Set<IRule> = setOf(
         CWERules.CWE1336,
 //        CERTRules.,
@@ -346,7 +347,7 @@ object TemplateIChecker : IChecker {
     }
 }
 object HttpRespSplitChecker : IChecker {
-    override val report: IRule = CWERules.CWE113
+    override val report: IRule = FeyshRules.HttpRespSplit
     override val standards: Set<IRule> = setOf(
         CWERules.CWE113,
 //        CERTRules.,
@@ -362,24 +363,9 @@ object HttpRespSplitChecker : IChecker {
     }
 }
 
-object CrlfiLogChecker : IChecker {
-    override val report: IRule = CWERules.CWE117
-    override val standards: Set<IRule> = setOf(
-        CWERules.CWE117,
-        CERTRules.IDS03_J,
-        // TODO:
-    )
 
-    object CrlfInjectionLogs : CheckType() {
-        override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "使用 `$callee` 可能会导致 CRLF 字符出现在日志消息中" },
-            Language.EN to msgGenerator { "This use of `$callee` might be used to include CRLF characters into log messages" }
-        )
-        override val checker: IChecker = CrlfiLogChecker
-    }
-}
 object HardcodeCredentialChecker : IChecker {
-    override val report: IRule = CWERules.CWE798
+    override val report: IRule = FeyshRules.HardcodeCredential
     override val standards: Set<IRule> = setOf(
         CWERules.CWE798,
 //        CERTRules.,
@@ -415,7 +401,7 @@ object HardcodeCredentialChecker : IChecker {
 
 
 object HardcodeKeyChecker : IChecker {
-    override val report: IRule = CWERules.CWE321
+    override val report: IRule = FeyshRules.HardcodeKey
     override val standards: Set<IRule> = setOf(
         CWERules.CWE321
     )
@@ -430,7 +416,7 @@ object HardcodeKeyChecker : IChecker {
     }
 }
 object XssChecker : IChecker {
-    override val report: IRule = CWERules.CWE79
+    override val report: IRule = FeyshRules.Xss
     override val standards: Set<IRule> = setOf(
         CWERules.CWE79,
         CERTRules.IDS51_J,
@@ -458,7 +444,7 @@ object XssChecker : IChecker {
 
 
 object OpenRedirectChecker : IChecker {
-    override val report: IRule = CWERules.CWE601
+    override val report: IRule = FeyshRules.OpenRedirect
     override val standards: Set<IRule> = setOf(
         CWERules.CWE601,
 //        CERTRules.,
@@ -475,7 +461,7 @@ object OpenRedirectChecker : IChecker {
 
 }
 object DeserializationChecker : IChecker {
-    override val report: IRule = CWERules.CWE502
+    override val report: IRule = FeyshRules.Deserialization
     override val standards: Set<IRule> = setOf(
         CWERules.CWE502,
 //        CERTRules.,
@@ -492,7 +478,7 @@ object DeserializationChecker : IChecker {
 }
 
 object TrustBoundaryChecker : IChecker {
-    override val report: IRule = CWERules.CWE501
+    override val report: IRule = FeyshRules.TrustBoundary
     override val standards: Set<IRule> = setOf(
         CWERules.CWE501,
 //        CERTRules.,
@@ -508,7 +494,7 @@ object TrustBoundaryChecker : IChecker {
     }
 }
 object SensitiveDataExposeChecker : IChecker {
-    override val report: IRule = CWERules.CWE200
+    override val report: IRule = FeyshRules.SensitiveDataExpose
     override val standards: Set<IRule> = setOf(
         CWERules.CWE200,
 //      CERTRules.,
@@ -524,7 +510,7 @@ object SensitiveDataExposeChecker : IChecker {
 }
 
 object IncompleteModelOfEndpointFeatures : IChecker {
-    override val report: IRule = CWERules.CWE347
+    override val report: IRule = FeyshRules.IncompleteModelOfEndpointFeatures
     override val standards: Set<IRule> = setOf(
         CWERules.CWE347,
     )
@@ -539,7 +525,7 @@ object IncompleteModelOfEndpointFeatures : IChecker {
 }
 
 object Log4jChecker : IChecker {
-    override val report: IRule = CWERules.CWE502
+    override val report: IRule = FeyshRules.Log4J
     override val standards: Set<IRule> = setOf(
         CWERules.CWE502,
         CWERules.CWE400,
@@ -559,7 +545,7 @@ object Log4jChecker : IChecker {
 }
 
 object SsrfChecker : IChecker {
-    override val report: IRule = CWERules.CWE918
+    override val report: IRule = FeyshRules.Ssrf
     override val standards: Set<IRule> = setOf(
         CWERules.CWE918
     )
@@ -573,7 +559,7 @@ object SsrfChecker : IChecker {
     }
 }
 object PermissiveCorsChecker : IChecker {
-    override val report: IRule = CWERules.CWE942
+    override val report: IRule = FeyshRules.PermissiveCors
     override val standards: Set<IRule> = setOf(
         CWERules.CWE942,
 //        CERTRules.,
@@ -589,7 +575,7 @@ object PermissiveCorsChecker : IChecker {
     }
 }
 object WeakSslChecker : IChecker {
-    override val report: IRule = CWERules.CWE757
+    override val report: IRule = FeyshRules.WeakSsl
     override val standards: Set<IRule> = setOf(
         CWERules.CWE757,
 //      CERTRules.,
