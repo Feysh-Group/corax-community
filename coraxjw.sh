@@ -26,7 +26,7 @@
 #
 ################################################################################
 
-CORAX_VERSION=2.6
+CORAX_VERSION=2.8
 CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
@@ -415,7 +415,7 @@ _detect_corax() {
       if [[ $is_cn == "false" ]]; then
           CORAX_JAVA_RELEASE_URL="https://github.com/Feysh-Group/corax-community/releases/download/v$CORAX_VERSION/$CORAX_JAVA_ARTIFACT_ZIP"
       else
-          CORAX_JAVA_RELEASE_URL="https://release.feysh.com/corax%2Fcorax-java-cli-community-2.6.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1738550438&Signature=gerVvL1taJfRCuxTaw6B1f2yx6g%3D"
+          CORAX_JAVA_RELEASE_URL="http://release.feysh.com/corax-java-group/corax-java-cli-community-2.8.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1713062793&Signature=FyVCtsGwJgfEbWdXV%2BA1SlPo4hQ%3D"
       fi
 
       _download_extract "Corax Java" "$CORAX_JAVA_RELEASE_URL" "$CJ_TARGET_DIR" "$ARCHIVE_NAME"
