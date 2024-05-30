@@ -35,6 +35,7 @@
   * [CoraxJava+Docker](#coraxjavadocker)
 - [测试集表现](#%E6%B5%8B%E8%AF%95%E9%9B%86%E8%A1%A8%E7%8E%B0)
 - [自定义规则检查器](#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A7%84%E5%88%99%E6%A3%80%E6%9F%A5%E5%99%A8)
+- [License](#license)
 - [交流反馈](#%E4%BA%A4%E6%B5%81%E5%8F%8D%E9%A6%88)
 - [招贤纳士](#%E6%8B%9B%E8%B4%A4%E7%BA%B3%E5%A3%AB)
 
@@ -257,6 +258,9 @@ $ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-
 
 **如需实现自定义的 `CoraxJava规则检查器`，请参考 [CoraxJava规则检查器](docs/zh/checker.md) 了解更多详情。**
 
+## License
+
+Corax-社区根据LGPL-2.1许可证授权，详情请参阅LICENSE文件。这基本上意味着您可以自由使用该工具（甚至在商业、闭源项目中）。但是，如果您扩展或修改了工具，则必须按照LGPL的规定使您的更改可用。这样可以确保我们作为一个社区共同努力，继续改进该工具。
 
 ## 交流反馈
 

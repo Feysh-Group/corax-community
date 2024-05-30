@@ -35,6 +35,7 @@
   * [CoraxJava+Docker](#coraxjavadocker)
 - [Test Suite Performance](#test-suite-performance)
 - [Custom Rule Checker](#custom-rule-checker)
+- [License](#license)
 - [Communication and Feedback](#communication-and-feedback)
 - [Recruitment](#recruitment)
 
@@ -239,6 +240,10 @@ The final report will be generated in the folder path specified by `--output`.
 **Read [Corax Community Edition Feature Comparison](docs/en/feature_diff.md#open-rules) to understand the open rules of this Java community edition tool.**
 
 **If you need to implement a custom `CoraxJava rule checker`, refer to [CoraxJava Rule Checker](docs/en/checker.md) for more details.**
+
+## License
+
+corax-community is licensed under the LGPL-2.1 license, see LICENSE file. This basically means that you are free to use the tool (even in commercial, closed-source projects). However, if you extend or modify the tool, you must make your changes available under the LGPL as well. This ensures that we can continue to improve the tool as a community effort.
 
 ## Communication and Feedback
 
