@@ -31,8 +31,15 @@ CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
 JDK_TARGET_DIR="${HOME}/.local/share"
-CORAX_TARGET_DIR="${HOME}/.corax"
+CORAX_TARGET_DIR="${HOME}/.local/.corax"
 JVM_VERSION=jdk-17.0.3.1
+
+OSS_URL_CORAX_JAVA_CLI_COMMUNITY="http://release.feysh.com/corax-java-group/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1749644384&Signature=dtDV6mVSmTHgU3XT34IgOo9beWs%3D"
+OSS_URL_JDK_DARWIN_X64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-x64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865870&Signature=pSaX7XqiEO%2BuZ5NsF0AsnkvKTB0%3D"
+OSS_URL_JDK_DARWIN_AARCH64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-aarch64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865859&Signature=M41W3NYVzNfVR8wLpmOoiGTYxWo%3D"
+OSS_URL_JDK_WIN_X64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"
+OSS_URL_JDK_LINUX_X64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_linux-x64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865849&Signature=VKfQnzV5P7qKygBu9WODOzNPmDw%3D"
+OSS_URL_JDK_LINUX_AARCH64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_linux-aarch64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865822&Signature=E45ZFy%2BYpDRo7dm9%2Ftjg%2Bj1trMU%3D"
 
 
 uninstall=false
@@ -250,6 +257,28 @@ _download_extract() {
 
 }
 
+test_valid_down_url() {
+    # 参数检查
+    if [ -z "$1" ]; then
+        echo "Usage: test_valid_down_url <url>"
+        return 1
+    fi
+
+    local url="$1"
+    local status_code
+
+    # 使用curl命令发送HEAD请求并获取状态码
+    status_code=$(curl -s -I -L -w '%{http_code}\n' "$url" -o /dev/null)
+
+    # 检查HTTP状态码是否为200
+    if [ "$status_code" -eq 200 ]; then
+        return 0
+    else
+        echo "Test url: Failed to download $url : response.status: $status_code"
+        return 1
+    fi
+}
+
 is_cn=$(_is_china && echo true || echo false)
 
 _detect_jdk() {
@@ -271,17 +300,17 @@ _detect_jdk() {
       if [ "$darwin" = "true" ]; then
           case $JVM_ARCH in
           x86_64)
-              if [[ $is_cn == "false" ]]; then
-                JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_macos-x64_bin.tar.gz"
+              if _is_china && test_valid_down_url "$OSS_URL_JDK_DARWIN_X64" == "true"; then
+                JVM_URL="$OSS_URL_JDK_DARWIN_X64"
               else
-                JVM_URL="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-x64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865870&Signature=pSaX7XqiEO%2BuZ5NsF0AsnkvKTB0%3D"
+                JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_macos-x64_bin.tar.gz"
               fi
               ;;
           arm64)
-              if [[ $is_cn == "false" ]]; then
-                JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_macos-aarch64_bin.tar.gz"
+              if _is_china && test_valid_down_url "$OSS_URL_JDK_DARWIN_AARCH64" == "true"; then
+                JVM_URL="$OSS_URL_JDK_DARWIN_AARCH64"
               else
-                JVM_URL="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-aarch64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865859&Signature=M41W3NYVzNfVR8wLpmOoiGTYxWo%3D"
+                JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_macos-aarch64_bin.tar.gz"
               fi
               ;;
           *)
@@ -289,27 +318,27 @@ _detect_jdk() {
               ;;
           esac
       elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
-          if [[ $is_cn == "false" ]]; then
-            JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_windows-x64_bin.zip"
+          if _is_china && test_valid_down_url "$OSS_URL_JDK_WIN_X64" == "true"; then
+            JVM_URL="$OSS_URL_JDK_WIN_X64"
           else
-            JVM_URL="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"
+            JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_windows-x64_bin.zip"
           fi
           ARCHIVE_NAME="jdk.zip"
       else
           JVM_ARCH=$(linux$(getconf LONG_BIT) uname -m)
            case $JVM_ARCH in
               x86_64)
-                  if [[ $is_cn == "false" ]]; then
-                    JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_linux-x64_bin.tar.gz"
+                  if _is_china && test_valid_down_url "$OSS_URL_JDK_LINUX_X64" == "true"; then
+                    JVM_URL="$OSS_URL_JDK_LINUX_X64"
                   else
-                    JVM_URL="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_linux-x64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865849&Signature=VKfQnzV5P7qKygBu9WODOzNPmDw%3D"
+                    JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_linux-x64_bin.tar.gz"
                   fi
                   ;;
               aarch64)
-                  if [[ $is_cn == "false" ]]; then
-                    JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_linux-aarch64_bin.tar.gz"
+                  if _is_china && test_valid_down_url "$OSS_URL_JDK_LINUX_AARCH64" == "true"; then
+                    JVM_URL=$OSS_URL_JDK_LINUX_AARCH64
                   else
-                    JVM_URL="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_linux-aarch64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865822&Signature=E45ZFy%2BYpDRo7dm9%2Ftjg%2Bj1trMU%3D"
+                    JVM_URL="https://download.oracle.com/java/17/archive/${JVM_VERSION}_linux-aarch64_bin.tar.gz"
                   fi
                   ;;
               *)
@@ -330,6 +359,9 @@ _detect_jdk() {
     done
 
     if [ '!' -e "$JAVA_HOME/bin/java" ]; then
+      rm -f "$JVM_TARGET_DIR/$flag"
+      rm -rf "$JVM_TARGET_DIR"
+      _msg info "Retry?"
       die "Unable to find bin/java under $JVM_TARGET_DIR"
     fi
     _msg info "[Version] JDK: $JAVA_HOME (version: $JVM_VERSION)"
@@ -348,9 +380,15 @@ _detect_jdk() {
             JAVACMD=$JAVA_HOME/bin/java
         fi
         if [ ! -x "$JAVACMD" ] ; then
+            rm -f "$JVM_TARGET_DIR/$flag"
+            rm -rf "$JVM_TARGET_DIR"
+            _msg info "Retry?"
             die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME"
         fi
     else
+        rm -f "$JVM_TARGET_DIR/$flag"
+        rm -rf "$JVM_TARGET_DIR"
+        _msg info "Retry?"
         die "ERROR: JAVA_HOME is not set"
     fi
 
@@ -419,10 +457,10 @@ _detect_corax() {
         true
     else
       local ARCHIVE_NAME=$CORAX_JAVA_ARTIFACT_ZIP
-      if [[ $is_cn == "false" ]]; then
-          CORAX_JAVA_RELEASE_URL="https://github.com/Feysh-Group/corax-community/releases/download/v$CORAX_VERSION/$CORAX_JAVA_ARTIFACT_ZIP"
+      if _is_china && test_valid_down_url "$OSS_URL_CORAX_JAVA_CLI_COMMUNITY" ; then
+          CORAX_JAVA_RELEASE_URL="$OSS_URL_CORAX_JAVA_CLI_COMMUNITY"
       else
-          CORAX_JAVA_RELEASE_URL="http://release.feysh.com/corax-java-group/corax-java-cli-community-2.8.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1713062793&Signature=FyVCtsGwJgfEbWdXV%2BA1SlPo4hQ%3D"
+          CORAX_JAVA_RELEASE_URL="https://github.com/Feysh-Group/corax-community/releases/download/v$CORAX_VERSION/$CORAX_JAVA_ARTIFACT_ZIP"
       fi
 
       _download_extract "Corax Java" "$CORAX_JAVA_RELEASE_URL" "$CJ_TARGET_DIR" "$ARCHIVE_NAME"
@@ -447,9 +485,15 @@ _detect_corax() {
     if [ -n "$CORAX_HOME" ] ; then
         CORAX_JAR="$CORAX_HOME/$CORAX_JAVA_CLI_NAME"
         if [ ! -f "$CORAX_JAR" ] ; then
+            rm -f "$CJ_TARGET_DIR/$flag"
+            rm -rf "$CJ_TARGET_DIR"
+            _msg info "Retry?"
             die "ERROR: CORAX_HOME is set to an invalid directory: $CORAX_HOME"
         fi
     else
+        rm -f "$CJ_TARGET_DIR/$flag"
+        rm -rf "$CJ_TARGET_DIR"
+        _msg info "Retry?"
         die "ERROR: CORAX_HOME could not found in $CJ_TARGET_DIR."
     fi
 }
