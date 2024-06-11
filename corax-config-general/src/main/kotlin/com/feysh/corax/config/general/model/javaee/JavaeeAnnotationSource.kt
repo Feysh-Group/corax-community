@@ -68,7 +68,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
 
     context (api@PreAnalysisApi)
     private fun parseWebControllerMappingMethods(): PreAnalysisApi.Result<Pair<WebFramework, SootMethod>> {
-        return atAnyMethod(config = { incrementalAnalyze = false }) {
+        return atAnyMethod(config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val visibilityAnnotationTag = visibilityAnnotationTag
             if (visibilityAnnotationTag != null) {
                 if (!visibilityAnnotationTag.hasAnnotations()) {
@@ -114,6 +114,7 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
 
 
     context (AIAnalysisApi)
+    @Suppress("UNUSED_PARAMETER")
     private fun taintWebRequestMappingHandlerParameters(framework: WebFramework, requestMappingHandler: SootMethod) {
         val hTypes = TypeHandler.getHandlerType(requestMappingHandler)
         for ((i, hType) in hTypes) {

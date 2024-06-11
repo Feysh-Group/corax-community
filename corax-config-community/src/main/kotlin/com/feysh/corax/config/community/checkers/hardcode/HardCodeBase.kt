@@ -44,12 +44,7 @@ abstract class HardCodeBase : AIAnalysisUnit() {
                 continue
             }
 
-            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase, object : TaintModelingConfig.IApplySourceSink {
-                context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-                override fun visitAccessPath(acp: ILocalT<*>) {
-                    check(ConstantPropagate.isConst(acp), sink.reportType)
-                }
-            })
+            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase, { acp, _ -> check(ConstantPropagate.isConst(acp), sink.reportType) })
         }
     }
 }

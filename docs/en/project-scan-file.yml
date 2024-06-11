@@ -1,77 +1,162 @@
-# Prerequisites:
-# We categorize all runtime classes into three types: application class (core classes that users expect to scan), library class (third-party dependencies for enhanced analysis precision), and phantom class (class not found, possibly due to not being compiled or missing libraries)
-# For semantic analysis of general programs, an explicit or implicit entry function/method must be provided as the analysis target, which should reside within the user's code (application classes).
-# If the analysis entry point includes library code, it can lead to too many analysis targets, consuming significant resources and making it inefficient to scan the code we care about.
+
+# Configuration for scanning-related settings of the analyzed project
 
 # Usage
-## Add parameter: --output ${output} before the corax analysis parameter --extra-args
-## Add parameter: --project-scan-config project-scan-config.yml at the end of the command
+#   Add argument: --output ${output} before corax analysis parameter --extra-args
+#   Append argument: --project-config project-scan-config.yml at the end of the command
+#   This configuration includes extensive explanations; to skip, proceed to line 100 for direct configuration
+#
+# Effect of Configuration
+#   The practical outcome of filtering on scanned content can be viewed after analysis by opening ${output}/scan-classifier-info.json, which reveals class categorization and which source code was included or excluded from analysis
+#   The ScanAction types in this file include:
+#     Process: To be scanned
+#     Skip: Not actively scanned
+#     Keep: Maintain original state
+#
+# Additional Information
+#   Visit https://regex101.com to test regular expressions, selecting FLAVOR as Java
+#   Note that "\." matches ".", while a single "." matches any character (excluding line terminators)
 
-# Other Information
-# You can test regular expressions at https://regex101.com and select FLAVOR as java
-# Note that "\." matches "." while a single "." matches any character (except line terminators)
 
-# Class Classification Rules
-process-class-regex: #                            Regular expression for class package names. Note that matching is done in an ordered manner from top to bottom, pay attention to the order
-    - (-)\.R\$\w+$                                    # E.g., com.android.R$id
-    - (+)org\.owasp\.benchmark\.testcode              # E.g., org.owasp.benchmark.testcode.Test001, org.owasp.benchmark.testcode.xss.Xss001
-    - (+)org\.owasp\.benchmark(-)org\.owasp\.benchmark\.utils # Scan (Process) classes under org.owasp.benchmark excluding those under org.owasp.benchmark.utils
-                                                      # Supports multiple regexes connected with (+) or (-)
-    - (-)org\.owasp(+)org\.owasp\.benchmark           # Exclude (Skip) all classes under org.owasp except those under org.owasp.benchmark, e.g., org.owasp.comp.Test will be excluded (Skip), but org.owasp.benchmark and org.foo will not be excluded (proceed to next rule)
+# Analysis targets are categorized into classes (commonly found in folders/jars/wars/apks/dex/zips, etc.) and ordinary files (any non-class files such as source code, XML, txt, properties, etc.)
+process-regex: # Filter configuration for analysis targets
+  # Configurable fields include: (multiple fields, if present, are logically ANDed)
+  #   class:           # For class classification only,不影响源码文件 processing
+  #   classpath:       # For configuring class loading filters, classes within excluded classpaths won't be loaded by the analyzer, hence won't be analyzed
+  #   file:            # Solely for including or excluding various resource files from scanning, such as source code and resources, without affecting classes
 
-    # ⇲ Add your required package name regex(es) here ↙
-    - (+)org\.example
+  # Matching mechanism: Later rules have higher priority; e.g., with these ordered rules, */src/Abc.java will be excluded from analysis, while */src/Efg.java will be analyzed.
+  #   - op: Add
+  #     path: /src/Abc.java  # All files with '/src/Abc.java' in their path
+  #   - op: Sub
+  #     path: /src/          # All files containing '/src/' in their path
+  #   - op: Add
+  #     path: /src/Efg.java  # All files with '/src/Efg.java' in their path
 
-    - (-others) # Equivalent to (-).+, meaning do not scan classes not covered by the above regexes, or [+others]; if not written, keep the original classification (Keep) (where --process and --auto-app-classes point to application classes, and --class-path points to library classes).
 
-# Resource File Classification Rules
-process-res-regex: #                              Regular expression for resource file paths
-    - (+)/.+_jsp.java$                                # E.g., build/jsp-classes/org/**/View_jsp.java will be parsed by AST or scanned as plain text
-                                                      # However, placing this regex after (-)/build/ would cause build/**/*_jsp.java to never be parsed by AST or scanned as plain text
-    # files                                       Regular expressions for resource paths
-    - (-)/\.R\.java$                                  # E.g., com/android/.R.java
+  class: # For class classification only,不影响源码文件 processing
 
-    # directories                                 Regular expressions for resource directories. Note that matching is done in an ordered manner, pay attention to the order
-    - (-)/out/
-    - (-)/output/
-    - (-)/tmp/
-    - (-)/temp/
-    - (-)/log/                                        # Preferably add "/" to directory path regexes to match folder paths, otherwise all files containing 'log' will also be excluded
-    - (-)/logs/
-    - (-)/build/
-    - (-)/target/
-    - (-)/\.git/
-    - (-)/\.idea/
-    - (-)/\.gradle/
-    - (-)/\.mvn
-    - (-)/\.run/
+    # Background Knowledge:
+    #   All runtime classes are divided into three categories: application class (primary focus of scanning), library class (third-party dependencies for enhancing analysis precision), and phantom class (class not found, potentially due to incomplete compilation, missing libraries, incorrect parameters, unsupported binary formats, etc.)
+    #  +----------------+-------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------+
+    #  | Class Category |             Origin                              |                      Explanation                                       |                     Notes                            |
+    #  +================+=================================================+========================================================================+======================================================+
+    #  |                | Classes specified via --process                 | Classes that the analyzer focuses on,                                  | Improper parameter or filter configurations can lead |
+    #  | Application    +-------------------------------------------------+ Primary classes users intend to scan directly                          | to excessive inclusion of library code,              |
+    #  |                | Classes existing in source per --auto-app-class |                                                                        | causing high memory and performance consumption      |
+    #  |                |                                                 | and inefficient scanning of code of interest                           | on machines                                          |
+    #  +----------------+-------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------+
+    #  |                | Classes listed in --class-path                  | Typically third-party libraries that the project depends on            | Misconfigurations can inadvertently classify         |
+    #  | Library        +-------------------------------------------------+ Only these classes are analyzed when referenced by Application classes | user-focused classes as Library classes,             |
+    #  |                | Classes absent in source per --auto-app-class   | Enhances analysis precision                                            | potentially resulting in missed scans                |
+    #  +----------------+-------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------+
+    #  | Phantom        | Classes not located                             | Potentially due to incomplete project compilation,                     | Aim to minimize the number of Phantom classes        |
+    #  |                | Classes referenced but not found                | Incomplete third-party libraries, incorrect parameters,                |                                                      |
+    #  |                | Binary format unsupported, etc.                 |                                                                        |                                                      |
+    #  +----------------+-------------------------------------------------+------------------------------------------------------------------------+------------------------------------------------------+
 
-    - (+others) # Equivalent to (+).+, meaning scan resources not covered by the above regexes, or [-others]; if not written, maintain the original classification (Keep), where originally --source-path and --auto-app-classes pointed resources will be scanned.
+    # After preprocessing based on parameters like --process, --auto-app-class, etc., and considering this configuration if --project-config is set with project-scan-config.yml, classifications might be adjusted.
+    #  +--------------+--------------+---------------+
+    #  | Pre-Match State | Match Outcome | Post-Match State |
+    #  +=============+==============+===============+
+    #  |             |      Add     |  Application  |
+    #  +-------------+--------------+---------------+
+    #  | Application |      Sub     |   *Library*   |  🟡Avoid demoting classes intended for analysis; careful consideration is needed when subtracting project's own classes.
+    #  +-------------+--------------+---------------+
+    #  |             |    No Match  |  Application  |
+    #  +-------------+--------------+---------------+
+    #  |             |      Add     | *Application* |  🟡Prevent unnecessary classes (like third-party library classes) from being added, as it leads to excessive analysis scope and resource consumption.
+    #  +-------------+--------------+---------------+
+    #  |   Library   |      Sub     |    Library    |
+    #  +-------------+--------------+---------------+
+    #  |             |    No Match  |    Library    |
+    #  +-------------+--------------+---------------+
+    #  |             |      Add     |    Phantom    |
+    #  +-------------+--------------+---------------+
+    #  |   Phantom   |      Sub     |    Phantom    |
+    #  +-------------+--------------+---------------+
+    #  |             |    No Match  |    Phantom    |
+    #  +-------------+--------------+---------------+
 
-# The actual filtering and classification information based on this configuration file can be viewed after the analysis completes in ${output}/scan-classifier-info.yml
-# ScanAction has the following types:
-#    Process: indicates the item will be scanned
-#    Keep: keeps the original classification
-#    Skip: indicates the item will not be directly scanned as a primary entry point, but methods in classes marked Skip that can be reached through inter-procedural calls will still be analyzed in dependency scanning
+    # Configurable fields include: (for a rule with multiple fields, logical AND is applied)
+    #   - op: Add                    # Add for inclusion, Sub for exclusion
+    #     class:name: %regex%        # Matches the class name, e.g., com.example.Main
+    #                                # Note: Backslashes or forward slashes are not allowed for class name matching
+    #     class:src: %regex%         # Since one source can correspond to multiple classes, use source path regex to match classes without affecting the source itself
+    #                                # Note: No backslashes allowed; use '/' to denote directory paths
+    #
+    #     method:signature: %regex%  # Matches soot-style method signatures, e.g., <com.example.Main: void main(java.lang.String[])>
+    #     method:name: %regex%       # Matches method names, e.g., "main"
+    #
+    #     field:signature: %regex%   # Matches soot-style field signatures, e.g., <com.example.util.Optional: java.lang.Object value>
+    #     field:name: %regex%        # Matches class field names, e.g., "value"
 
-# Examples:
-# - "library -> Process: com.example.JavaAnnotationTest" means the originally classified library class (not directly analyzed) com.example.JavaAnnotationTest is marked as Process after matching the regex in project-scan-config.yml and will be directly analyzed.
-# - "application -> Skip: com.foo.Test" means the originally classified application class (directly analyzed) com.foo.Test is marked as Skip after regex matching and will not be directly analyzed.
-# - "phantom -> Skip: com.not.exists.Test" means the originally classified phantom class (a class referenced in the analysis but only its name could be obtained without the class file) com.not.exists.Test cannot be analyzed regardless of its ScanAction change because it does not exist. Check whether --auto-app-classes, --process, and --class-path parameters include the complete class.
+    - op: Sub   # If Sub is used for all classes, this configuration operates as a whitelist; conversely, Add for all classes implies a blacklist approach.
+        # Avoid using .+ to match all resources if neither whitelist nor blacklist is intended.
+      # Resources not matched by any scanning filters retain their original handling mode.
+      class:name: .+ # Matches any class
 
-# Therefore, for a class you want to scan, such as com.example.foo.ApplicationTest, the following cases indicate issues with parameters, configurations, or input resources:
-# - "library -> Keep: com.example.foo.ApplicationTest"               Reason: not covered by project-scan-config.yml and either exists in --class-path but not --process, or the source code for the class in the path pointed by --auto-app-classes does not exist (will be classified as a library class)
-# - "application -> Skip: com.example.foo.ApplicationTest"           Reason: incorrectly excluded by the regex following (-) in project-scan-config.yml; please check your regex
-# - "phantom -> Process|Keep|Skip: com.example.foo.ApplicationTest"  Reason: class not found! Check whether it was compiled and whether it was specified in --auto-app-classes, --process, --class-path
-#   Correct classifications are:
-# - "library -> Process: com.example.foo.ApplicationTest"
-# - "application -> Process|Keep: com.example.foo.ApplicationTest"
 
-# Similarly, for classes you don't want to directly scan (e.g., third-party libraries, non-project code like org.spring.AbstractRequest), the following cases indicate issues with parameters, configurations, or input resources:
-# - "library -> Process: org.spring.AbstractRequest"                Reason: incorrectly included by the regex following (+) in project-scan-config.yml; please check your regex
-# - "application -> Keep: org.spring.AbstractRequest"               Reason: no regex related to this class in project-scan-config.yml; please check your regex
-# - "application -> Process: org.spring.AbstractRequest"            Reason: incorrectly included by the regex following (+) in project-scan-config.yml, and --auto-app-classes or --process points to this class
-# - "phantom -> Process|Keep|Skip: org.spring.AbstractRequest"      Reason: class not found! Check whether it was compiled and whether it was specified in --auto-app-classes, --process, --class-path
-#   Correct classifications are:
-# - "library -> Skip|Keep: org.spring.AbstractRequest"
-# - "application -> Skip: org.spring.AbstractRequest"
+
+    # 🟢 Add classes you wish to scan here ↓ (Direct class name matching is possible)
+    #    - op: Add                           # Uncomment this line and the next
+    #      class:name: com.insecurebank      # <- Fill in; (disallow com\android\insecurebankv2 or com/android/insecurebankv2)
+    # Alternatively, match classes via their corresponding source paths
+    - op: Add
+      class:src: /src/main/             # <- Fill in; (avoid src\\main ; also not advised to use src/main , which may match e.g., /js-src/main)
+
+
+
+    - op: Add
+      class:src: /.+_jsp.java$          # Matches any class corresponding to, e.g., build/jsp-classes/org/**/View_jsp.java, note this is matching classes, not sources
+    - op: Sub
+      class:name: \.R(\$.*)?$           # E.g., com.android.R$id
+
+  classpath: # For filtering class loading; classes within excluded classpaths won't be loaded by the analyzer, thus not analyzed
+    # Typically used to exclude invalid jars (like those containing method declarations without bodies, leading to many false negatives in analysis if normal classes are also present due to class loading's one-instance-per-name policy), common in Android
+    # Configurable fields:
+    #   - op: Add                  # Add for inclusion, Sub for exclusion
+    #     path: %regex%            # Matches the class file path, e.g., .class/jar/war/apk/dex/zip etc.
+    #                             # Internal resources in archives separated by !/, e.g., build/application.jar!/BOOT-INF/classes/
+    #                             # No backslashes allowed; use '/' for directory paths
+    - op: Sub
+      path: /classes-header.jar   # Problematic Android intermediate jar
+    - op: Sub
+      path: /classes-turbine.jar  # Problematic Android intermediate jar
+
+  file: # For including or excluding various resource files like source code and other resources, without affecting classes
+    # Configurable fields:
+    #   - op: Add                  # Add for inclusion, Sub for exclusion
+    #     path: %regex%            # Note: No backslashes allowed; use '/' for directory paths
+    #                             # Internal resources in archives separated by !/, e.g., build/application.jar!/META-INF/MANIFEST.MF
+    - op: Sub
+      path: /out/
+    - op: Sub
+      path: /output/
+    - op: Sub
+      path: /tmp/
+    - op: Sub
+      path: /temp/
+    - op: Sub
+      path: /log/                 # When denoting folder paths, preferably append "/", else files with 'log' in their names will also be excluded
+    - op: Sub
+      path: /logs/
+    - op: Sub
+      path: /build/
+    - op: Sub
+      path: /target/
+    - op: Sub
+      path: /\.git/
+    - op: Sub
+      path: /\.idea/
+    - op: Sub
+      path: /\.gradle/
+    - op: Sub
+      path: /\.mvn
+    - op: Sub
+      path: /\.run/
+
+    - op: Add
+      path: /.+_jsp.java$         # Matches source files like build/jsp-classes/org/**/View_jsp.java, note this is for sources only
+    - op: Sub
+      path: /R\.java$             # E.g., com/android/R.java

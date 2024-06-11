@@ -26,7 +26,7 @@
 #
 ################################################################################
 
-CORAX_VERSION=2.8
+CORAX_VERSION=2.10.1
 CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
@@ -216,20 +216,27 @@ _download_extract() {
 
     set -e
     mkdir -p "$BUILD_DIR"
-    if [ ! -e "$download_flag" ] ; then
-      rm -f "$temp_file"
-      _msg step "[Downloading] Downloading $name : $url to $temp_file"
-      if command -v curl >/dev/null 2>&1; then
-          if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--silent --show-error"; fi
-          # shellcheck disable=SC2086
-          curl $CURL_PROGRESS -L --output "${temp_file}" "$url" 2>&1
-      elif command -v wget >/dev/null 2>&1; then
-          if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
-          wget $WGET_PROGRESS -O "${temp_file}" "$url" 2>&1
-      else
-          die "ERROR: Please install wget or curl"
-      fi
-      echo "$url" > "$download_flag"
+    if [ -e "$download_flag" ] && [ ! -e "$temp_file" ] ; then
+        rm -f "$download_flag"
+    fi
+    if [ ! -e "$download_flag" ] || [ -z "$(ls "$dest")" ] ; then
+        rm -f "$temp_file"
+        _msg step "[Downloading] Downloading $name : $url to $temp_file"
+        if command -v curl >/dev/null 2>&1; then
+            if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--show-error"; fi
+            # shellcheck disable=SC2086
+            curl $CURL_PROGRESS -L --fail --output "${temp_file}" "$url" 2>&1
+        elif command -v wget >/dev/null 2>&1; then
+            if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
+            wget $WGET_PROGRESS -O "${temp_file}" "$url" 2>&1
+        else
+            die "ERROR: Please install wget or curl"
+        fi
+        echo "$url" > "$download_flag"
+    fi
+    if [ ! -e "$temp_file" ] ; then
+        rm -f "$download_flag"
+        die "Failed to download. Retry?"
     fi
 
     echo "Extracting $temp_file to $dest"

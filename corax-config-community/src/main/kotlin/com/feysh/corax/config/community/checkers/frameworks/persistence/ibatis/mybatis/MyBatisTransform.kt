@@ -28,6 +28,7 @@ import org.apache.ibatis.parsing.TokenHandler
 import org.apache.ibatis.parsing.XNode
 import org.apache.ibatis.scripting.xmltags.*
 import org.apache.ibatis.session.Configuration
+import java.nio.file.Path
 
 /**
  * @author NotifyBiBi
@@ -522,6 +523,7 @@ object SimpleSqlNodeTranslatorFactory : SqlNodeTranslatorFactory {
 open class MyBatisTransform(private val factory: SqlNodeTranslatorFactory) {
 
     class Statement(
+        val resource: Path,
         val namespace: String,
         val xNode: XNode,
         val sqlNode: SqlNode,
@@ -551,7 +553,7 @@ open class MyBatisTransform(private val factory: SqlNodeTranslatorFactory) {
     }
 
 
-    fun applyDynamicContent(configuration: Configuration, namespace: String, xNode: XNode, node: SqlNode): Statement {
+    fun applyDynamicContent(resource: Path, configuration: Configuration, namespace: String, xNode: XNode, node: SqlNode): Statement {
         val dynamicContext = DynamicContext(configuration, null)
         val translator = factory.createStatementTranslator(configuration, namespace, dynamicContext, xNode, node)
         val flatSqlNode = translator.translate(node)
@@ -561,6 +563,6 @@ open class MyBatisTransform(private val factory: SqlNodeTranslatorFactory) {
         val sqlSourceParser = WSqlSourceBuilder(configuration)
         val sqlSource = sqlSourceParser.parse(sql, Any::class.java, dynamicContext.bindings.mapValues { Any() })
 
-        return Statement(namespace, xNode, node, flatSqlNode, dynamicContext, translator, sqlSource)
+        return Statement(resource, namespace, xNode, node, flatSqlNode, dynamicContext, translator, sqlSource)
     }
 }

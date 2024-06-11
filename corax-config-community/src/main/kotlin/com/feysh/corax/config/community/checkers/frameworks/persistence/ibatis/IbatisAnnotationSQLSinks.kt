@@ -19,10 +19,7 @@
 
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis
 
-import com.feysh.corax.config.api.Elements
-import com.feysh.corax.config.api.AIAnalysisApi
-import com.feysh.corax.config.api.AIAnalysisUnit
-import com.feysh.corax.config.api.MethodConfig
+import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.general.checkers.internetControl
@@ -49,6 +46,16 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
 
                         val riskNames = selects.flatMap { IbatisUtils.getRiskNames(it) }.toSet()
                         if (riskNames.isEmpty()) continue
+
+                        with(preAnalysis) {
+                            selects.forEach {
+                                report(SqliChecker.MybatisSqlInjectionSinkHint, this@eachMethod.sootMethod) {
+                                    this.args["numSinks"] = riskNames.size
+                                    this.args["boundSql"] = it
+                                }
+                            }
+                        }
+
                         modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCaller }) {
                             for (parameterIndex in 0 until sootMethod.parameterCount) {
                                 val p = parameter(parameterIndex)
@@ -57,13 +64,22 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
                                     .filter { it.type == "Lorg/apache/ibatis/annotations/Param;" }.flatMap { it.elems }
                                     .filterIsInstance<AnnotationStringElem>().map { it.value }.toSet()
 
-                                if (params.intersect(riskNames).isNotEmpty()) {
+                                val matched = params.intersect(riskNames)
+                                if (matched.isNotEmpty()) {
+                                    val sinParam = if (matched.size == 1) "${matched.first()}" else "$matched"
                                     val sink = if (ConfigCenter.isCollectionClassType(p.type) || ConfigCenter.isOptionalClassType(p.type)) p.field(Elements) else p
                                     check(
                                         sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
                                         SqliChecker.SqlInjection
                                     ){
                                         this.args["type"] = "ibatis annotations Select"
+                                        appendPathEvent(
+                                            message = mapOf(
+                                                Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
+                                                Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`"
+                                            ),
+                                            loc = this@eachMethod.sootMethod
+                                        )
                                     }
                                 }
                             }

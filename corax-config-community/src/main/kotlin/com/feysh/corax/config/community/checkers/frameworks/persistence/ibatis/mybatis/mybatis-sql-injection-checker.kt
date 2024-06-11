@@ -38,6 +38,8 @@ import soot.Scene
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.type.TypeAliasRegistry
 import com.feysh.corax.config.community.checkers.frameworks.xml.XmlParser
 import com.feysh.corax.config.general.model.ConfigCenter
+import com.feysh.corax.config.general.utils.columnNumber
+import com.feysh.corax.config.general.utils.lineNumber
 import kotlinx.serialization.Serializable
 import soot.SootMethod
 import soot.Type
@@ -188,13 +190,33 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     }
 
     context (builder@ISootMethodDecl.CheckBuilder<Any>)
-    private fun checkSink(statement: MyBatisTransform.Statement, from: ExpressionEvaluator.Value, sink: ILocalT<*>) {
+    private fun checkSink(statement: MyBatisTransform.Statement, sinParam: ExpressionEvaluator.Value, method: SootMethod, sink: ILocalT<*>) {
+        val xmlNode = statement.xNode.node
+        val phantomBoundSql = statement.phantomBoundSql
         check(
             sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
             SqliChecker.SqlInjection
         ) {
             this.args["type"] = "Mybatis Xml Mapper SQL Query"
-            this.args["msg"] = "The injection point: `$from` at sql: `${statement.phantomBoundSql.sql}`"
+            this.args["msg"] = "The injection point: `$sinParam` at sql: `${phantomBoundSql.sql}`"
+
+            appendPathEvent(
+                message = mapOf(
+                    Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
+                    Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`"
+                ),
+                loc = method
+            )
+
+            appendPathEvent(
+                message = mapOf(
+                    Language.EN to "In the MyBatis Mapper XML, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
+                    Language.ZH to "MyBatis Mapper Xml 中存在外部恶意控制的动态拼接参数: `$sinParam`"
+                ),
+                loc = statement.resource,
+                line = xmlNode.lineNumber,
+                column = xmlNode.columnNumber
+            )
         }
     }
 
@@ -211,7 +233,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
                 if (method.parameterCount == 1) {
                     val pt = method.getParameterType(0)
                     if (TraverseExpr.isStringType(pt.typename)){
-                        checkSink(statement, bindingValue, p0)
+                        checkSink(statement, bindingValue, method, p0)
                     }
                 }
                 continue
@@ -222,7 +244,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
                     .traverseExpr(bindingValue)
                 if (sinks != null) {
                     for (sink in sinks) {
-                        checkSink(statement, bindingValue, sink.value)
+                        checkSink(statement, bindingValue, method, sink.value)
                     }
                 }
             } else {
@@ -234,12 +256,12 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     context (PreAnalysisApi)
     private suspend fun parseMybatisMapperAndConfig(): MybatisParseResult {
 
-        val mybatisConfiguration = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
+        val mybatisConfiguration = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val configuration = XmlParser.parseMybatisConfiguration(Scene.v(), path) ?: return@atAnySourceFile null
             configuration
         }.nonNull()
 
-        val myBatisSqlFragments = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
+        val myBatisSqlFragments = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val config = XMLConfigBuilder.createConfiguration()
             if (XmlParser.parseMyBatisSqlFragments(path, config)) {
                 path to config
@@ -252,7 +274,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
             acc.also { it.sqlFragments.putAll(element.second.sqlFragments) }
         }
 
-        val mybatisEntries = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false }) {
+        val mybatisEntries = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val configuration = XMLConfigBuilder.createConfiguration().also { it.sqlFragments.putAll(configurationMerge.sqlFragments) }
             XmlParser.parseMybatisMapper(path, configuration)
         }
@@ -264,9 +286,22 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     private fun reportOnlyMybatisSqlInjectionSinkInMapperXml(entry: MybatisEntry) {
         checkMybatisSqlInjection(entry) { method, statement ->
             // Just make a hint for security engineer! :)
+            val xmlNode = statement.xNode.node
+            val sqlInjectParameters = statement.translator.sqlInjectParameters
+            val phantomBoundSql = statement.phantomBoundSql
+            val xmlResource = statement.resource
             report(SqliChecker.MybatisSqlInjectionSinkHint, method) {
-                this.args["numSinks"] = statement.translator.sqlInjectParameters.size
-                this.args["boundSql"] = statement.phantomBoundSql.sql
+                this.args["numSinks"] = sqlInjectParameters.size
+                this.args["boundSql"] = phantomBoundSql.sql
+                appendPathEvent(
+                    message = mapOf(
+                        Language.EN to "In the MyBatis Mapper XML, there is a dynamic concatenation of the parameter: $sqlInjectParameters",
+                        Language.ZH to "MyBatis Mapper Xml 中存在动态拼接参数: $sqlInjectParameters"
+                    ),
+                    loc = xmlResource,
+                    line = xmlNode.lineNumber,
+                    column = xmlNode.columnNumber
+                )
             }
         }
     }

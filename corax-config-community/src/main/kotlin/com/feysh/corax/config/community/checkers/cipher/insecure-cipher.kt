@@ -21,9 +21,6 @@ package com.feysh.corax.config.community.checkers.cipher
 
 import com.feysh.corax.config.api.AIAnalysisApi
 import com.feysh.corax.config.api.AIAnalysisUnit
-import com.feysh.corax.config.api.baseimpl.matchSoot
-import com.feysh.corax.config.api.PreAnalysisApi
-import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.community.InsecureCipherChecker
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
 
@@ -33,8 +30,7 @@ object `insecure-cipher` : AIAnalysisUnit() {
     context (AIAnalysisApi)
     override suspend fun config() {
         TaintModelingConfig.applyJsonExtSinksDefault("cipher:transformation") {
-            val transformation = it.getString()
-            val transformationLower = transformation.toLowerCase()
+            val transformationLower = it.getString().toLowerCase()
 
             check(
                 transformationLower.stringEquals("des") or transformationLower.startsWith("des/"),
@@ -45,14 +41,19 @@ object `insecure-cipher` : AIAnalysisUnit() {
                 transformationLower.stringEquals("desede") or transformationLower.startsWith("desede/"),
                 InsecureCipherChecker.TdesUsage
             )
+        }
+
+
+        TaintModelingConfig.applyJsonExtSinksDefault("cipher:sink-algorithm") {
+            val algo = it.getString().toLowerCase()
 
             check(
-                transformationLower.stringEquals("aes") or
-                        transformationLower.stringEquals("des") or
-                        transformationLower.stringEquals("desede") or
-                        transformationLower.startsWith("aes/ecb/") or
-                        transformationLower.startsWith("des/ecb/") or
-                        transformationLower.startsWith("desede/ecb/"),
+                algo.stringEquals("aes") or
+                        algo.stringEquals("des") or
+                        algo.stringEquals("desede") or
+                        algo.startsWith("aes/ecb/") or
+                        algo.startsWith("des/ecb/") or
+                        algo.startsWith("desede/ecb/"),
                 InsecureCipherChecker.EcbMode
             )
         }
@@ -61,12 +62,3 @@ object `insecure-cipher` : AIAnalysisUnit() {
 }
 
 
-@Suppress("ClassName")
-object `insecure-cipher-api-call` : PreAnalysisUnit() {
-    context (PreAnalysisApi)
-    override suspend fun config() {
-        atInvoke(matchSoot("<com.hazelcast.config.SymmetricEncryptionConfig: void <init>()>")) {
-            report(InsecureCipherChecker.HazelcastSymmetricEncryption)
-        }
-    }
-}

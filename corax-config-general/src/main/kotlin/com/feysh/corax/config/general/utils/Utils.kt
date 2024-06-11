@@ -95,9 +95,17 @@ inline val Type.isStringArray: Boolean
     get() = this == stringType.arrayType || this == charSequenceType.arrayType
 
 fun Type.isInstanceOf(parents: Collection<Type>): Boolean  {
-    if (this is RefType) {
+    if (this is RefLikeType) {
         val hierarchy = Scene.v().orMakeFastHierarchy
         return parents.any { hierarchy.canStoreType(this, it) }
+    }
+    return false
+}
+
+fun Type.isInstanceOf(parent: Type): Boolean  {
+    if (this is RefLikeType) {
+        val hierarchy = Scene.v().orMakeFastHierarchy
+        return hierarchy.canStoreType(this, parent)
     }
     return false
 }

@@ -146,4 +146,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.opensaml/xmltooling
     compileOnly(group = "org.opensaml", name = "xmltooling", version ="1.4.4"){ isTransitive = false }
 
+    compileOnly(group = "org.apache.poi", name = "poi-ooxml", version ="3.10-FINAL"){ isTransitive = true }
+
 }

@@ -475,6 +475,22 @@ object DeserializationChecker : IChecker {
         )
         override val checker: IChecker = DeserializationChecker
     }
+    
+    object UnrestrictedObjectDeserialization : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "此处调用 `$callee` 对不可信数据进行反序列化是危险的（可能产生如RCE、拒绝服务等漏洞）" },
+            Language.EN to msgGenerator { "This use of `$callee` to deserialize untrusted data here is dangerous (potentially leading to RCE, Denial of service attack)." }
+        )
+        override val checker: IChecker = DeserializationChecker
+    }
+    
+    object JacksonUnsafeDeserialization : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "方法 `$callee` 使用了不安全的 Jackson 反序列化配置" },
+            Language.EN to msgGenerator { "Unsafe Jackson deserialization configuration used in method: `$callee`" }
+        )
+        override val checker: IChecker = DeserializationChecker
+    }
 }
 
 object TrustBoundaryChecker : IChecker {
@@ -510,7 +526,7 @@ object SensitiveDataExposeChecker : IChecker {
 }
 
 object IncompleteModelOfEndpointFeatures : IChecker {
-    override val report: IRule = FeyshRules.IncompleteModelOfEndpointFeatures
+    override val report: IRule = FeyshRules.ImproperVerification
     override val standards: Set<IRule> = setOf(
         CWERules.CWE347,
     )

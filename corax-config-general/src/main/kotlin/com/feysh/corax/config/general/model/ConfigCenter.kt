@@ -40,7 +40,9 @@ object ConfigCenter : CheckerUnit() {
 
     const val configDirectoryIdentifier = "\${analysis-config-dir}"
 
-    var analysisConfigPathRelativizePlugin = ClassCommons.locateAllClass(ConfigCenter::class.java).resolve("../../../").pathString
+    var analysisConfigPathRelativizePlugin = ClassCommons.locateAllClass(ConfigCenter::class.java).let {
+        if (it.name.endsWith(".jar")) it.parent else it
+    }.resolve("../../../").pathString
 
     @Serializable
     class Options : SAOptions {

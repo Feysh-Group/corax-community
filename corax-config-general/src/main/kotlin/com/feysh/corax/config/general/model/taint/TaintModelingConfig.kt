@@ -23,14 +23,20 @@ package com.feysh.corax.config.general.model.taint
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
+import com.feysh.corax.config.general.checkers.analysis.JsonExtVisitor
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.checkers.fileIoSource
 import com.feysh.corax.config.general.checkers.internetSource
 import com.feysh.corax.config.general.checkers.userInputSource
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.processor.*
+import com.feysh.corax.config.general.model.taint.TaintModelingConfig.IApplySourceSink
 import com.feysh.corax.config.general.rule.*
 import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
@@ -61,7 +67,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
         val sanitizerTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
             "crlf" to setOf(GeneralTaintTypes.CONTAINS_CRLF),
-            "path-traversal" to setOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL),
+            "path-traversal" to setOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, GeneralTaintTypes.ZIP_ENTRY_NAME),
             "unlimited-file-extension" to setOf(GeneralTaintTypes.UNLIMITED_FILE_EXTENSION),
             "sql" to setOf(GeneralTaintTypes.CONTAINS_SQL_INJECT),
             "xss" to setOf(GeneralTaintTypes.CONTAINS_XSS_INJECT),
@@ -92,7 +98,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
                     val accessPaths =
                         RuleArgumentParser.parseArg2AccessPaths(methodAndAcp.arg, shouldFillingPath = true)
                     for (acp in accessPaths) {
-                        apply.visitAccessPath(acp)
+                        apply.visitAccessPath(acp, methodAndAcp)
                     }
                 } catch (e: Exception) {
                     error.error("${e.message ?: e.toString()} in $methodAndAcp")
@@ -104,7 +110,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
     fun interface IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        fun visitAccessPath(acp: ILocalT<*>)
+        fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath)
     }
 
      open class SimpleApplySink(
@@ -114,13 +120,24 @@ object TaintModelingConfig : AIAnalysisUnit() {
         val env: BugMessage.Env.() -> Unit = { }
     ) : IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        override fun visitAccessPath(acp: ILocalT<*>) {
+        override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath) {
             val vulnerableBoolExpr = if (excludes.isEmpty()) {
                 acp.taint.containsAll(taintOf(check))
             } else {
                 acp.taint.containsAll(taintOf(check)) and (!acp.taint.containsAll(taintOf(excludes)))
             }
-            check(vulnerableBoolExpr, report, env)
+            val envArgs = mutableMapOf<String, String>()
+            object : JsonExtVisitor() {
+                override fun visitObject(key: String, value: Map<String, JsonElement>) {
+                    when (key) {
+                        "@env" -> {
+                            envArgs.putAll(value.mapValues { it.value.toString() })
+                        }
+                    }
+                }
+            }.visitAll(methodAndAcp.ext)
+            val env = this.env
+            check(vulnerableBoolExpr, report, env = { args.putAll(envArgs); env() })
         }
     }
 
@@ -129,7 +146,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applySourceRule(sourceRule: TaintRule.Source, append: Set<ITaintType>) {
         if (!sourceRule.enable)
             return
-        applyMethodAccessPathConfig(sourceRule) { acp ->
+        applyMethodAccessPathConfig(sourceRule) { acp, _ ->
             acp.taint += taintOf(append) // must plusAssign
         }
     }
@@ -176,7 +193,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applyJsonExtSinks(kind: String,
                           ruleManager: GroupedMethodsManager<out IMethodAccessPathGrouped>,
                           apply: IApplySourceSink,
-                          filter: (rule: IMethodSignature) -> Boolean = { true }
+                          filter: (rule: IMethodSignature) -> Boolean = { LibVersionProvider.isEnable(it.ext) }
     ) {
         val sinkRules = ruleManager.getRulesByGroupKinds(kind)
         val info = "${this.javaClass.simpleName}: ${sinkRules.size} rules defined in JSON have been found based on kinds: $kind"
@@ -194,8 +211,17 @@ object TaintModelingConfig : AIAnalysisUnit() {
     context (AIAnalysisApi)
     fun applyJsonExtSinksDefault(
         kind: String,
+        rules: GroupedMethodsManager<out IMethodAccessPathGrouped> = ConfigCenter.methodAccessPathDataBase,
         visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>) -> Unit
     ) {
-        applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase, visit)
+        applyJsonExtSinks(kind, rules, object : IApplySourceSink {
+            context(api@AIAnalysisApi, bdr@ISootMethodDecl.CheckBuilder<Any>)
+            override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath) { visit(this@api, this@bdr, acp) }
+        })
     }
+}
+
+
+abstract class XX() {
+    abstract fun applySourceSink(): IApplySourceSink
 }

@@ -9,15 +9,6 @@
   {"signature":"<org.apache.commons.lang3.text.StrSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2].MapValue","provenance":"manual","ext":""},
   {"signature":"<org.apache.commons.lang3.text.StrSubstitutor: void <init>(java.util.Map,java.lang.String,java.lang.String,char,java.lang.String)>","subtypes":false,"to":"Argument[this]","propagate":"taint","from":"Argument[1..2]","provenance":"manual","ext":""},
 
-  "`return`.taint -= taintOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL)",
-  {"signature":"org.apache.commons.io.FilenameUtils: * getName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"df-generated","ext":""},
-  {"signature":"org.apache.commons.io.FilenameUtils: * getExtension(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"df-generated","ext":""},
-  {"signature":"org.apache.commons.io.FilenameUtils: * getBaseName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
-
-
-  "`return`.taint -= taintOf(GeneralTaintTypes.ANY_FILE_EXTENSION)",
-  {"signature":"org.apache.commons.io.FilenameUtils: * getBaseName(String)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
-
   {"signature":"android.database.DatabaseUtils: * appendEscapedSQLString(StringBuilder,String)","subtypes":false,"to":"Argument[0]","propagate":"taint","from":"Argument[1]","provenance":"manual","ext":""},
   {"signature":"android.database.DatabaseUtils: * sqlEscapeString(String)","subtypes":false,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
   {"signature":"android.database.DatabaseUtils: * sqlEscapeString(String)","subtypes":false,"to":"ReturnValue","propagate":"sanitizer","from":"sql","provenance":"manual","ext":""},
@@ -412,7 +403,19 @@
 
   "ognl",
   {"signature":"ognl.Ognl: * parseExpression(String expression)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
-  {"signature":"ognl.OgnlParser: void <init>(*,**)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""}
+  {"signature":"ognl.OgnlParser: void <init>(*,**)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+
+  "xxe",
+  {"signature":"org.apache.poi.util.PackageHelper: OPCPackage open(InputStream)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.util.PackageHelper: OPCPackage clone(OPCPackage pkg, File file)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0..1]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.util.PackageHelper: OPCPackage clone(OPCPackage pkg, File file)","subtypes":true,"to":"Argument[1]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.openxml4j.opc.OPCPackage: OPCPackage open(*, **)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.openxml4j.opc.OPCPackage: OPCPackage create(*, **)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.openxml4j.opc.OPCPackage: OPCPackage openOrCreate(File)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.xssf.usermodel.XSSFWorkbook: * getCustomXMLMappings()","subtypes":true,"to":"ReturnValue.Element","propagate":"taint","from":"Argument[this]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.xssf.usermodel.XSSFWorkbook: void <init>(*, **)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.ss.usermodel.WorkbookFactory: * create(*, **)","subtypes":true,"to":"ReturnValue","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""},
+  {"signature":"org.apache.poi.xssf.extractor.XSSFExportToXml: void <init>(org.apache.poi.xssf.usermodel.XSSFMap)","subtypes":true,"to":"Argument[this]","propagate":"taint","from":"Argument[0]","provenance":"manual","ext":""}
 
 
 

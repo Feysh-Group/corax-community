@@ -21,11 +21,11 @@ package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.
 
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.type.TypeAliasRegistry
 import com.feysh.corax.config.community.checkers.frameworks.xml.BasedXmlHandler
+import com.feysh.corax.config.general.utils.PositionalXMLReader
 import mu.KotlinLogging
 import org.apache.ibatis.session.Configuration
 import soot.Scene
 import java.nio.file.Path
-import kotlin.io.path.inputStream
 
 data class MybatisConfiguration(
     val resource: Path,
@@ -53,20 +53,24 @@ open class MyBatisConfigurationXmlHandler : BasedXmlHandler() {
     }
 
     fun compute(scene: Scene, filePath: Path): MybatisConfiguration? {
-        logger.info("process mybatis configuration file: $filePath")
         return streamToConfiguration(scene, filePath)
     }
 
     private fun streamToConfiguration(scene: Scene, resource: Path): MybatisConfiguration? {
-        return resource.inputStream().use { inputSource ->
-            try {
-                val configBuilder = XMLConfigBuilder(scene, inputSource)
-                configBuilder.parse()
-                MybatisConfiguration(resource, configBuilder.typeAliasRegistry, configBuilder.configuration)
-            } catch (e: Exception) {
-                logger.warn(e) { e.message }
-                null
-            }
+        val document = PositionalXMLReader.readXMLUnsafe(resource)
+        if (document == null) {
+            logger.warn { "Failed to process mybatis configuration file: $resource" }
+            return null
+        } else {
+            logger.info { "process mybatis configuration file: $resource" }
+        }
+        return try {
+            val configBuilder = XMLConfigBuilder(scene, document)
+            configBuilder.parse()
+            MybatisConfiguration(resource, configBuilder.typeAliasRegistry, configBuilder.configuration)
+        } catch (e: Exception) {
+            logger.warn(e) { e.message }
+            null
         }
     }
 

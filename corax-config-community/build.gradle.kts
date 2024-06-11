@@ -16,18 +16,19 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 @file:Suppress("VulnerableLibrariesLocal")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val commonsLangVersion: String by rootProject
+val apacheCommonsLang3Version: String by rootProject
 val kamlVersion: String by rootProject
 val log4j2Version: String by rootProject
 val caffeineVersion: String by rootProject
 val mybatisApacheVersion: String by rootProject
 val javaparserVersion: String by rootProject
 val kotlinSerializationVersion: String by rootProject
+val guavaVersion: String by rootProject
+val apacheCommonsTextVersion: String by rootProject
 
 plugins {
     kotlin("kapt")
@@ -51,9 +52,11 @@ dependencies {
 
     implementation(group = "org.mybatis", name = "mybatis", version = mybatisApacheVersion)
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = caffeineVersion)
-    implementation(group = "org.apache.commons", name = "commons-lang3", version = commonsLangVersion)
+    implementation(group = "org.apache.commons", name = "commons-lang3", version = apacheCommonsLang3Version)
     implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = kotlinSerializationVersion)
     implementation(group = "com.github.javaparser", name = "javaparser-core", version = javaparserVersion)
+    implementation(group = "com.google.guava", name = "guava", version = guavaVersion)
+    implementation(group = "org.apache.commons", name = "commons-text", version = apacheCommonsTextVersion)
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("javax:javaee-api:7.0")
@@ -64,7 +67,9 @@ dependencies {
     testImplementation(project(":corax-config-api"))
     testImplementation(project(":corax-config-general"))
     testImplementation(group = "com.charleskorn.kaml", name = "kaml", version = kamlVersion)
-    testImplementation(group = "org.apache.logging.log4j", name = "log4j-slf4j-impl", version = log4j2Version)
+    testImplementation(group = "org.apache.logging.log4j", name = "log4j-core", version = log4j2Version)
+    testImplementation(group = "org.apache.logging.log4j", name = "log4j-api", version = log4j2Version)
+    testImplementation(group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version = log4j2Version)
 }
 
 

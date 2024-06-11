@@ -1,6 +1,9 @@
 package testcode.insecurecipher;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Provider;
 
 /**
@@ -14,6 +17,7 @@ public class BlockCipherList {
 
         Cipher.getInstance("AES/CBC/NoPadding");
         Cipher.getInstance("AES/CBC/PKCS5Padding", "SunJCE");
+        Cipher.getInstance("AES");  // $EcbMode
         Cipher.getInstance("AES/ECB/NoPadding", "IBMJCE");  // $EcbMode
         Cipher.getInstance("AES/ECB/PKCS5Padding", new DummyProvider());  // $EcbMode
         Cipher.getInstance("DES/CBC/NoPadding", new DummyProvider());  // $DesUsage
@@ -32,6 +36,12 @@ public class BlockCipherList {
         Cipher.getInstance("DES/CBC/NoPadding", "SunJCE");  // $DesUsage
         Cipher.getInstance("DES");  // $DesUsage $EcbMode
         Cipher.getInstance("RSA"); //Just to test a cipher with a different format in the input
+
+        KeyGenerator kgen = KeyGenerator.getInstance("AES/NoPadding");
+        kgen.init(128); // 192 and 256 bits may be unavailable
+        SecretKey skey = kgen.generateKey();
+        byte[] raw = skey.getEncoded();
+        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES"); // !$EcbMode
     }
 
     /**

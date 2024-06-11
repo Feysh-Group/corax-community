@@ -79,7 +79,8 @@ enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
 }
 
 
-val injectionTypes: MutableSet<GeneralTaintTypes> = mutableSetOf(
+private val normalSource: MutableSet<GeneralTaintTypes> = mutableSetOf(
+    GeneralTaintTypes.ControlData,
     GeneralTaintTypes.CONTAINS_CRLF,
     GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL,
     GeneralTaintTypes.CONTAINS_SQL_INJECT,
@@ -87,15 +88,16 @@ val injectionTypes: MutableSet<GeneralTaintTypes> = mutableSetOf(
     GeneralTaintTypes.CONTAINS_XPATH_INJECT,
     GeneralTaintTypes.CONTAINS_COMMAND_INJECT,
     GeneralTaintTypes.CONTAINS_REDIRECTION_INJECT,
-    GeneralTaintTypes.CONTAINS_OGNL_INJECT
+    GeneralTaintTypes.CONTAINS_OGNL_INJECT,
+    GeneralTaintTypes.UNLIMITED_FILE_EXTENSION,
 )
 
 val internetSource: MutableSet<GeneralTaintTypes> =
-    (injectionTypes + GeneralTaintTypes.InternetData + GeneralTaintTypes.ControlData).toMutableSet()
+    (normalSource + GeneralTaintTypes.InternetData).toMutableSet()
 val fileIoSource: MutableSet<GeneralTaintTypes> =
-    (injectionTypes + GeneralTaintTypes.FileStreamData + GeneralTaintTypes.ControlData).toMutableSet()
+    (normalSource + GeneralTaintTypes.FileStreamData).toMutableSet()
 val userInputSource: MutableSet<GeneralTaintTypes> =
-    (injectionTypes + GeneralTaintTypes.UserInputData + GeneralTaintTypes.ControlData).toMutableSet()
+    (normalSource + GeneralTaintTypes.UserInputData).toMutableSet()
 
 val internetControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.InternetData, GeneralTaintTypes.ControlData)
 val localControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.UserInputData, GeneralTaintTypes.ControlData)

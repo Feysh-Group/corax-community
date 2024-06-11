@@ -1,7 +1,7 @@
 [
   "CoraxJava - a Java Static Analysis Framework\\n Copyright (C) 2024.  Feysh-Tech Group\\n \\n This library is free software; you can redistribute it and/or\\n modify it under the terms of the GNU Lesser General Public\\n License as published by the Free Software Foundation; either\\n version 2.1 of the License, or (at your option) any later version.\\n \\n This library is distributed in the hope that it will be useful,\\n but WITHOUT ANY WARRANTY; without even the implied warranty of\\n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU\\n Lesser General Public License for more details.\\n \\n You should have received a copy of the GNU Lesser General Public\\n License along with this library; if not, write to the Free Software\\n Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA\\n",
 
-  "//database-query-source",
+"//database-query-source",
   {"kind":"remote","signature":"java.sql.ResultSet: * getNString(int)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"remote","signature":"java.sql.ResultSet: * getNString(String)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"remote","signature":"java.sql.ResultSet: * getString(int)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
@@ -254,7 +254,6 @@
   {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.ArchiveEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"zip-entry","signature": "java.util.jar.JarFile.JarFileEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"zip-entry","signature": "java.util.jar.JarEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
-  {"kind":"zip-entry","signature": "java.nio.file.Path: Path resolve(java.lang.String)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.zip.ZipArchiveEntry: String getName()","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
   {"kind":"zip-entry","signature": "org.apache.commons.compress.archivers.zip.ZipFile: InputStream getInputStream(org.apache.commons.compress.archivers.zip.ZipArchiveEntry)","subtypes":true,"arg":"ReturnValue","provenance":"manual","ext":""},
 

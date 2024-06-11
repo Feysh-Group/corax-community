@@ -71,7 +71,8 @@ object MissingJWTSignatureCheck : PreAnalysisUnit() {
         atInvoke(matchSimpleSig("io.jsonwebtoken.JwtParser: * parse(String accessToken, JwtHandler JwtHandler)")) {
             val handlerTypes = this.invokeExpr?.getArg(1)?.possibleTypes ?: return@atInvoke
             val handlerTypeStrings = handlerTypes.mapNotNullTo(mutableSetOf()) { (it as? RefType)?.className }
-            val intersection = handlerTypeStrings.intersect(vulnHandlerDeclareTypes.await())
+            val vulnHandlerDeclareTypesSet = vulnHandlerDeclareTypes.await() ?: emptySet()
+            val intersection = handlerTypeStrings.intersect(vulnHandlerDeclareTypesSet)
             if (intersection.isNotEmpty()) {
                 report(IncompleteModelOfEndpointFeatures.HasMissingJwtSignatureCheck)
             }

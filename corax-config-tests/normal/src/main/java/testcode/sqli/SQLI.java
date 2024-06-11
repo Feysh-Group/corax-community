@@ -3,6 +3,7 @@ package testcode.sqli;
 
 import org.springframework.web.bind.annotation.*;
 import testcode.sqli.dao.User;
+import testcode.sqli.dao.UserNoSetter;
 import testcode.sqli.dto.UserProfile;
 import testcode.sqli.mapper.UserMapper;
 import org.slf4j.Logger;
@@ -195,7 +196,31 @@ public class SQLI {
     public List<User> mybatisVuln03(@RequestParam("sort") String sort) {
         return userMapper.findByUserNameVuln03(sort); // $SqliChecker
     }
+    Connection connection;
 
+    @GetMapping("/mybatis/orderby/vuln04")
+    public void mybatisVuln04(User user) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver"); // 1. 加载驱动程序
+            Statement statement = connection.createStatement();  // 3. 创建Statement对象
+            String sql = "select * from users where username = '" + user.getUsername() + "'";
+            statement.executeQuery(sql);
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping("/mybatis/orderby/vuln05")
+    public void mybatisVuln05(UserNoSetter userNoSetter) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver"); // 1. 加载驱动程序
+            Statement statement = connection.createStatement();  // 3. 创建Statement对象
+            String sql = "select * from users where username = '" + userNoSetter.username + "'";
+            statement.executeQuery(sql);
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * security code

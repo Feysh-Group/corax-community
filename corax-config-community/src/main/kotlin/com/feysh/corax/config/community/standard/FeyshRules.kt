@@ -42,7 +42,7 @@ enum class FeyshRules(
     Ldapi("feysh.java.ldapi", CWERules.CWE90.desc),
     CodeInject("feysh.java.codei", CWERules.CWE94.desc),
     Templatei("feysh.java.templatei", CWERules.CWE1336.desc),//cwe-1336
-    HttpRespSplit("feysh.java.http-resp-split", CWERules.CWE113.desc),//cwe-113
+    HttpRespSplit("feysh.java.http-resp-split", CWERules.CWE113.desc),//cwe-113, cwe-93
     CrlfiLog("feysh.java.crlfi-log", CWERules.CWE117.desc),
     Log4J("feysh.java.log4j-injection", "log4j JNDI Appender injection"),
     HardcodeCredential("feysh.java.hardcode-credential", CWERules.CWE798.desc),
@@ -56,6 +56,7 @@ enum class FeyshRules(
     PermissiveCors("feysh.java.permissive-cors", CWERules.CWE942.desc),
     WeakSsl("feysh.java.weak-ssl", CWERules.CWE757.desc),
     IncompleteModelOfEndpointFeatures("feysh.java.incomplete-model", CWERules.CWE347.desc),
+    ImproperVerification("feysh.java.improper-verification", "cwe-926,cwe-940,cwe-347."),
     UnrestrictedFileUpload("feysh.java.file-upload", CWERules.CWE434.desc),
     ;
 

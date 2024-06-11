@@ -21,6 +21,7 @@ package com.feysh.corax.config.general.rule
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.model.type.TypeHandler
+import mu.KotlinLogging
 import soot.G
 import soot.Type
 import java.util.*
@@ -30,7 +31,12 @@ object RuleArgumentParser {
     private val argRangeRegex = "(?<start>-?(\\d+)|global|this)..(?<end>-?(\\d+)|this)".toRegex()
 
     context (ISootMethodDecl.CheckBuilder<*>)
-    private fun addAccessPath(p: ILocalT<Any>, type: Type, acpStr: String, shouldFillingPath: Boolean): List<ILocalT<Any>> {
+    private fun addAccessPath(
+        p: ILocalT<Any>,
+        type: Type,
+        acpStr: String,
+        shouldFillingPath: Boolean
+    ): List<ILocalT<Any>> {
         val acp = acpStr.split(".").filter { it.isNotEmpty() }
         if (acp.isEmpty()) {
             if (!shouldFillingPath) {
@@ -39,7 +45,11 @@ object RuleArgumentParser {
             return when (val hType = TypeHandler.getHandlerType(type)) {
                 is TypeHandler.BoxedPrimitiveType -> listOf(p)
                 is TypeHandler.CollectionType -> listOf(p.field(Elements))
-                is TypeHandler.MapType -> if (hType.isMultiValueMap) listOf(p.field(MapKeys), p.field(MapValues).field(Elements)) else listOf(p.field(MapKeys), p.field(MapValues))
+                is TypeHandler.MapType -> if (hType.isMultiValueMap) listOf(
+                    p.field(MapKeys),
+                    p.field(MapValues).field(Elements)
+                ) else listOf(p.field(MapKeys), p.field(MapValues))
+
                 is TypeHandler.OptionalType -> listOf(p.field(Elements))
                 is TypeHandler.OtherClassType -> listOf(p)
                 is TypeHandler.PrimitiveType -> listOf(p)
@@ -74,7 +84,7 @@ object RuleArgumentParser {
     }
 
     private fun arg2index(arg: String?): Int? {
-        return when{
+        return when {
             arg?.lowercase(Locale.getDefault()) == "this" -> return -1
             arg?.lowercase(Locale.getDefault()) == "global" -> return -2
             arg?.toIntOrNull() != null -> return arg.toIntOrNull()
@@ -83,12 +93,12 @@ object RuleArgumentParser {
     }
 
     private fun isRange(args: String): IntRange? {
-        arg2index(args)?.let { return it .. it }
+        arg2index(args)?.let { return it..it }
         val argument = argRangeRegex.matchEntire(args)
         if (argument != null) {
             val start = arg2index(argument.groups["start"]) ?: error("invalid syntax $args for $argRangeRegex")
             val end = arg2index(argument.groups["end"]) ?: error("invalid syntax $args for $argRangeRegex")
-            return start .. end
+            return start..end
         }
         return null
     }
@@ -100,15 +110,15 @@ object RuleArgumentParser {
                 val x = isRange(arg)?.toList() ?: return@let null
                 acc + x
             }
-        }?.let{ return it }
+        }?.let { return it }
         return null
     }
 
     context (ISootMethodDecl.CheckBuilder<Any>)
     fun parseArg2AccessPaths(argumentsStr: String, shouldFillingPath: Boolean): List<ILocalT<Any>> {
-        val arguments = if (argumentsStr.startsWith("Parameter[")){
+        val arguments = if (argumentsStr.startsWith("Parameter[")) {
             "Argument[" + argumentsStr.substringAfter("[")
-        } else{
+        } else {
             argumentsStr
         }
         kotlin.run {
@@ -121,9 +131,13 @@ object RuleArgumentParser {
                     val acp = arguments.substringAfter(".", missingDelimiterValue = "")
                     return addAccessPath(`return`, `return`.type, acp, shouldFillingPath)
                 }
+
                 arguments.startsWith("Argument[") -> {
                     val (range, acp) = arguments.substringAfter("Argument[").let {
-                        it.substringBefore("]", missingDelimiterValue = "") to it.substringAfter("]", missingDelimiterValue = "")
+                        it.substringBefore("]", missingDelimiterValue = "") to it.substringAfter(
+                            "]",
+                            missingDelimiterValue = ""
+                        )
                     }
                     if (range.isEmpty())
                         return@run null
@@ -137,7 +151,7 @@ object RuleArgumentParser {
                         parameter(index)
                     }
                     while (errorIndex.isNotEmpty()) {
-                        if (method.sootMethod.signature.startsWith("<java.util.Map: java.util.Map of(")){
+                        if (method.sootMethod.signature.startsWith("<java.util.Map: java.util.Map of(")) {
                             break
                         }
                         method.error.warning("yml: $method (argument count: ${method.argumentCnt}): arguments${errorIndex} out of index range.")
@@ -148,20 +162,50 @@ object RuleArgumentParser {
                         return argLocals.flatMap { argument ->
                             addAccessPath(argument, argument.type, acp, shouldFillingPath)
                         }
-                    } else{
+                    } else {
                         return argLocals
                     }
                 }
+
                 arguments.equals("global", ignoreCase = true) -> {
                     val acp = arguments.substringAfter(".", missingDelimiterValue = "")
                     return addAccessPath(global, G.v().soot_VoidType(), acp, shouldFillingPath)
                 }
+
                 else -> {
                     null
                 }
             }
         }
         method.error.warning("yml: invalid syntax: $arguments")
+        return emptyList()
+    }
+
+    fun getArgumentListFromString(argumentsStr: String): List<Int> {
+        val arguments = if (argumentsStr.startsWith("Parameter[")) {
+            "Argument[" + argumentsStr.substringAfter("[")
+        } else {
+            argumentsStr
+        }
+
+        kotlin.run {
+            when {
+                arguments.startsWith("Argument[") -> {
+                    val (range, acp) = arguments.substringAfter("Argument[").let {
+                        it.substringBefore("]", missingDelimiterValue = "") to it.substringAfter(
+                            "]",
+                            missingDelimiterValue = ""
+                        )
+                    }
+                    if (range.isEmpty())
+                        return@run null
+                    return parseRange(range) ?: return@run
+                }
+
+                else -> {}
+            }
+        }
+        logger.warn("yml: invalid syntax: $arguments")
         return emptyList()
     }
 
@@ -172,5 +216,7 @@ object RuleArgumentParser {
             else ps.split(",")
         }
     }
+
+    private val logger = KotlinLogging.logger { }
 
 }

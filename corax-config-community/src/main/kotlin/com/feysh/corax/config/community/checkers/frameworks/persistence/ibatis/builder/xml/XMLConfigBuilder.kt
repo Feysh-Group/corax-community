@@ -27,6 +27,7 @@ import org.apache.ibatis.mapping.ResultSetType
 import org.apache.ibatis.parsing.XNode
 import org.apache.ibatis.parsing.XPathParser
 import org.apache.ibatis.session.Configuration
+import org.w3c.dom.Document
 import soot.RefType
 import soot.Scene
 import java.io.InputStream
@@ -51,6 +52,10 @@ class XMLConfigBuilder private constructor(
 
     constructor(scene: Scene, inputStream: InputStream, props: Properties? = null) : this(
         scene, XPathParser(inputStream, true, props, XMLMapperEntityResolver())
+    )
+
+    constructor(scene: Scene, document: Document, props: Properties? = null) : this(
+        scene, XPathParser(document, true, props, XMLMapperEntityResolver())
     )
 
 

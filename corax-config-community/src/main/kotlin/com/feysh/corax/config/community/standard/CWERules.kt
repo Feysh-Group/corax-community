@@ -50,7 +50,9 @@ enum class CWERules(
 
     CWE328("cwe-328", "Use of Weak Hash"),
     CWE330("cwe-330","Use of Insufficiently Random Values"),
-    CWE347("cwe-347","Incomplete Model of Endpoint Features"),
+
+    CWE347("cwe-347","Improper Verification of Cryptographic Signature"),
+
 
     CWE352("cwe-352","Cross-Site Request Forgery (CSRF)"),
     CWE400("cwe-400","Uncontrolled Resource Consumption"),

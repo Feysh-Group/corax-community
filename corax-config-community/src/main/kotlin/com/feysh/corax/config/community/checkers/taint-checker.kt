@@ -23,9 +23,13 @@ import com.feysh.corax.config.api.*
 import com.feysh.corax.config.community.*
 import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.checkers.*
+import com.feysh.corax.config.general.checkers.analysis.JsonExtVisitor
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider.versionCondCheck
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
 import kotlinx.serialization.*
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 
 
 @Suppress("ClassName")
@@ -45,8 +49,8 @@ object `taint-checker` : AIAnalysisUnit() {
             "log4j-injection" to CustomSinkDataForCheck(control, reportType = Log4jChecker.Log4jInjection),
 
             "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = PathTraversalChecker.PathTraversalIn),
-            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, reportType = UnrestrictedFileUploadChecker.UnrestrictedFileUpload),
-            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.ZIP_ENTRY_NAME, reportType = PathTraversalChecker.ZipSlip),
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.InternetData + GeneralTaintTypes.UNLIMITED_FILE_EXTENSION, reportType = UnrestrictedFileUploadChecker.UnrestrictedFileUpload),
+            "path-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.ZIP_ENTRY_NAME, reportType = PathTraversalChecker.ZipSlip),
 
             "template-injection" to CustomSinkDataForCheck(control, reportType = TemplateIChecker.TemplateInjection),
             "request-forgery" to CustomSinkDataForCheck(control, reportType = SsrfChecker.RequestForgery),
@@ -56,7 +60,7 @@ object `taint-checker` : AIAnalysisUnit() {
             "xpath-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_XPATH_INJECT, reportType = XpathiChecker.XpathInjection),
             "command-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
 
-            "deserialization" to CustomSinkDataForCheck(control, reportType = DeserializationChecker.ObjectDeserialization),
+            "deserialization" to CustomSinkDataForCheck(control, reportType = DeserializationChecker.UnrestrictedObjectDeserialization),
             "xss-injection" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "XSS Sink")),
             "html-injection" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "Html Sink")),
             "xss-injection-jsp" to CustomSinkDataForCheck(control+ GeneralTaintTypes.CONTAINS_XSS_INJECT, reportType = XssChecker.XssInjection, msgArgs = mapOf("type" to "JSP Sink")),
@@ -79,7 +83,10 @@ object `taint-checker` : AIAnalysisUnit() {
             "sql-injection-spring" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs =  mapOf("type" to "Spring")),
             "sql-injection-turbine" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs = mapOf("type" to "Turbine")),
             "sql-injection-vertx" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_SQL_INJECT, reportType = SqliChecker.SqlInjection, msgArgs =  mapOf("type" to "Vert.x Sql Client")),
-            )
+            "xxe" to CustomSinkDataForCheck(internetControl, reportType =  XxeChecker.XxeRemote),
+            "xxe" to CustomSinkDataForCheck(localControl, reportType =  XxeChecker.XxeLocal),
+            "xxe" to CustomSinkDataForCheck(fileIoControl, reportType =  XxeChecker.XxeLocal),
+        )
     }
 
     private var option: Options = Options()
@@ -96,12 +103,8 @@ object `taint-checker` : AIAnalysisUnit() {
                 continue
             }
             TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.taintRulesManager.sinks, TaintModelingConfig.SimpleApplySink(sink.checkTaintTypes, sink.taintTypeExcludes, sink.reportType) {
-                for ((name, msg) in sink.msgArgs) {
-                    args[name] = msg
-                }
-            }) { sinkRule ->
-                LibVersionProvider.isEnable(sinkRule.ext)
-            }
+                args.putAll(sink.msgArgs)
+            })
         }
     }
 }

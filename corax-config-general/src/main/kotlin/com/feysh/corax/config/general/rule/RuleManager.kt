@@ -77,7 +77,7 @@ open class RuleManager<T> (val rules: List<T>){
         fun <T> load(files: List<Path>, serializer: KSerializer<T>): RuleManager<T> {
             val methods = ArrayList<T>(files.size * 100)
             files.sortedBy { it.absolute().normalize() }.forEach { file ->
-                methods +=  decode(file, serializer)
+                methods += decode(file, serializer)
             }
             return RuleManager(methods)
         }

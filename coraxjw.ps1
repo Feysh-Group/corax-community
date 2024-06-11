@@ -23,7 +23,7 @@
 ##  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
-$CORAX_VERSION = "2.8"
+$CORAX_VERSION = "2.10.1"
 $CORAX_JAVA_ARTIFACT_NAME = "corax-java-cli-community-$CORAX_VERSION"
 $CORAX_JAVA_ARTIFACT_ZIP = "$CORAX_JAVA_ARTIFACT_NAME.zip"
 $CORAX_JAVA_CLI_NAME = "corax-cli-community-${CORAX_VERSION}.jar"
@@ -65,36 +65,45 @@ function _download_extract {
     $temp_file="$BUILD_DIR\$temp_file_name"
     $download_flag="$BUILD_DIR\$temp_file_name.flag"
     Write-Host $download_flag
-    try {
-        New-Item -ItemType Directory -Path "$BUILD_DIR" -ErrorAction SilentlyContinue
-        if (-not (Test-Path -Path "$download_flag")) {
-            Remove-Item "$temp_file" -ErrorAction SilentlyContinue
-            Write-Host "[Downloading] Downloading $name : $url to $temp_file"
+    New-Item -ItemType Directory -Path "$BUILD_DIR" -ErrorAction SilentlyContinue
 
-            #            $client = New-Object Net.WebClient
-            #            $client.DownloadFile($url, $temp_file)
-            # 启用进度条显示
-            $ProgressPreference = 'Continue'
+    if ((Test-Path -Path "$download_flag") -and -not (Test-Path -Path "$temp_file")) {
+        Remove-Item "$download_flag" -ErrorAction SilentlyContinue
+    }
+    if (-not ((Test-Path -Path "$download_flag") -and (Test-Path -Path "$dest"))) {
+        Remove-Item "$temp_file" -ErrorAction SilentlyContinue
+        Write-Host "[Downloading] Downloading $name : $url to $temp_file"
 
+        #            $client = New-Object Net.WebClient
+        #            $client.DownloadFile($url, $temp_file)
+        # 启用进度条显示
+        $ProgressPreference = 'Continue'
+
+        # 使用 Invoke-WebRequest 下载并显示进度
+        try {
             # 若要更详细地控制进度报告，可以使用 Start-BitsTransfer（仅适用于Windows系统）
             if (Get-Command Start-BitsTransfer -ErrorAction SilentlyContinue) {
-                Start-BitsTransfer -Source $url -Destination $temp_file
+                Start-BitsTransfer -DisplayName $url -Source $url -Destination $temp_file -ErrorAction Stop
             } else {
-                # 使用 Invoke-WebRequest 下载并显示进度
                 Invoke-WebRequest -Uri $url -OutFile $temp_file -Verbose
             }
-            Set-Content -Path "$download_flag" -Value $url
+        } catch
+        {
+
+
+            throw 'Failed to transfer with BITS. Here is the error message: ' + $error[0].exception.message
         }
-
-        Write-Host "Extracting $temp_file to $dest"
-        Remove-Item "$dest" -Recurse -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path "$dest" -ErrorAction SilentlyContinue
-
-        Expand-Archive "$temp_file" -DestinationPath "$dest"
-
-    } catch {
-        throw
+        Set-Content -Path "$download_flag" -Value $url
     }
+    if (-not (Test-Path -Path "$temp_file")) {
+        Remove-Item "$download_flag" -ErrorAction SilentlyContinue
+        throw "Failed to download. Retry?"
+    }
+    Write-Host "Extracting $temp_file to $dest"
+    Remove-Item "$dest" -Recurse -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path "$dest" -ErrorAction SilentlyContinue
+
+    Expand-Archive "$temp_file" -DestinationPath "$dest"
 }
 
 function _detect_jdk() {

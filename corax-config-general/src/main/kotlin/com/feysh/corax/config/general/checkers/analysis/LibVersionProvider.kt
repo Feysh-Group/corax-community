@@ -16,16 +16,22 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package com.feysh.corax.config.general.checkers.analysis
 
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.api.SAOptions
+import com.feysh.corax.config.general.common.collect.Maps
+import com.feysh.corax.config.general.common.collect.Sets
+import com.feysh.corax.config.general.utils.MavenParser
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.json.*
 import mu.KotlinLogging
+import org.apache.commons.io.FileUtils
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion
+import org.apache.maven.model.Model
 import soot.Scene
 import soot.SootField
 import soot.SootMethod
@@ -36,9 +42,11 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
+import java.util.regex.Pattern
 import kotlin.collections.Map
 import kotlin.io.path.inputStream
-import kotlin.io.path.name
+import kotlin.io.path.outputStream
+import kotlin.io.path.pathString
 
 @Serializable
 data class MavenRepositoryLibraryDescriptor(val groupId: String, val artifactId: String, val version: String): Comparable<MavenRepositoryLibraryDescriptor> {
@@ -51,6 +59,17 @@ data class MavenRepositoryLibraryDescriptor(val groupId: String, val artifactId:
         this.artifactId.compareTo(other.artifactId).takeIf { it != 0 }?.let { return it }
         return this.m2.compareTo(other.m2)
     }
+
+    override fun toString(): String {
+        return "$groupId:$artifactId:$version"
+    }
+}
+
+@Serializable
+data class ExistsDependency(val location: String, val libraryDescriptor: MavenRepositoryLibraryDescriptor) {
+    override fun toString(): String {
+        return "$libraryDescriptor(at $location)"
+    }
 }
 
 @Serializable
@@ -60,7 +79,13 @@ object LibVersionProvider : PreAnalysisUnit() {
 
     private val logger = KotlinLogging.logger {}
 
-    private val libraryDescriptors: ConcurrentMap<String, MutableSet<MavenRepositoryLibraryDescriptor>> = ConcurrentHashMap()
+    private val libraryDescriptors: ConcurrentMap<String, MutableSet<ExistsDependency>> = ConcurrentHashMap()
+
+    private val xmlPathAndModelMap: ConcurrentMap<Path, Model?> = ConcurrentHashMap()
+
+    private val allProperties = Maps.newMultiMap<String, String>(Collections.synchronizedMap(Maps.newHybridMap())) {
+        Collections.synchronizedSet(Sets.newHybridSet())
+    }
 
     fun findFieldAssignedStringConstantValue(sm: SootMethod): Map<SootField, Constant>? {
         val body = if (sm.hasActiveBody()) sm.activeBody else return null
@@ -106,14 +131,14 @@ object LibVersionProvider : PreAnalysisUnit() {
     data class VersionConditions(
         val compareMode: Mode,
         val op: CompareOp,
-        val version: MavenRepositoryLibraryDescriptor
+        val libraryDescriptor: MavenRepositoryLibraryDescriptor
     ) {
         enum class Mode {
             MayOrUnknown, May, Must
         }
 
-        enum class CompareOp(val check: (test: Int) -> Boolean) {
-            LT({ it < 0 }), LE({ it <= 0 }), EQ({ it == 0 }), GE({ it >= 0 }), GT({ it > 0 })
+        enum class CompareOp(val code: String, val check: (test: Int) -> Boolean) {
+            LT("<", { it < 0 }), LE("<=", { it <= 0 }), EQ("==", { it == 0 }), GE(">=", { it >= 0 }), GT(">", { it > 0 })
         }
     }
 
@@ -129,24 +154,29 @@ object LibVersionProvider : PreAnalysisUnit() {
 
         val versionConditions = mapOf(
             "risk-fastjson" to VersionConditions(
-                VersionConditions.Mode.May,
+                VersionConditions.Mode.Must,
                 VersionConditions.CompareOp.LT,
                 MavenRepositoryLibraryDescriptor("com.alibaba", "fastjson", "1.2.83")
             ),
             "risk-jackson" to VersionConditions(
-                VersionConditions.Mode.MayOrUnknown,
+                VersionConditions.Mode.Must,
                 VersionConditions.CompareOp.LT,
                 MavenRepositoryLibraryDescriptor("com.fasterxml.jackson.core", "jackson-databind", "2.13.4.2")
             ),
             "risk-log4j-injection" to VersionConditions(
-                VersionConditions.Mode.May, // // 不要设置为 MayOrUnknown issue: corax-java-config#70 问题2
+                VersionConditions.Mode.Must, // // 不要设置为 MayOrUnknown issue: corax-java-config#70 问题2
                 VersionConditions.CompareOp.LT,
                 MavenRepositoryLibraryDescriptor("org.apache.logging.log4j", "log4j-core", "2.16.0")
             ),
-            "risk-org.apache.poi-ooxml" to VersionConditions(
+            "risk-org.apache.poi-ooxml-CVE-2019-12415" to VersionConditions(
                 VersionConditions.Mode.May,
                 VersionConditions.CompareOp.LT,
                 MavenRepositoryLibraryDescriptor("org.apache.poi", "poi-ooxml", "4.1.1")
+            ),
+            "risk-org.apache.poi-ooxml-CVE-2014-3529" to VersionConditions(
+                VersionConditions.Mode.May,
+                VersionConditions.CompareOp.LT,
+                MavenRepositoryLibraryDescriptor("org.apache.poi", "poi-ooxml", "3.10.1")
             )
         )
     }
@@ -155,47 +185,61 @@ object LibVersionProvider : PreAnalysisUnit() {
 
     // logic and
     fun isEnable(conditionString: String): Boolean {
-        if (conditionString.isEmpty()) return true
-        val condResults = parseCondition(conditionString)
-        return condResults.all { it != false }
+        if (conditionString.isEmpty())
+            return true
+
+        var result = true
+        object : JsonExtVisitor() {
+            override fun visitObject(key: String, value: JsonPrimitive) {
+                if (!result) return
+                when (key) {
+                    "@active:condition:version" -> {
+                        if (versionCondCheck(value.jsonPrimitive.content) == false) {
+                            result = false
+                        }
+                    }
+                }
+            }
+        }.visitAll(json = conditionString)
+
+        return result
     }
 
+    private val parseConditionCache = mutableMapOf<String, Any>()
 
-    private fun versionCondCheck(condName: String): Boolean? {
+    fun versionCondCheck(condName: String): Boolean? {
         val versionCondition = option.versionConditions[condName] ?: let {
             logger.error { "condition name `$condName` is not exists." }; return null
         }
-        val cmpResults = compareTo(versionCondition.version)
-        val checkRes = cmpResults.map { versionCondition.op.check(it.value) }
+        val cmpResults = compareTo(versionCondition.libraryDescriptor)
+        val checkRes = cmpResults.mapValues { versionCondition.op.check(it.value) }
+        val boolRes = checkRes.values
         val mode = versionCondition.compareMode
         return if (cmpResults.isEmpty()) {
             mode == VersionConditions.Mode.MayOrUnknown
         } else {
-            val anyFalse = checkRes.any { !it }
-            val anyTrue = checkRes.any { it }
+            val anyFalse = boolRes.any { !it }
+            val anyTrue = boolRes.any { it }
             if (mode == VersionConditions.Mode.Must) {
-                return !anyFalse
+                !anyFalse
             } else {
-                return anyTrue
+                anyTrue
             }
-        }
-    }
-
-
-    private val condRegex = Regex("@active:condition:(?<kind>[^:]+):(?<cond>[^:]+)")
-    private fun parseCondition(conditionString: String): Sequence<Boolean?> {
-        return condRegex.findAll(conditionString).map { match ->
-            val kind = match.groups["kind"]?.value ?: return@map null
-            val cond = match.groups["cond"]?.value ?: return@map null
-            when (kind) {
-                "version" -> versionCondCheck(cond)
-                else -> {
-                    logger.error { "condition kind `$kind` is not exists." }
-                    null
+        }.also { result ->
+            if (parseConditionCache.put(condName, result) == null) {
+                logger.info {
+                    val versionInfoMsg = "Condition evaluate result: cond: \"$condName\" = $result with ${versionCondition.compareMode} compare mode."
+                    val versionDetailedMsg = if (cmpResults.isEmpty()) "" else {
+                        "\n" + checkRes.toList().joinToString(postfix = "\n", separator = "\n") {
+                            "\t${it.first} ${versionCondition.op.code} ${versionCondition.libraryDescriptor.version} = ${it.second}"
+                        }
+                    }
+                    versionInfoMsg + versionDetailedMsg
                 }
             }
         }
     }
+
 
     private fun parsePomProperties(virtualFile: Path): MavenRepositoryLibraryDescriptor? {
         val properties = Properties()
@@ -214,30 +258,96 @@ object LibVersionProvider : PreAnalysisUnit() {
         ) else null
     }
 
-    fun getLibraryDescriptor(groupId: String, artifactId: String): Set<MavenRepositoryLibraryDescriptor> {
+    fun getLibraryDescriptor(groupId: String, artifactId: String): Set<ExistsDependency> {
         return libraryDescriptors["$groupId.$artifactId"] ?: emptySet()
     }
 
     fun compareTo(other: MavenRepositoryLibraryDescriptor) =
-        getLibraryDescriptor(other.groupId, other.artifactId).associateWith { it.compareTo(other) }
+        getLibraryDescriptor(other.groupId, other.artifactId).associateWith { it.libraryDescriptor.compareTo(other) }
 
 
-    fun add(descriptor: MavenRepositoryLibraryDescriptor) =
-        libraryDescriptors.getOrPut("${descriptor.groupId}.${descriptor.artifactId}") {
-            Collections.synchronizedSet(mutableSetOf())
+    fun add(descriptor: ExistsDependency) =
+        libraryDescriptors.getOrPut("${descriptor.libraryDescriptor.groupId}.${descriptor.libraryDescriptor.artifactId}") {
+            Collections.synchronizedSet(LinkedHashSet())
         }.add(descriptor)
 
     context (PreAnalysisApi)
+    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun config() {
         assert(option.versionConditions.none { it.key.contains(":") })
         for (it in option.libVersionInVersionClassFields) {
             val version = getFieldAssignedStringConstantValue(className = it.className, methodName = it.methodName, filedName = it.fieldName) ?: continue
             val versionString = (version as? StringConstant)?.value ?: continue
-            add(MavenRepositoryLibraryDescriptor(groupId = it.groupId, artifactId = it.artifactId, version = versionString))
+            add(ExistsDependency(it.toString(), MavenRepositoryLibraryDescriptor(groupId = it.groupId, artifactId = it.artifactId, version = versionString)))
         }
-        atAnySourceFile(filename = "pom.properties", config = { incrementalAnalyze = false }) {
+
+        val parser = atAnySourceFile(filename = "pom.properties", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val descriptor = parsePomProperties(path) ?: return@atAnySourceFile
-            add(descriptor)
+            add(ExistsDependency(path.toUri().toString(), descriptor))
         }
+
+        val parser2 = atAnySourceFile(filename = "pom.xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
+            // skip xml contains in jar lib
+            if (path.pathString.contains("META-INF/maven/")) {
+                return@atAnySourceFile
+            }
+            val model = MavenParser(path).parse() ?: return@atAnySourceFile
+            xmlPathAndModelMap[path] = model
+            mergeProperties(model)
+        }
+
+        runInScene {
+            parser.await()
+            parser2.await()
+            collectExistsDependency()
+            val out = outputPath.resolve("project-env").also { FileUtils.forceMkdir(it.toFile()) }
+            out.resolve("versions.txt").outputStream().use { outputStream ->
+                jsonFormat.encodeToStream(libraryDescriptors.toMap(), outputStream)
+            }
+        }
+    }
+
+    private fun collectExistsDependency() {
+        for (entry in xmlPathAndModelMap.entries) {
+            val (xmlPath, model) = entry
+            generateMavenRepositoryLibraryDescriptors(model).forEach {
+                add(ExistsDependency(xmlPath.toUri().toString(), it))
+            }
+        }
+    }
+
+    private fun getTrueVersion(version: String): Set<String> {
+        val matcher = Pattern.compile("\\$ *\\{(.*?)}").matcher(version)
+        if (matcher.find()) {
+            val versionDesc = matcher.group(1).trim()
+            return allProperties.get(versionDesc).toSet()
+        }
+        return setOf(version)
+    }
+
+    private fun generateMavenRepositoryLibraryDescriptors(model: Model?): MutableList<MavenRepositoryLibraryDescriptor> {
+        val mavenRepositoryLibraryDescriptors = mutableListOf<MavenRepositoryLibraryDescriptor>()
+        model?.dependencies?.forEach { dependency->
+            val version = dependency.version ?: return@forEach
+            val trueVersion = getTrueVersion(version)
+            trueVersion.forEach {
+                val descriptor = MavenRepositoryLibraryDescriptor(dependency.groupId, dependency.artifactId, it)
+                mavenRepositoryLibraryDescriptors.add(descriptor)
+            }
+        }
+        return mavenRepositoryLibraryDescriptors
+    }
+
+    private fun mergeProperties(model: Model?) {
+        model?.properties?.entries?.forEach {
+            val key = (it.key as? String)?.trim() ?: return@forEach
+            val value = (it.value as? String)?.trim() ?: return@forEach
+            allProperties.put(key, value)
+        }
+    }
+
+    private val jsonFormat = Json {
+        useArrayPolymorphism = true
+        prettyPrint = true
     }
 }

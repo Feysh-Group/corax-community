@@ -21,13 +21,18 @@
 
 package com.feysh.corax.config.general.utils
 
+import mu.KotlinLogging
 import org.apache.ibatis.builder.BuilderException
+import org.sonarsource.analyzer.commons.xml.XmlFile
 import org.w3c.dom.Document
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import org.xml.sax.*
 import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.parsers.SAXParserFactory
+import javax.xml.xpath.*
 
 val SAX_FACTORY: SAXParserFactory = SAXParserFactory.newInstance().also {
     it.isValidating = java.lang.Boolean.FALSE
@@ -79,5 +84,29 @@ fun createDocument(inputSource: InputSource, entityResolver: EntityResolver, val
         builder.parse(inputSource)
     } catch (e: Exception) {
         throw BuilderException("Error creating document instance.  Cause: $e", e)
+    }
+}
+
+
+object XmlUtils {
+
+    val logger = KotlinLogging.logger {}
+    private val xpath: XPath = XPathFactory.newInstance().newXPath()
+
+    fun evaluateAsList(expression: XPathExpression, node: Node): List<Node> {
+        return XmlFile.asList(evaluate(expression, node))
+    }
+
+    fun evaluate(expression: XPathExpression, node: Node): NodeList? {
+        return try {
+            expression.evaluate(node, XPathConstants.NODESET) as NodeList
+        } catch (e: XPathExpressionException) {
+            logger.error(e) { "Unable to evaluate XPath expression: $expression" }
+            null
+        }
+    }
+
+    fun getXPathExpression(expression: String): XPathExpression {
+        return xpath.compile(expression)
     }
 }

@@ -1,79 +1,163 @@
-# 前置知识：
-#    我们将所有的运行时类分为三种：application class（用户期望直接扫描的重点类），library class（依赖的三方库，增加分析精度）, phantom class（class not found，可能没编译可能没有三方库）
-# 一般的程序的语义分析都需要显式或者隐式地给出 入口函数/方法 即分析目标，入口函数位置应该在用户部分的代码（application classes）中。
-# 如果分析入口包含了库代码则会导致分析目标过多而大量消耗资源，无法高效地扫描我们关心的代码。
+# 被分析项目对应扫描相关的配置
 
 # 使用方法
-## 添加参数: --output ${output} 在 corax 分析参数 --extra-args 前
-## 添加参数: --project-scan-config project-scan-config.yml 在命令最后
-
+#   添加参数: --output ${output} 在 corax 分析参数 --extra-args 前
+#   添加参数: --project-config project-scan-config.yml 在命令最后
+#   本配置含有大量详细说明, 如需跳过, 可以跳转到第100行开始配置
+#
+# 配置产生的作用
+#   本配置对扫描过滤的实际作用结果可以在分析完成后打开 ${output}/scan-classifier-info.json 查看，可以得知class的扫描分类和哪些源码被分析哪些源码被排除
+#   此文件中的 ScanAction 有如下几种：
+#     Process：表示会被扫描
+#     Skip：表示不会被主动扫描
+#     Keep: 保持原状
+#
 # 其他
-# 可以前往 https://regex101.com 测试正则，并选择 FLAVOR 为 java
-#  注意 "\." 是匹配 "." , 而单个 "." 是匹配任何字符（行终止符除外）
-
-# class 的分类规则
-process-class-regex: #                            class包名的正则。注意匹配时候是从上到下有序匹配的，请注意顺序
-    - (-)\.R\$\w+$                                    # 如 com.android.R$id
-    - (+)org\.owasp\.benchmark\.testcode              # 如 org.owasp.benchmark.testcode.Test001, org.owasp.benchmark.testcode.xss.Xss001
-    - (+)org\.owasp\.benchmark(-)org\.owasp\.benchmark\.utils # 扫描(Process) org.owasp.benchmark下且非org.owasp.benchmark.utils下的类。
-                                                      # 支持任意数量的正则并使用(+)or(-)连接
-    - (-)org\.owasp(+)org\.owasp\.benchmark           # 排除(Skip) org.owasp下且非org.owasp.benchmark的所有的类， 如 org.owasp.comp.Test会被排除(Skip)，但是如org.owasp.benchmark和org.foo不会被排除(继续下面的规则)
-
-    # ⇲ 请在这里加上您需要扫描的包名正则 ↙
-    - (+)org\.example
-
-    - (-others) # 完全等价 (-).+ ，表示不扫描上面正则没有涵盖到的类，或者[+others], 不写的话保持原来的分类（Keep）（--process和--auto-app-classes指向的是application classes， --class-path指向的是library class）。
-
-# 资源文件的分类规则
-process-res-regex: #                              资源文件路径的正则
-    - (+)/.+_jsp.java$                                # 如 build/jsp-classes/org/**/View_jsp.java 会被AST解析或纯文本的扫描
-                                                      # 但是将此正则放在 (-)/build/ 后会导致 build/**/*_jsp.java 永远无法被AST解析或纯文本的扫描
-    # files                                       资源路径的正则
-    - (-)/\.R\.java$                                  # 如 com/android/.R.java
-    
-    # directories                                 资源目录的正则。注意匹配时候是从上到下有序匹配的，请注意顺序
-    - (-)/out/
-    - (-)/output/
-    - (-)/tmp/
-    - (-)/temp/
-    - (-)/log/                                        # 路径正则尽量加上"/", 表示为文件夹路径, 否则所有名字包含log的文件也会被排除
-    - (-)/logs/
-    - (-)/build/
-    - (-)/target/
-    - (-)/\.git/
-    - (-)/\.idea/
-    - (-)/\.gradle/
-    - (-)/\.mvn
-    - (-)/\.run/
-
-    - (+others) # 完全等价 (+).+ ，表示扫描上面正则没有涵盖到的资源，或者[-others], 不写的话则保持原来的分类（Keep），原来--source-path和--auto-app-classes指向的资源会被扫描。
+#   可以前往 https://regex101.com 测试正则，并选择 FLAVOR 为 java
+#   注意 "\." 是匹配 "." , 而单个 "." 是匹配任何字符（行终止符除外）
 
 
+#  分析对象被划分为 class （一般包含在于文件夹/jar/war/apk/dex/zip等） 和 普通文件（非class的任何文件，如源码文件、xml、txt、properties等）两类
+process-regex: # 分析对象的过滤器配置
+  #  可配置的字段如下： （多个字段同时存在时，采用逻辑与匹配）
+  #  class:           # 仅用于配置 class 的分类，不影响源码文件
+  #  classpath:       # 用于配置过滤 class 的加载，被排除的 classpath 所对应包含的 class 不会被分析器加载，故也不可能会被分析到
+  #  file:            # 仅用于配置扫描或排除扫描各类资源文件，如源码和各种资源文件，但不影响class
 
-# 本配置文件实际的筛选分类信息可以在分析完成后打开 ${output}/scan-classifier-info.yml 查看
-# ScanAction有如下几种：
-#    Process：表示会被扫描
-#    Keep: 保持原状
-#    Skip：表示不会被作为入口重点扫描，但是Skip标记的类如果可以被过程间调用到，那么这部分方法仍然会被依赖扫描分析
+  #  匹配机制： 越靠后的规则优先级越高，比如下面的3个有序匹配配置，*/src/Abc.java 文件会被排除分析, */src/Efg.java 文件会被分析。
+  #   - op: Add
+  #     path: /src/Abc.java  # 所有路径字符串中包含 ‘/src/Abc.java’ 的文件
+  #   - op: Sub
+  #     path: /src/          # 所有路径字符串中包含 ‘/src/’ 的文件
+  #   - op: Add
+  #     path: /src/Efg.java  # 所有路径字符串中包含 ‘/src/Efg.java’ 的文件
 
-# 比如：
-# - "library -> Process: com.example.JavaAnnotationTest" 表示原分类为library class（不会被直接分析）的com.example.JavaAnnotationTest经过project-scan-config.yml文件中的正则匹配后被标记为Process，将会被直接分析。
-# - "application -> Skip: com.foo.Test" 表示原分类为application class（会被直接分析）的com.foo.Test经过正则匹配后被标记为Skip，将不会被直接的分析
-# - "phantom -> Skip: com.not.exists.Test" 原分类为phantom class（表示被分析依赖的但是分析器只能获取到类名字无法获得类文件的类）的com.not.exists.Test，无论如何改变其ScanAction也无法被分析，因为它不存在。需要检查--auto-app-classes,--process,--class-path这几个参数的指向位置是否包含完整的类
 
-# 所以您需要扫描的类如 com.example.foo.ApplicationTest 出现以下任意下情形均表示参数和配置或输入资源出现问题：
-# - "library -> Keep: com.example.foo.ApplicationTest"               原因：project-scan-config.yml中没有涵盖到该类 并且 <该类存在于--class-path而不存在于--process，或者--auto-app-classes指向的路径的类没有对应源码（会被分类为library class）>
-# - "application -> Skip: com.example.foo.ApplicationTest"           原因：被project-scan-config.yml中(-)后的正则错误地排除掉了，请检查您的正则
-# - "phantom -> Process|Keep|Skip: com.example.foo.ApplicationTest"  原因：class not found!，是否没有编译，是否没有被--auto-app-classes,--process,--class-path指定
-#   正确的是：
-# - "library -> Process: com.example.foo.ApplicationTest"
-# - "application -> Process|Keep: com.example.foo.ApplicationTest"
+  class: # 仅用于配置 class 的分类，不影响源码文件
 
-# 所以您不希望被直接扫描的类(如三方库，非目标项目的代码的类)如 org.spring.AbstractRequest 出现以下任意下情形均表示参数和配置或输入资源出现问题：
-# - "library -> Process: org.spring.AbstractRequest"                原因：被project-scan-config.yml中(+)后的正则错误地包含了，请检查您的正则
-# - "application -> Keep: org.spring.AbstractRequest"               原因：project-scan-config.yml中没有关于此类的正则，请检查您的正则
-# - "application -> Process: org.spring.AbstractRequest"            原因：被project-scan-config.yml中(+)后的正则错误地包含了，并且--auto-app-classes,--process指向了该类
-# - "phantom -> Process|Keep|Skip: org.spring.AbstractRequest"      原因：class not found!，是否没有编译，是否没有被--auto-app-classes,--process,--class-path指定
-#   正确的是：
-# - "library -> Skip|Keep: org.spring.AbstractRequest"
-# - "application -> Skip: org.spring.AbstractRequest"
+    # 前置知识：
+    #  我们将所有的运行时类分为三种：application class（用户期望直接扫描的重点类），library class（依赖的三方库，增加分析精度）, phantom class（class not found，可能没编译可能没有三方库）
+    #  +-------------+---------------------------------------+-----------------------------------------------+---------------------------------------------------+
+    #  |  class分类  |                 来源                   |                        解释                    |                        注意                        |
+    #  +=============+=======================================+===============================================+===================================================+
+    #  |             | --process参数指定的类                   |                                               | 如果因为参数或过滤配置不当，                           |
+    #  | application +---------------------------------------+   分析器重点分析的class,用户期望直接扫描的重点类     | 多包含了库代码则会导致分析目标过多而大量消耗机器内存和性能  |
+    #  |             | --auto-app-class参数中存在源码文件的类    |                                               | 无法高效地扫描我们关心的代码                           |
+    #  +-------------+---------------------------------------+-----------------------------------------------+---------------------------------------------------+
+    #  |             | --class-path参数指定的类                | 一般为项目依赖的三方库，                          | 如果因为参数或过滤配置不当，                           |
+    #  |   library   +---------------------------------------+ 当application class依赖到的这部分class才会被分析  | 导致用户期望重点分析的class被归类为library class        |
+    #  |             | --auto-app-class参数中不存在源码文件的类  | 用于增加分析精度                                 | 很可能导致漏扫                                      |
+    #  +-------------+---------------------------------------+-----------------------------------------------+---------------------------------------------------+
+    #  |   phantom   |  class not found                      |  可能因为项目没有完整编译，三方库不全，             | 尽量保证较少的phantom class数量                       |
+    #  |             |  被项目引用了但无法找到的class            |  参数指定不全，二进制格式不支持等                  |                                                    |
+    #  +-------------+---------------------------------------+-----------------------------------------------+---------------------------------------------------+
+
+    #   class 在 match 前就已经通过参数 --auto-app-class，--process，--auto-app-class 等参数分类过了
+    #   如果参数中还配置了 --project-config project-scan-config.yml 并且包含本分类配置，则还会根据match结果调整原有的分类
+    #   +--------------+--------------+---------------+
+    #   | before match | match result |  after match  |
+    #   +--------------+--------------+---------------+
+    #   |              |      Add     |  application  |
+    #   |              +--------------+---------------+
+    #   |  application |      Sub     |   *library*   |  🟡应该避免期望分析的class被Sub，如Sub项目自身的class是需要斟酌的。
+    #   |              +--------------+---------------+
+    #   |              |   NotMatch   |  application  |
+    #   +--------------+--------------+---------------+
+    #   |              |      Add     | *application* |  🟡应该避免不期望分析的class被Add，如Add三方库的class是不应该的，会导致分析目标过多而大量消耗资源。
+    #   |              +--------------+---------------+
+    #   |    library   |      Sub     |    library    |
+    #   |              +--------------+---------------+
+    #   |              |   NotMatch   |    library    |
+    #   +--------------+--------------+---------------+
+    #   |              |      Add     |    phantom    |
+    #   |              +--------------+---------------+
+    #   |    phantom   |      Sub     |    phantom    |
+    #   |              +--------------+---------------+
+    #   |              |   NotMatch   |    phantom    |
+    #   +--------------+--------------+---------------+
+
+    #
+    #  可配置的字段如下： （一个规则存在多个字段时，采用逻辑*与*匹配）
+    #  - op: Add                    # Add 表示包含，Sub 表示排除
+    #    class:name: %regex%        # 用于匹配 class 的名字，如 com.example.Main，
+    #                               # 注意：class名 使用正斜杠\或反斜杠/进行匹配是被禁止的
+    #    class:src: %regex%         # 因为一个源码可以关联多个class, 所以筛选class时候可以用class对应源码路径作为正则匹配目标，但不会影响源码
+    #                               # 注意：不允许包含正斜杠\ , 表示文件夹路径时前后请加上/
+    #
+    #    method:signature: %regex%  # 用于匹配 soot 格式的类方法签名如 <com.example.Main: void main(java.lang.String[])>
+    #    method:name: %regex%       # 用于匹配方法的名字：如 "main"
+    #
+    #    field:signature: %regex%   # 用于匹配 soot 格式的类成员变量签名如 <com.example.util.Optional: java.lang.Object value>
+    #    field:name: %regex%        # 用于匹配 class field 的名字：如 "value"
+
+    - op: Sub   # 如果 Sub all class，则可理解为本配置属于白名单模式, 反之如果Add all class，则可理解为本配置属于黑名单模式
+        # 既不想使用白名单也不想使用黑名单，则请不要使用.+匹配全部资源。
+      # 所有扫描过滤配置中均没有匹配到的资源，则保持原始的分析处理方式
+      class:name: .+ # 表示任意 class
+
+
+
+    # 🟢 请在这里加上您需要扫描的 class ↙ (可以直接通过 class name 进行匹配)
+    #    - op: Add                           # 还需要去除本行和下一行的注释
+    #      class:name: com.insecurebank      # <- 请填写; (不允许填写 com\android\insecurebankv2 或者 com/android/insecurebankv2)
+    # 也可以通过 class 对应的源码路径来匹配 class
+    - op: Add
+      class:src: /src/main/             # <- 请填写; (不允许填写 src\\main ; 也不建议写 src/main , 可能会匹配到如 /js-src/main)
+
+
+
+    - op: Add
+      class:src: /.+_jsp.java$          # 匹配如 build/jsp-classes/org/**/View_jsp.java 对应的任意 class，注意是匹配 class
+    - op: Sub
+      class:name: \.R(\$.*)?$           # 如 com.android.R$id
+
+  classpath: # 用于配置过滤 class 的加载，被排除的 classpath 所对应包含的 class 不会被分析器加载，故也不可能会被分析到
+    # 一般用于屏蔽加载一些无效的jar包（比如class只有方法声明但是不包含方法体定义，分析器加载后无法分析这些空壳class会导致大量漏报（假如还同时存在正常的class,也会因同名class只加载一份的机制，仍会导致分析异常），在android中常见）
+    #  可配置的字段如下：
+    #  - op: Add                  # Add 表示包含，Sub 表示排除
+    #    path: %regex%            # 匹配class所在的文件路径，如.class/jar/war/apk/dex/zip等路径
+    #                             # 压缩包内部资源以 !/ 分割，如 build/application.jar!/BOOT-INF/classes/
+    #                             # 注意：不允许包含正斜杠\ ， 表示为文件夹路径时前后请加上/
+    - op: Sub
+      path: /classes-header.jar   # bad android intermediates jar
+    - op: Sub
+      path: /classes-turbine.jar  # bad android intermediates jar
+
+  file: # 仅用于配置扫描或排除扫描各类资源文件，如源码和各种资源文件，但不影响class
+    #  可配置的字段如下：
+    #  - op: Add                  # Add 表示包含，Sub 表示排除
+    #    path: %regex%            # 注意：不允许包含正斜杠\ ， 表示为文件夹路径时前后请加上/
+    #                             # 压缩包内部资源以 !/ 分割，如 build/application.jar!/META-INF/MANIFEST.MF
+    - op: Sub
+      path: /out/
+    - op: Sub
+      path: /output/
+    - op: Sub
+      path: /tmp/
+    - op: Sub
+      path: /temp/
+    - op: Sub
+      path: /log/                 # 表示为文件夹路径时，路径正则尽量加上"/", , 否则所有名字包含log的文件也会被排除
+    - op: Sub
+      path: /logs/
+    - op: Sub
+      path: /build/
+    - op: Sub
+      path: /target/
+    - op: Sub
+      path: /\.git/
+    - op: Sub
+      path: /\.idea/
+    - op: Sub
+      path: /\.gradle/
+    - op: Sub
+      path: /\.mvn
+    - op: Sub
+      path: /\.run/
+
+    - op: Add
+      path: /.+_jsp.java$         # 匹配如 build/jsp-classes/org/**/View_jsp.java 源码文件，注意是仅匹配源码
+    - op: Sub
+      path: /R\.java$             # 如 com/android/R.java
+
+

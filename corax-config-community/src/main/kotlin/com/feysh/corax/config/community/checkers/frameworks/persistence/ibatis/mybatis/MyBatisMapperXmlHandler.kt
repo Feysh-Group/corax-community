@@ -20,6 +20,7 @@
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis
 
 import com.feysh.corax.config.community.checkers.frameworks.xml.BasedXmlHandler
+import com.feysh.corax.config.general.utils.PositionalXMLReader
 import mu.KotlinLogging
 import org.apache.ibatis.builder.MapperBuilderAssistant
 import org.apache.ibatis.builder.xml.XMLIncludeTransformer
@@ -38,7 +39,6 @@ import org.apache.ibatis.scripting.xmltags.XMLLanguageDriver
 import org.apache.ibatis.scripting.xmltags.XMLScriptBuilder
 import org.apache.ibatis.session.Configuration
 import java.nio.file.Path
-import kotlin.io.path.inputStream
 import kotlin.io.path.pathString
 
 class MybatisEntry(
@@ -104,72 +104,78 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
     }
 
     fun initSqlFragments(resource: Path, configuration: Configuration) {
-        resource.inputStream().use { inputSource ->
-            val parser = XPathParser(inputSource, true, configuration.variables, XMLMapperEntityResolver())
-            val context = parser.evalNode("/mapper") ?: return@use null
-            val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
-            // create inside <sql> for inline
-            val sqlNodes = parser.evalNodes("/mapper/sql")
-            parseSqlStatement(sqlNodes, builderAssistant, configuration)
+        val document = PositionalXMLReader.readXMLUnsafe(resource)
+        if (document == null) {
+            logger.warn { "Failed to process MyBatis SqlFragments in xml: $resource" }
+            return
         }
+        val parser = XPathParser(document, true, configuration.variables, XMLMapperEntityResolver())
+        val context = parser.evalNode("/mapper") ?: return
+        val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
+        // create inside <sql> for inline
+        val sqlNodes = parser.evalNodes("/mapper/sql")
+        parseSqlStatement(sqlNodes, builderAssistant, configuration)
     }
 
     fun streamToSqls(resource: Path, configuration: Configuration): MybatisEntry? {
-        return resource.inputStream().use { inputSource ->
-            val parser = XPathParser(inputSource, true, configuration.variables, XMLMapperEntityResolver())
-
-            val context = parser.evalNode("/mapper") ?: return@use null
-
-            val mybatisEntry = MybatisEntry(resource = resource, namespace = context.getStringAttribute("namespace"))
-
-            val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
-
-            try {
-                mybatisEntry.methodSqlList += buildCrudSqlMap(mybatisEntry.namespace, context, configuration, builderAssistant)
-            } catch (e: Exception) {
-                logger.warn(e) { "Failed to parse mybatis mapper sqls: ${e.message} " }
-            }
-            return@use mybatisEntry
+        val document = PositionalXMLReader.readXMLUnsafe(resource)
+        if (document == null) {
+            logger.warn { "Failed to process MyBatis mappers in xml: $resource" }
+            return null
         }
+
+        val parser = XPathParser(document, true, configuration.variables, XMLMapperEntityResolver())
+
+        val context = parser.evalNode("/mapper") ?: return null
+
+        val mybatisEntry = MybatisEntry(resource = resource, namespace = context.getStringAttribute("namespace"))
+
+        val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
+
+        buildCrudSqlMap(resource, mybatisEntry.namespace, context, configuration, builderAssistant, mybatisEntry.methodSqlList)
+        return mybatisEntry
     }
 
     private fun buildCrudSqlMap(
+        resource: Path,
         namespace: String,
         context: XNode,
         configuration: Configuration,
         builderAssistant: MapperBuilderAssistant,
-    ): List<MyBatisTransform.Statement> {
-        val sqlList: MutableList<MyBatisTransform.Statement> = mutableListOf()
+        methodSqlList: MutableList<MyBatisTransform.Statement>
+    ) {
         val langDriver: LanguageDriver = XMLLanguageDriver()
         val crudList = context.evalNodes("select|insert|update|delete")
 
         for (it in crudList) {
             val methodName: String = it.getStringAttribute("id") ?: continue
-
-            // 1. enable include
             try {
-                val includeParser = XMLIncludeTransformer(configuration, builderAssistant)
-                includeParser.applyIncludes(it.node)
+                // 1. enable include
+                try {
+                    val includeParser = XMLIncludeTransformer(configuration, builderAssistant)
+                    includeParser.applyIncludes(it.node)
+                } catch (e: Exception) {
+                    logger.warn(e) { e.message }
+                    continue
+                }
+
+                // 2. follow parseStatementNode to remove all keys
+                val selectKeyNodes = it.evalNodes("selectKey")
+                parseSelectKeyStatement(selectKeyNodes, methodName, langDriver, configuration, builderAssistant)
+
+
+                // 3. get rootNode to do some simple calculate
+                val simpleScriptBuilder = SimpleScriptBuilder(configuration, it)
+                val rootNode: MixedSqlNode = simpleScriptBuilder.getNode()!!
+
+                // 4. convert to source
+                val myBatisTransform = createMyBatisTransform()
+                val sqlContent = myBatisTransform.applyDynamicContent(resource, configuration, namespace, it, rootNode)
+                methodSqlList += sqlContent
             } catch (e: Exception) {
-                logger.warn(e) { e.message }
-                continue
+                logger.error(e) { "Failed to parse mybatis mapper id: $namespace#$methodName in $resource" }
             }
-
-            // 2. follow parseStatementNode to remove all keys
-            val selectKeyNodes = it.evalNodes("selectKey")
-            parseSelectKeyStatement(selectKeyNodes, methodName, langDriver, configuration, builderAssistant)
-
-
-            // 3. get rootNode to do some simple calculate
-            val simpleScriptBuilder = SimpleScriptBuilder(configuration, it)
-            val rootNode: MixedSqlNode = simpleScriptBuilder.getNode()!!
-
-            // 4. convert to source
-            val myBatisTransform = createMyBatisTransform()
-            val sqlContent = myBatisTransform.applyDynamicContent(configuration, namespace, it, rootNode)
-            sqlList += sqlContent
         }
-        return sqlList
     }
 
     open fun createMyBatisTransform(): MyBatisTransform {

@@ -15,7 +15,7 @@
   * [--class-path](#--class-path)
   * [--source-path](#--source-path)
   * [--disable-analyze-library-classes](#--disable-analyze-library-classes)
-  * [--project-scan-config](#--project-scan-config)
+  * [--project-config](#--project-config)
   * [--serialize-cg](#--serialize-cg)
   * [--enable-coverage](#--enable-coverage)
   * [--make-scorecard](#--make-scorecard)
@@ -189,7 +189,7 @@ corresponding complete project source code)>
                                  Set whether to find the source code file from
                                  the compressed package (default:
                                  RecursivelyIndexArchive)
-  --project-scan-config=<file path>
+  --project-config=<file path>
                                  Specify the path of project scan config file
   --disable-wrapper              Analyze the full frameworks together with the
                                  app without any optimizations (default: Use
@@ -329,19 +329,19 @@ flag option。 此选项默认关闭以保证分析精度
 
 
 
-### --project-scan-config
+### --project-config
 
 > 用于告知分析器分析的重点及期望分析和不希望分析的 类或者文件
 
 eg：
 
 ```
---project-scan-config project-scan-config.yml
+--project-config project-scan-config.yml
 ```
 
 获取详细内容请查看此文件 [project-scan-file.yml](project-scan-file.yml)
 
-请注意正确的转义，比如yml中的 `\.` 是正则非yaml的转义。如果想要知道该配置产生的影响，可以查看 output 目录中的 `scan-classifier-info.yml` 文件
+请注意正确的转义，比如yml中的 `\.` 是正则非yaml的转义。如果想要知道该配置产生的影响，可以查看 output 目录中的 `scan-classifier-info.json` 文件
 
 
 
@@ -506,7 +506,7 @@ SourceCodeDir: nacos
 
 <img src="../image/fat jar-1.png" alt="img" style="zoom:50%;" />
 
-此类项目的项目类文件和三方库类文件完全混合到一起，这种时候就需要使用 **--project-scan-config** 参数进一步筛选分析目标。
+此类项目的项目类文件和三方库类文件完全混合到一起，这种时候就需要使用 **--project-config** 参数进一步筛选分析目标。
 
 可以使用如下命令下载代码
 
@@ -520,20 +520,21 @@ git clone https://github.com/skylot/jadx.git jadx-src
 # 全部标记为 application class
 --process jadx-gui-1.4.3-with-jre-win\jadx-gui-1.4.3.jar 
 # 配合 filter 就可以从上面的 application class 中过滤掉 非jadx 开头的类，所以 application 只包含 jadx 开头的类了。过滤掉的类都成为了 library class，这部分类也会辅助分析以得到更精确的报告
---project-scan-config Jadx-JavaScanFilter.yml       
+--project-config Jadx-JavaScanFilter.yml       
 --source-path .\jadx-src
 ```
 
 其中，Jadx-JavaScanFilter.yml 如下编写：
 
 ```YAML
-# 部分省略
-analyze-filter:
-  class:
-    exclude:
-      - ..+$ # 所有除了 jadx 开头的类全部标记为 library class
-    include:
-      - jadx\..+$
+process-regex: #分析过滤器配置
+  java: # 所有除了 jadx 开头的类全部标记为 library class
+    - op: Sub
+      class: .+ # 全都类都不扫描。
+    - op: Add
+      file: .+
+    - op: Add
+      class: ^jadx\.
 ```
 
 
@@ -599,9 +600,7 @@ tasks.register<Copy>("copyRuntimeDependencies") {
 
 ```
 output
-├── analyzeSkip                      // --project-scan-config 参数的输出
-│   ├── classSkipList.txt            // ApplictionClasses 中被过滤掉的类
-│   └── sourceFileSkipList.txt       // 扫描资源文件中被过滤掉的文件
+├── scan-classifier-info.json        // ApplictionClasses 中被过滤掉的类, 扫描资源文件中被过滤掉的文件, 相关参数：--project-config
 ├── command.txt                      // 分析命令解析结果
 ├── source_files_which_class_not_found.txt // 项目中缺少对应class的源码, 可能是未能完整编译或没有正确指定到完整的classes
 ├── undefined_summary_methods.txt    // 被分析到且没有定义方法行为描述摘要的方法

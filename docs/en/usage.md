@@ -15,7 +15,7 @@
   * [--class-path](#--class-path)
   * [--source-path](#--source-path)
   * [--disable-analyze-library-classes](#--disable-analyze-library-classes)
-  * [--project-scan-config](#--project-scan-config)
+  * [--project-config](#--project-config)
   * [--serialize-cg](#--serialize-cg)
   * [--enable-coverage](#--enable-coverage)
   * [--make-scorecard](#--make-scorecard)
@@ -189,7 +189,7 @@ corresponding complete project source code)>
                                  Set whether to find the source code file from
                                  the compressed package (default:
                                  RecursivelyIndexArchive).
-  --project-scan-config=<file path>
+  --project-config=<file path>
                                  Specify the path of project scan config file.
   --disable-wrapper              Analyze the full frameworks together with the
                                  app without any optimizations (default: Use
@@ -327,19 +327,19 @@ Only needs to specify any parent directory of the source code.
 Flag option. This option is disabled by default to ensure analysis accuracy. During the Java inter-process analysis, the methods of the classes belonging to `LibraryClasses` will be analyzed. This option determines whether to skip analyzing library methods. If turned off, it will reduce some analysis resource consumption but may decrease analysis accuracy (more false positives and false negatives, depending on the specific project). Enable as needed.
 
 
-### --project-scan-config
+### --project-config
 
 > Used to inform the analyzer of the focus of analysis, expected analysis, and classes or files that are not desired to be analyzed.
 
 e.g.:
 
 ```
---project-scan-config project-scan-config.yml
+--project-config project-scan-config.yml
 ```
 
 For detailed content, please refer to this file [project-scan-file.yml](project-scan-file.yml).
 
-Please note correct escaping, such as `\.` in YAML is a regex escape, not YAML escape. If you want to know the impact of this configuration, you can check the `scan-classifier-info.yml` file in the output directory.
+Please note correct escaping, such as `\.` in YAML is a regex escape, not YAML escape. If you want to know the impact of this configuration, you can check the `scan-classifier-info.json` file in the output directory.
 
 
 
@@ -506,7 +506,7 @@ Some projects, when compiled, directly generate a complete fat JAR file, and may
 
 <img src="../image/fat jar-1.png" alt="img" style="zoom:50%;" />
 
-In such projects, project class files and third-party library class files are completely mixed together. In these cases, you need to use the **--project-scan-config** parameter for further filtering and analysis.
+In such projects, project class files and third-party library class files are completely mixed together. In these cases, you need to use the **--project-config** parameter for further filtering and analysis.
 
 You can download the code using the following command:
 
@@ -520,20 +520,21 @@ Combine with the already downloaded build artifacts, the key options and paramet
 # Mark all as application class
 --process jadx-gui-1.4.3-with-jre-win\jadx-gui-1.4.3.jar 
 # In conjunction with the filter, you can filter out classes not starting with "jadx" from the above application classes. Therefore, the application class only contains classes starting with "jadx". The filtered-out classes become library classes, which also assist in analysis to obtain more accurate reports.
---project-scan-config Jadx-JavaScanFilter.yml       
+--project-config Jadx-JavaScanFilter.yml       
 --source-path .\jadx-src
 ```
 
 Whereas, Jadx-JavaScanFilter.yml is written as follows:
 
 ```YAML
-# Partial omission
-analyze-filter:
-  class:
-    exclude:
-      - ..+$ # Mark all classes except those starting with "jadx" as library classes
-    include:
-      - jadx\..+$
+process-regex:
+  java: # Mark all classes except those starting with "jadx" as library classes
+    - op: Sub
+      class: .+ # exclude all classes as set library classes
+    - op: Add
+      file: .+
+    - op: Add
+      class: ^jadx\.
 ```
 
 **Alternatively, for a simpler approach, use the --auto-app-classes parameter pointing to the project's source code. This inherently provides the filtering effect, eliminating the need to manually write a filter file.**
@@ -601,9 +602,7 @@ The `--output output` points to the output directory that will be generated afte
 
 ```
 output
-├── analyzeSkip                      // Output of --project-scan-config parameter
-│   ├── classSkipList.txt            // Classes skipped in ApplictionClasses
-│   └── sourceFileSkipList.txt       // Files skipped during resource file scanning
+├── scan-classifier-info.json        // Classes skipped in ApplictionClasses or Files skipped during resource file scanning. releated command argument：--project-config
 ├── command.txt                      // Analysis command parsing result
 ├── source_files_which_class_not_found.txt // Source files missing corresponding class, possibly due to incomplete compilation or incorrect specification of complete classes
 ├── undefined_summary_methods.txt    // Methods analyzed but not defined in behavior description summary

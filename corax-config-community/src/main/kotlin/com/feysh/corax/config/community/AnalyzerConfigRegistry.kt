@@ -68,11 +68,12 @@ class AnalyzerConfigRegistry(wrapper: PluginWrapper) : Plugin(wrapper) {
             it += com.feysh.corax.config.community.checkers.`insecure-cookie`
             it += com.feysh.corax.config.community.checkers.`httponly-cookie`
             it += com.feysh.corax.config.community.checkers.`weak-ssl`.SSLContext
-            it += com.feysh.corax.config.community.checkers.`xxe-attacks`
+            it += com.feysh.corax.config.community.checkers.`external-xxe-attacks`
             it += com.feysh.corax.config.community.checkers.`weak-hash`
             it += com.feysh.corax.config.community.checkers.`open-redirect`
             it += com.feysh.corax.config.community.checkers.`permissive-cors`
             it += com.feysh.corax.config.community.checkers.`permissive-cors`.`any-url-request`
+            it += com.feysh.corax.config.community.checkers.deserialize.`deserialize-insecure-call`
         }
 
         override val sootConfig: ISootInitializeHandler = DefaultSootConfiguration
