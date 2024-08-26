@@ -26,12 +26,12 @@
 #
 ################################################################################
 
-CORAX_VERSION=2.10.1
+CORAX_VERSION=2.14
 CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
 JDK_TARGET_DIR="${HOME}/.local/share"
-CORAX_TARGET_DIR="${HOME}/.local/.corax"
+CORAX_TARGET_DIR="${HOME}/.local/corax"
 JVM_VERSION=jdk-17.0.3.1
 
 OSS_URL_CORAX_JAVA_CLI_COMMUNITY="http://release.feysh.com/corax-java-group/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1749644384&Signature=dtDV6mVSmTHgU3XT34IgOo9beWs%3D"

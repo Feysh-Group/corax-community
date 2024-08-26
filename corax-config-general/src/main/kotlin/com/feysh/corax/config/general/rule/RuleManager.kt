@@ -20,10 +20,12 @@
 package com.feysh.corax.config.general.rule
 
 import com.feysh.corax.config.general.model.taint.TaintRule
+import com.feysh.corax.config.general.utils.checkArg
 import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -33,6 +35,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 import kotlin.io.path.absolute
+import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.io.path.reader
 
@@ -53,15 +56,17 @@ open class RuleManager<T> (val rules: List<T>){
                 }
             }
         }
+
         private fun <T> decode(text: String, serializer: KSerializer<T>): List<T> {
-            val ret = mutableListOf<T>()
-            jsonFormat.parseToJsonElement(text).jsonArray.forEach { e ->
-                if (e is JsonObject){
-                    ret.add(jsonFormat.decodeFromString(serializer, e.toString()))
+            return jsonFormat.parseToJsonElement(text).jsonArray.mapNotNull { e ->
+                if (e is JsonObject) {
+                    jsonFormat.decodeFromJsonElement(serializer, e)
+                } else { // comment string
+                    null
                 }
             }
-            return ret
         }
+
         private fun <T> decode(file: Path, serializer: KSerializer<T>): List<T> {
             try {
                 file.reader(Charsets.UTF_8).use {
@@ -76,7 +81,7 @@ open class RuleManager<T> (val rules: List<T>){
 
         fun <T> load(files: List<Path>, serializer: KSerializer<T>): RuleManager<T> {
             val methods = ArrayList<T>(files.size * 100)
-            files.sortedBy { it.absolute().normalize() }.forEach { file ->
+            files.sortedBy { it.name }.forEach { file ->
                 methods += decode(file, serializer)
             }
             return RuleManager(methods)
@@ -113,7 +118,10 @@ open class GroupedMethodsManager<T: IMethodGrouped>(methods: List<T>) : RuleMana
     fun getRulesByGroupKinds(kinds: List<String>): Map<String, List<T>> = kinds.associateWith { getRulesByGroupKinds(it) }
 
     fun validate() {
-        rules.forEach { it.methodMatch }
+        rules.forEach {
+            val methodMatch = it.methodMatch
+            if (it is IMethodAccessPath) it.checkArg(methodMatch, it.signature)
+        }
     }
 
     companion object {

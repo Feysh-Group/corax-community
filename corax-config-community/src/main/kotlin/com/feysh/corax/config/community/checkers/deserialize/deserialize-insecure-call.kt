@@ -20,10 +20,12 @@
 package com.feysh.corax.config.community.checkers.deserialize
 
 import com.feysh.corax.config.api.SAOptions
-import com.feysh.corax.config.api.baseimpl.RawSignatureMatch
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
+import com.feysh.corax.config.api.baseimpl.matchSimpleSig
 import com.feysh.corax.config.community.DeserializationChecker
+import com.feysh.corax.config.community.language.soot.annotation.Converter
+import com.feysh.corax.config.community.language.soot.annotation.EnumElement
 import kotlinx.serialization.Serializable
 
 @Suppress("ClassName")
@@ -82,8 +84,35 @@ object `deserialize-insecure-call` : PreAnalysisUnit() {
             report(DeserializationChecker.ObjectDeserialization)
         }
 
-        atInvoke(RawSignatureMatch("com.fasterxml.jackson.databind.ObjectMapper", "enableDefaultTyping", null, null)) {
-            report(DeserializationChecker.JacksonUnsafeDeserialization)
+        // https://leadroyal.cn/p/633/
+        listOf(
+            matchSimpleSig("com.fasterxml.jackson.databind.ObjectMapper: * enableDefaultTyping(**)"),
+            matchSimpleSig("com.fasterxml.jackson.databind.ObjectMapper: * activateDefaultTyping(**)"),
+            matchSimpleSig("com.fasterxml.jackson.databind.ObjectMapper: * enableDefaultTypingAsProperty(**)"),
+            matchSimpleSig("com.fasterxml.jackson.databind.ObjectMapper: * activateDefaultTypingAsProperty(**)")
+        ).forEach {
+            atInvoke(it) {
+                val name = callee.name
+                report(DeserializationChecker.JacksonUnsafeDeserialization) {
+                    args["unsafe-config"] = name
+                }
+            }
+        }
+
+        atAnyField{
+            val jsonTypeInfo = Converter.convertAnnotations(visibilityAnnotationTag).annotations
+            for (annotation in jsonTypeInfo) {
+                if (annotation.type == "com.fasterxml.jackson.annotation.JsonTypeInfo") {
+                    val use = (annotation.getElement("use") as? EnumElement) ?: continue
+                    if (use.type == "com.fasterxml.jackson.annotation.JsonTypeInfo\$Id") {
+                        if (use.name == "CLASS" || use.name == "MINIMAL_CLASS") {
+                            report(DeserializationChecker.JacksonUnsafeDeserialization) {
+                                args["unsafe-config"] = use
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

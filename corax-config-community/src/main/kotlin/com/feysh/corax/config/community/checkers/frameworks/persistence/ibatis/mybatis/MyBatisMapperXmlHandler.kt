@@ -103,18 +103,19 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
         return builderAssistant
     }
 
-    fun initSqlFragments(resource: Path, configuration: Configuration) {
+    fun initSqlFragments(resource: Path, configuration: Configuration): Boolean {
         val document = PositionalXMLReader.readXMLUnsafe(resource)
         if (document == null) {
             logger.warn { "Failed to process MyBatis SqlFragments in xml: $resource" }
-            return
+            return false
         }
         val parser = XPathParser(document, true, configuration.variables, XMLMapperEntityResolver())
-        val context = parser.evalNode("/mapper") ?: return
+        val context = parser.evalNode("/mapper") ?: return false
         val builderAssistant = newBuilderAssistant(configuration, context, resource.pathString)
         // create inside <sql> for inline
         val sqlNodes = parser.evalNodes("/mapper/sql")
         parseSqlStatement(sqlNodes, builderAssistant, configuration)
+        return true
     }
 
     fun streamToSqls(resource: Path, configuration: Configuration): MybatisEntry? {

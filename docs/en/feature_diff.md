@@ -77,6 +77,9 @@ Currently, this project includes the following 27 open rule checkers:
 | Predictable Random Number Generation  |                                                        |
 | Weak Hash Algorithm                   |                                                        |
 
+
+You can refer to the IDE command parameter template: [.run/list-all-rules.run.xml](/.run/list-all-rules.run.xml) to print all rule names and IDs in the plugin.
+
 **If you want to learn more about Corax Commercial Edition, you can visit www.feysh.com or contact directly at contact@feysh.com**
 
 

@@ -10,14 +10,12 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.junit.Before
 import org.junit.Test
-import soot.MethodOrMethodContext
-import soot.PackManager
-import soot.Scene
-import soot.UnitPatchingChain
+import soot.*
 import soot.jimple.DynamicInvokeExpr
 import soot.jimple.Stmt
 import soot.jimple.toolkits.callgraph.Edge
 import soot.options.Options
+import soot.util.Chain
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -59,17 +57,49 @@ class ConfigValidate {
         private val logger = KotlinLogging.logger {}
     }
 
-    private val testClasses = "../corax-config-tests/normal/build/classes/java"
+    private val testClasses = "../corax-config-tests/normal/build/classes/java/main"
 
     @Before
     fun initSoot() {
+        val applicationClasses = getAppClasses(testClasses)
+        val libraryClasses = Scene.v().libraryClasses
+        val phantomClasses = Scene.v().phantomClasses
+        check(applicationClasses.size > 1)
+        getAndAddSootMethods(applicationClasses)
+        PackManager.v().getPack("wjpp").apply()
+        PackManager.v().getPack("cg").apply()
+
+        initInvokeExprMethods()
+        Scene.v().orMakeFastHierarchy
+
+        logger.info("applicationClasses: ${applicationClasses.size}. libraryClasses: ${libraryClasses.size}. phantomClasses: ${phantomClasses.size}")
+    }
+
+    fun getAndAddSootMethods(applicationClasses: Chain<SootClass>, checkConcrete: Boolean = true): LinkedHashSet<SootMethod> {
+        val sootMethods = linkedSetOf<SootMethod>()
+        for (appClass in applicationClasses) {
+            if (appClass.isPhantom) {
+                continue
+            }
+            for (method in appClass.methods) {
+                if (checkConcrete && !method.isConcrete) {
+                    continue
+                }
+                sootMethods.add(method)
+                Scene.v().entryPoints.add(method)
+            }
+        }
+        return sootMethods
+    }
+
+    fun getAppClasses(classPath: String): Chain<SootClass> {
         Options.v().prepend_classpath()
         Options.v().apply {
 //            set_soot_classpath(classPath.toString())
-            check(File(testClasses).exists()) {
+            check(File(classPath).exists()) {
                 "需要手动 gradle build 一次 corax-config-tests 模块，或者更改IDEA的Build+Execution+Deployment>Build+Tools>Gradle>using 更改为 gradle"
             }
-            set_process_dir(listOf(testClasses))
+            set_process_dir(listOf(classPath))
             set_src_prec(Options.src_prec_only_class)
             set_prepend_classpath(true)
 //            set_process_dir(listOf("target/test-classes"))
@@ -86,28 +116,7 @@ class ConfigValidate {
         }
         println(Scene.v().sootClassPath)
         Scene.v().loadNecessaryClasses()
-        val applicationClasses = Scene.v().applicationClasses
-        val libraryClasses = Scene.v().libraryClasses
-        val phantomClasses = Scene.v().phantomClasses
-        check(applicationClasses.size > 1)
-        for (appClass in applicationClasses) {
-            if (appClass.isPhantom) {
-                continue
-            }
-            for (method in appClass.methods) {
-                if (!method.isConcrete) {
-                    continue
-                }
-                Scene.v().entryPoints.add(method)
-            }
-        }
-        PackManager.v().getPack("wjpp").apply()
-        PackManager.v().getPack("cg").apply()
-
-        initInvokeExprMethods()
-        Scene.v().orMakeFastHierarchy
-
-        logger.info("applicationClasses: ${applicationClasses.size}. libraryClasses: ${libraryClasses.size}. phantomClasses: ${phantomClasses.size}")
+        return Scene.v().applicationClasses
     }
 
 

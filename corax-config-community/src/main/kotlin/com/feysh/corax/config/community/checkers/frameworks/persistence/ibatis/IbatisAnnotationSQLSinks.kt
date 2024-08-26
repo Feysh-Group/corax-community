@@ -20,6 +20,7 @@
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis
 
 import com.feysh.corax.config.api.*
+import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.general.checkers.internetControl
@@ -67,19 +68,22 @@ object IbatisAnnotationSQLSinks : AIAnalysisUnit() {
                                 val matched = params.intersect(riskNames)
                                 if (matched.isNotEmpty()) {
                                     val sinParam = if (matched.size == 1) "${matched.first()}" else "$matched"
-                                    val sink = if (ConfigCenter.isCollectionClassType(p.type) || ConfigCenter.isOptionalClassType(p.type)) p.field(Elements) else p
-                                    check(
-                                        sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
-                                        SqliChecker.SqlInjection
-                                    ){
-                                        this.args["type"] = "ibatis annotations Select"
-                                        appendPathEvent(
-                                            message = mapOf(
-                                                Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
-                                                Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`"
-                                            ),
-                                            loc = this@eachMethod.sootMethod
-                                        )
+                                    val sinkType = p.type.typename?.removeSuffix("java.lang.")
+                                    val sinks = if (ConfigCenter.isCollectionClassType(p.type) || ConfigCenter.isOptionalClassType(p.type)) listOf(p.field(Elements), p) else listOf(p)
+                                    for (sink in sinks) {
+                                        check(
+                                            sink.taint.containsAll(taintOf(internetControl + GeneralTaintTypes.CONTAINS_SQL_INJECT)),
+                                            SqliChecker.SqlInjection
+                                        ) {
+                                            this.args["type"] = "ibatis annotations Select"
+                                            appendPathEvent(
+                                                message = mapOf(
+                                                    Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the $sinkType type parameter `$sinParam` that is vulnerable to external malicious control.",
+                                                    Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`, 参数类型为: $sinkType"
+                                                ),
+                                                loc = this@eachMethod.sootMethod
+                                            )
+                                        }
                                     }
                                 }
                             }

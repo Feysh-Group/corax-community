@@ -80,6 +80,8 @@
 | 可预测的随机数生成                      |  |
 | 使用弱 hash 算法                    |  |
 
+您可以参考IDE命令参数模板：[.run/list-all-rules.run.xml](/.run/list-all-rules.run.xml) 打印插件中全部的规则名id
+
 **如果您想了解更多与Corax商业版相关的信息，可以访问www.feysh.com或直接联系contact@feysh.com**
 
 

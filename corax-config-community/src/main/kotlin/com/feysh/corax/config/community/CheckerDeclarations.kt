@@ -68,7 +68,7 @@ object InsecureCookieChecker : IChecker {
     override val report: IRule = FeyshRules.InsecureCookie
     override val standards: Set<IRule> = setOf(
         CWERules.CWE614,
-//      CERTRules.,
+//        CERTRules.,
     )
 
     object InsecureCookie : CheckType() {
@@ -420,7 +420,8 @@ object XssChecker : IChecker {
     override val standards: Set<IRule> = setOf(
         CWERules.CWE79,
         CERTRules.IDS51_J,
-//      CERTRules.,
+//        CERTRules.,
+        // TODO
     )
 
 
@@ -486,8 +487,8 @@ object DeserializationChecker : IChecker {
     
     object JacksonUnsafeDeserialization : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "方法 `$callee` 使用了不安全的 Jackson 反序列化配置" },
-            Language.EN to msgGenerator { "Unsafe Jackson deserialization configuration used in method: `$callee`" }
+            Language.ZH to msgGenerator { "使用了不安全的 Jackson 反序列化配置: `${args["unsafe-config"]}`" },
+            Language.EN to msgGenerator { "Unsafe Jackson deserialization configuration used: `${args["unsafe-config"]}`" }
         )
         override val checker: IChecker = DeserializationChecker
     }
@@ -509,11 +510,13 @@ object TrustBoundaryChecker : IChecker {
         override val checker: IChecker = TrustBoundaryChecker
     }
 }
+
 object SensitiveDataExposeChecker : IChecker {
     override val report: IRule = FeyshRules.SensitiveDataExpose
     override val standards: Set<IRule> = setOf(
         CWERules.CWE200,
-//      CERTRules.,
+//        CERTRules.,
+        // TODO
     )
 
     object SensitiveDataExposure : CheckType() {
@@ -594,7 +597,8 @@ object WeakSslChecker : IChecker {
     override val report: IRule = FeyshRules.WeakSsl
     override val standards: Set<IRule> = setOf(
         CWERules.CWE757,
-//      CERTRules.,
+//        CERTRules.,
+        // TODO
     )
 
     object DefaultHttpClient : CheckType() {

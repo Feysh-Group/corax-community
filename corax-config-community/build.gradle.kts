@@ -25,14 +25,14 @@ val kamlVersion: String by rootProject
 val log4j2Version: String by rootProject
 val caffeineVersion: String by rootProject
 val mybatisApacheVersion: String by rootProject
+val sonarPluginApiVersion: String by rootProject
+val sonarVersion: String by rootProject
+val sonarAnalyzerCommonsVersion: String by rootProject
 val javaparserVersion: String by rootProject
 val kotlinSerializationVersion: String by rootProject
 val guavaVersion: String by rootProject
 val apacheCommonsTextVersion: String by rootProject
-
-plugins {
-    kotlin("kapt")
-}
+val saxonVersion: String by rootProject
 
 tasks.withType<KotlinCompile> {
     //kotlinOptions.languageVersion = "1.8"
@@ -42,7 +42,7 @@ tasks.withType<KotlinCompile> {
 }
 
 evaluationDependsOn(":corax-config-tests")
-tasks.named<JavaCompile>("compileTestJava") {
+tasks.test {
     dependsOn(tasks.getByPath(":corax-config-tests:classes"))
 }
 
@@ -50,6 +50,10 @@ dependencies {
     compileOnly(project(":corax-config-api"))
     compileOnly(project(":corax-config-general"))
 
+    compileOnly(group = "org.sonarsource.analyzer-commons", name = "sonar-xml-parsing", version = sonarAnalyzerCommonsVersion)
+    compileOnly(group = "org.sonarsource.analyzer-commons", name = "sonar-analyzer-commons", version = sonarAnalyzerCommonsVersion)
+    compileOnly(group = "org.sonarsource.api.plugin", name = "sonar-plugin-api", version = sonarPluginApiVersion)
+    compileOnly(group = "org.sonarsource.sonarqube", name = "sonar-plugin-api-impl", version = sonarVersion)
     implementation(group = "org.mybatis", name = "mybatis", version = mybatisApacheVersion)
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = caffeineVersion)
     implementation(group = "org.apache.commons", name = "commons-lang3", version = apacheCommonsLang3Version)
@@ -57,12 +61,12 @@ dependencies {
     implementation(group = "com.github.javaparser", name = "javaparser-core", version = javaparserVersion)
     implementation(group = "com.google.guava", name = "guava", version = guavaVersion)
     implementation(group = "org.apache.commons", name = "commons-text", version = apacheCommonsTextVersion)
+    compileOnly(group = "net.sf.saxon", name = "Saxon-HE", version = saxonVersion)
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("javax:javaee-api:7.0")
     implementation("org.springframework:spring-web:4.3.30.RELEASE")
     implementation("org.springframework:spring-webmvc:4.3.30.RELEASE")
-
 
     testImplementation(project(":corax-config-api"))
     testImplementation(project(":corax-config-general"))

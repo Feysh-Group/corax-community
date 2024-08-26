@@ -1,7 +1,5 @@
 package testcode.hardcode.cryptokey;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.handler.CSRFHandler;
 import sun.security.provider.DSAPublicKeyImpl;
 
 import javax.crypto.spec.*;
@@ -168,16 +166,6 @@ public class HardcodedKey {
         return DriverManager.getConnection("url", "user", pwd);                  // $HardCodeUserName $HardCodePassword
     }
 
-
-    public void bad15(Vertx vertx) throws Exception {
-        String pwd;
-        if (PWD2[2] % 2 == 1) { // non-trivial condition
-            pwd = "hardcoded1";
-        } else { // different constant but still hard coded
-            pwd = "hardcoded2";
-        }
-        CSRFHandler.create(vertx, pwd);                                                   // $HardcodeCredentialChecker
-    }
 
     private byte[] pwd4; // not considered hard coded !$HardCodeKey
     private char[] pwd5 = null;  // !$HardCodeKey

@@ -22,7 +22,7 @@ val guavaVersion: String by rootProject
 val semVer: String? by project
 val configDir by extra { file("${layout.buildDirectory.get()}/analysis-config") }
 val pluginDir by extra { file("${layout.buildDirectory.get()}/analysis-config/plugins") }
-version = semVer ?: "2.10.1"
+version = semVer ?: "dev"
 
 plugins {
     `java-library`
@@ -355,6 +355,19 @@ configure(
             create<MavenPublication>("library") {
                 from(components["java"])
             }
+        }
+    }
+}
+
+subprojects {
+    tasks.test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            showCauses = true
+            showExceptions = true
+            setExceptionFormat("full")
+            setEvents(setOf("passed", "skipped", "failed", "standardOut", "standardError"))
         }
     }
 }

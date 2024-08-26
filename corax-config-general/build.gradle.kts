@@ -27,6 +27,7 @@ val mybatisApacheVersion: String by rootProject
 val sonarAnalyzerCommonsVersion: String by rootProject
 val sonarPluginApiVersion: String by rootProject
 val sonarVersion: String by rootProject
+val saxonVersion: String by rootProject
 
 java {
     withJavadocJar()
@@ -44,6 +45,7 @@ dependencies {
     implementation(group = "org.sonarsource.analyzer-commons", name = "sonar-analyzer-commons", version = sonarAnalyzerCommonsVersion)
     implementation(group = "org.sonarsource.api.plugin", name = "sonar-plugin-api", version = sonarPluginApiVersion)
     implementation(group = "org.sonarsource.sonarqube", name = "sonar-plugin-api-impl", version = sonarVersion)
+    implementation(group = "net.sf.saxon", name = "Saxon-HE", version = saxonVersion)
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("javax:javaee-api:7.0")

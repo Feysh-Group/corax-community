@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import testcode.sqli.dao.User;
+import testcode.sqli.domain.entity.SysDept;
 
 import java.util.List;
 
@@ -27,4 +28,11 @@ public interface UserMapper {
 
     User OrderByUsername();
 
+
+    /**
+     * 修改所在部门的父级部门状态
+     *
+     * @param dept 部门
+     */
+    public void updateDeptStatus(SysDept dept); // cwe-89
 }

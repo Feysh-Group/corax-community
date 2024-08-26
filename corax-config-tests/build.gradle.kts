@@ -7,10 +7,6 @@ repositories {
     google()
 }
 
-tasks.withType<JavaCompile>() {
-    options.isWarnings = false
-}
-
 java {
     withSourcesJar()
 }

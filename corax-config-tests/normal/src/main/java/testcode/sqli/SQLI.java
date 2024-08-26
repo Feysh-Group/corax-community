@@ -4,6 +4,7 @@ package testcode.sqli;
 import org.springframework.web.bind.annotation.*;
 import testcode.sqli.dao.User;
 import testcode.sqli.dao.UserNoSetter;
+import testcode.sqli.domain.entity.SysDept;
 import testcode.sqli.dto.UserProfile;
 import testcode.sqli.mapper.UserMapper;
 import org.slf4j.Logger;
@@ -220,6 +221,11 @@ public class SQLI {
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GetMapping("/mybatis/vuln06")
+    public void mybatisVuln06(SysDept sysDept) {
+        userMapper.updateDeptStatus(sysDept);// $cwe-89
     }
 
     /**

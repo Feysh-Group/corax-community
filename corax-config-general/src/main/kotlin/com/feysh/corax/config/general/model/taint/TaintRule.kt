@@ -23,6 +23,7 @@ package com.feysh.corax.config.general.model.taint
 
 
 import com.feysh.corax.config.general.rule.*
+import com.feysh.corax.config.general.utils.checkFromTo
 import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.*
 import mu.KotlinLogging
@@ -68,7 +69,10 @@ object TaintRule {
 
     open class SummaryManager(methods: List<Summary>) : RuleManager<Summary>(methods) {
         fun validate() {
-            rules.forEach { it.methodMatch }
+            rules.forEach {
+                val methodMatch = it.methodMatch
+                it.checkFromTo(methodMatch, it.signature)
+            }
         }
 
         companion object {

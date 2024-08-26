@@ -44,13 +44,14 @@ object RuleArgumentParser {
             }
             return when (val hType = TypeHandler.getHandlerType(type)) {
                 is TypeHandler.BoxedPrimitiveType -> listOf(p)
-                is TypeHandler.CollectionType -> listOf(p.field(Elements))
+                is TypeHandler.CollectionType -> listOf(p, p.field(Elements))
                 is TypeHandler.MapType -> if (hType.isMultiValueMap) listOf(
+                    p,
                     p.field(MapKeys),
                     p.field(MapValues).field(Elements)
-                ) else listOf(p.field(MapKeys), p.field(MapValues))
+                ) else listOf(p, p.field(MapKeys), p.field(MapValues))
 
-                is TypeHandler.OptionalType -> listOf(p.field(Elements))
+                is TypeHandler.OptionalType -> listOf(p, p.field(Elements))
                 is TypeHandler.OtherClassType -> listOf(p)
                 is TypeHandler.PrimitiveType -> listOf(p)
                 is TypeHandler.StringType -> listOf(p)

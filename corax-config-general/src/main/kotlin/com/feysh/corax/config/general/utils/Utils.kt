@@ -22,9 +22,13 @@
 package com.feysh.corax.config.general.utils
 
 import com.feysh.corax.config.api.IMethodMatch
+import com.feysh.corax.config.api.baseimpl.RawSignatureMatch
+import com.feysh.corax.config.api.baseimpl.SootSignatureMatch
 import com.feysh.corax.config.api.baseimpl.matchSimpleSig
 import com.feysh.corax.config.api.baseimpl.matchSoot
 import com.feysh.corax.config.api.utils.typename
+import com.feysh.corax.config.general.model.taint.TaintRule
+import com.feysh.corax.config.general.rule.IMethodAccessPath
 import com.feysh.corax.config.general.rule.IMethodSignature
 import com.google.common.base.Optional
 import mu.KotlinLogging
@@ -51,6 +55,18 @@ fun Any.enumerate(e: (Int) -> Unit) {
     }
 }
 
+
+val primTypesBoxedQuotedString get() = setOf(
+    "java.lang.Byte",
+    "java.lang.Short",
+    "java.lang.Integer",
+    "java.lang.Long",
+    "java.lang.Float",
+    "java.lang.Double",
+    "java.lang.Boolean",
+    "java.lang.Character",
+)
+
 val primTypes
     get() = setOf(
         ByteType.v(),
@@ -64,8 +80,6 @@ val primTypes
     )
 
 val primTypesBoxed get() = primTypes.mapTo(mutableSetOf()) { it.boxedType() }
-
-val primTypesBoxedQuotedString get() = primTypesBoxed.mapTo(mutableSetOf()) { it.typename!! }
 
 inline val Type.isBoxedPrimitives: Boolean
     get() = primTypesBoxed.contains(this)
@@ -160,6 +174,30 @@ object Utils {
 
 }
 
+fun isVoidReturnTypeOf(methodMatch: IMethodMatch) : Boolean {
+    return when (methodMatch) {
+        is RawSignatureMatch -> {
+            methodMatch.name.any { it == SootMethod.constructorName } || methodMatch.returnType?.lowercase() == "void"
+        }
+        is SootSignatureMatch -> {
+            val sm = methodMatch.sm
+            sm.name == SootMethod.constructorName || sm.returnType.lowercase() == "void"
+        }
+        else -> false
+    }
+}
+
+fun IMethodAccessPath.checkArg(methodMatch: IMethodMatch, sig: String): Boolean {
+    if (isVoidReturnTypeOf(methodMatch) && this.arg.lowercase().contains("returnvalue"))
+        error("it's not allowed to assign 'ReturnValue' to 'arg' if the return type is 'void'.The sig is:$sig")
+    return true
+}
+
+fun TaintRule.Summary.checkFromTo(methodMatch: IMethodMatch, sig: String): Boolean {
+    if (isVoidReturnTypeOf(methodMatch) && (this.from.lowercase().contains("returnvalue") || this.to.lowercase().contains("returnvalue")))
+        error("it's not allowed to assign 'ReturnValue' to 'from' or 'to' if the return type is 'void'.The sig is:$sig")
+    return true
+}
 
 val IMethodSignature.methodMatch: IMethodMatch
     get() {

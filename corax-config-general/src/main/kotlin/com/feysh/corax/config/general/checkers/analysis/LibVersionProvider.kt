@@ -18,6 +18,7 @@
  */
 package com.feysh.corax.config.general.checkers.analysis
 
+import com.feysh.corax.commons.compareToNullable
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.api.SAOptions
@@ -45,23 +46,29 @@ import java.util.concurrent.ConcurrentMap
 import java.util.regex.Pattern
 import kotlin.collections.Map
 import kotlin.io.path.inputStream
+import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
 
 @Serializable
-data class MavenRepositoryLibraryDescriptor(val groupId: String, val artifactId: String, val version: String): Comparable<MavenRepositoryLibraryDescriptor> {
+data class MavenRepositoryLibraryDescriptor(val groupId: String? = null, val artifactId: String, val version: String) :
+    Comparable<MavenRepositoryLibraryDescriptor> {
 
     @Transient
     val m2: DefaultArtifactVersion = DefaultArtifactVersion(version)
 
     override fun compareTo(other: MavenRepositoryLibraryDescriptor): Int {
-        this.groupId.compareTo(other.groupId).takeIf { it != 0 }?.let { return it }
+        this.groupId.compareToNullable(other.groupId).takeIf { it != 0 }?.let { return it }
         this.artifactId.compareTo(other.artifactId).takeIf { it != 0 }?.let { return it }
+        return compareToVersion(other)
+    }
+
+    fun compareToVersion(other: MavenRepositoryLibraryDescriptor): Int {
         return this.m2.compareTo(other.m2)
     }
 
     override fun toString(): String {
-        return "$groupId:$artifactId:$version"
+        return if (groupId != null) "$groupId:$artifactId:$version" else "$artifactId:$version"
     }
 }
 
@@ -87,7 +94,7 @@ object LibVersionProvider : PreAnalysisUnit() {
         Collections.synchronizedSet(Sets.newHybridSet())
     }
 
-    fun findFieldAssignedStringConstantValue(sm: SootMethod): Map<SootField, Constant>? {
+    private fun findFieldAssignedStringConstantValue(sm: SootMethod): Map<SootField, Constant>? {
         val body = if (sm.hasActiveBody()) sm.activeBody else return null
         val r = mutableMapOf<SootField, Constant>()
         for (u in body.units) {
@@ -109,7 +116,8 @@ object LibVersionProvider : PreAnalysisUnit() {
         }
         return r
     }
-    fun findFieldAssignedStringConstantValue(className: String, methodName: String): Map<SootField, Constant>? {
+
+    private fun findFieldAssignedStringConstantValue(className: String, methodName: String): Map<SootField, Constant>? {
         val sc = Scene.v().getSootClassUnsafe(className, false) ?: return null
         val r = mutableMapOf<SootField, Constant>()
         for (f in sc.fields) {
@@ -122,7 +130,7 @@ object LibVersionProvider : PreAnalysisUnit() {
     }
 
 
-    fun getFieldAssignedStringConstantValue(className: String, methodName: String, filedName: String): Constant? {
+    private fun getFieldAssignedStringConstantValue(className: String, methodName: String, filedName: String): Constant? {
         return findFieldAssignedStringConstantValue(className = className, methodName = methodName)?.mapKeys { it.key.name.lowercase() }?.get(filedName.lowercase())
     }
 
@@ -177,8 +185,16 @@ object LibVersionProvider : PreAnalysisUnit() {
                 VersionConditions.Mode.May,
                 VersionConditions.CompareOp.LT,
                 MavenRepositoryLibraryDescriptor("org.apache.poi", "poi-ooxml", "3.10.1")
+            ),
+            "risk-spring-web-CVE-2016-1000027" to VersionConditions(
+                VersionConditions.Mode.Must,
+                VersionConditions.CompareOp.LT,
+                MavenRepositoryLibraryDescriptor(artifactId = "spring-web", version = "6.0.0")
             )
         )
+
+        val jarFilePattern =
+            "^(?<artifactId>[a-zA-Z0-9_\\-\\.]+)-(?<version>[0-9]+(?:\\.[0-9]+)*(?:-[a-zA-Z0-9_\\-\\.]+)?)\\.jar\$"
     }
 
     private var option: Options = Options()
@@ -211,6 +227,10 @@ object LibVersionProvider : PreAnalysisUnit() {
         val versionCondition = option.versionConditions[condName] ?: let {
             logger.error { "condition name `$condName` is not exists." }; return null
         }
+        return versionCondCheck(condName, versionCondition)
+    }
+
+    fun versionCondCheck(condName: String, versionCondition: VersionConditions): Boolean {
         val cmpResults = compareTo(versionCondition.libraryDescriptor)
         val checkRes = cmpResults.mapValues { versionCondition.op.check(it.value) }
         val boolRes = checkRes.values
@@ -258,18 +278,29 @@ object LibVersionProvider : PreAnalysisUnit() {
         ) else null
     }
 
-    fun getLibraryDescriptor(groupId: String, artifactId: String): Set<ExistsDependency> {
-        return libraryDescriptors["$groupId.$artifactId"] ?: emptySet()
+    fun getLibraryDescriptor(groupId: String?, artifactId: String): Set<ExistsDependency> {
+        if (groupId != null) {
+            return libraryDescriptors["$groupId.$artifactId"] ?: libraryDescriptors[artifactId] ?: emptySet()
+        }
+        return libraryDescriptors[artifactId] ?: emptySet()
     }
 
     fun compareTo(other: MavenRepositoryLibraryDescriptor) =
-        getLibraryDescriptor(other.groupId, other.artifactId).associateWith { it.libraryDescriptor.compareTo(other) }
+        getLibraryDescriptor(other.groupId, other.artifactId).associateWith { it.libraryDescriptor.compareToVersion(other) }
 
 
-    fun add(descriptor: ExistsDependency) =
-        libraryDescriptors.getOrPut("${descriptor.libraryDescriptor.groupId}.${descriptor.libraryDescriptor.artifactId}") {
+    fun add(descriptor: ExistsDependency) {
+        val groupId = descriptor.libraryDescriptor.groupId
+        val artifactId = descriptor.libraryDescriptor.artifactId
+        libraryDescriptors.getOrPut(artifactId) {
             Collections.synchronizedSet(LinkedHashSet())
         }.add(descriptor)
+        if (groupId != null) {
+            libraryDescriptors.getOrPut("$groupId.$artifactId") {
+                Collections.synchronizedSet(LinkedHashSet())
+            }.add(descriptor)
+        }
+    }
 
     context (PreAnalysisApi)
     @OptIn(ExperimentalSerializationApi::class)
@@ -296,13 +327,32 @@ object LibVersionProvider : PreAnalysisUnit() {
             mergeProperties(model)
         }
 
+        val regex = option.jarFilePattern.toRegex()
+        val collectJarLibs = atAnySourceFile(extension = "jar") {
+            val matchResult = regex.matchEntire(path.name)
+            if (matchResult == null) {
+                logger.debug { "${path.name} can't match the lib pattern while collecting jar libs." }
+                return@atAnySourceFile
+            }
+            val artifactId = matchResult.groups["artifactId"]?.value ?: return@atAnySourceFile
+            val version = matchResult.groups["version"]?.value ?: return@atAnySourceFile
+            val libraryDescriptor = MavenRepositoryLibraryDescriptor(artifactId = artifactId, version = version)
+            add(ExistsDependency(path.toUri().toString(), libraryDescriptor))
+        }
+
         runInScene {
             parser.await()
             parser2.await()
+            collectJarLibs.await()
             collectExistsDependency()
             val out = outputPath.resolve("project-env").also { FileUtils.forceMkdir(it.toFile()) }
             out.resolve("versions.txt").outputStream().use { outputStream ->
-                jsonFormat.encodeToStream(libraryDescriptors.toMap(), outputStream)
+                val map = libraryDescriptors.values.flatten().toSet().groupBy {
+                    val groupId = it.libraryDescriptor.groupId
+                    val artifactId = it.libraryDescriptor.artifactId
+                    if (groupId != null) "$groupId.$artifactId" else artifactId
+                }
+                jsonFormat.encodeToStream(map, outputStream)
             }
         }
     }

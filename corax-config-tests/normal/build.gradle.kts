@@ -4,10 +4,14 @@ val mybatisApacheVersion: String by rootProject
 
 
 dependencies {
+    compileOnly(group = "org.projectlombok", name = "lombok", version ="1.18.32")
+    annotationProcessor(group = "org.projectlombok", name = "lombok", version ="1.18.32")
 
     compileOnly("com.google.guava:guava:19.0"){ isTransitive = false }
 
     compileOnly(group = "org.mybatis", name = "mybatis", version = mybatisApacheVersion)
+
+    compileOnly(group = "org.apache.logging.log4j", name = "log4j-core", version = "2.15.0")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web:1.5.1.RELEASE") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
@@ -21,16 +25,15 @@ dependencies {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
         isTransitive = false
     }
-    // https://mvnrepository.com/artifact/org.springframework/org.springframework.web
-    compileOnly("org.springframework:org.springframework.web:3.2.2.RELEASE"){ isTransitive = true }
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-web
-    implementation("org.springframework.security:spring-security-web:5.7.5"){ isTransitive = true }
+    implementation("org.springframework.security:spring-security-web:4.2.20.RELEASE"){ isTransitive = true }
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-config
+    compileOnly("org.springframework.security:spring-security-config:4.2.20.RELEASE"){ isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.springframework/spring-webmvc
-    compileOnly("org.springframework:spring-webmvc:4.3.6.RELEASE"){ isTransitive = true }
-    compileOnly("org.springframework:spring-web:4.3.6.RELEASE"){ isTransitive = true }
-    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-config
-    compileOnly("org.springframework.security:spring-security-config:4.2.1.RELEASE"){ isTransitive = false }
+    compileOnly("org.springframework:spring-webmvc:4.3.30.RELEASE"){ isTransitive = true }
+    // https://mvnrepository.com/artifact/org.springframework/org.springframework.web
+    compileOnly("org.springframework:spring-web:4.3.30.RELEASE"){ isTransitive = true }
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
     compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.8.0"){ isTransitive = false }
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
@@ -44,6 +47,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.tapestry/tapestry-core
     compileOnly("org.apache.tapestry:tapestry-core:5.8.2"){ isTransitive = false }
+    compileOnly("org.apache.tapestry:tapestry5-annotations:5.8.2"){ isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.apache.wicket/wicket-core
     compileOnly("org.apache.wicket:wicket-core:9.12.0"){ isTransitive = false }
@@ -73,7 +77,8 @@ dependencies {
     compileOnly("org.freemarker:freemarker:2.3.31"){ isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.apache.velocity/velocity
-    compileOnly("org.apache.velocity:velocity:1.7"){ isTransitive = false }
+//    compileOnly("org.apache.velocity:velocity:1.7"){ isTransitive = false }
+    compileOnly("org.apache.velocity:velocity-engine-core:2.3"){ isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.owasp.esapi/esapi
     compileOnly("org.owasp.esapi:esapi:2.0.1"){ isTransitive = false }
@@ -88,8 +93,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
     compileOnly("org.bouncycastle:bcprov-jdk15on:1.60"){ isTransitive = false }
 
-    compileOnly("io.vertx:vertx-web:4.3.5"){ isTransitive = false }
-    compileOnly("io.vertx:vertx-core:4.3.5"){ isTransitive = false }
     // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core
     compileOnly("com.amazonaws:aws-java-sdk-core:1.12.297"){ isTransitive = false }
     // https://mvnrepository.com/artifact/com.auth0/java-jwt
@@ -144,8 +147,28 @@ dependencies {
     compileOnly("io.jsonwebtoken:jjwt:0.9.1") { isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.opensaml/xmltooling
-    compileOnly(group = "org.opensaml", name = "xmltooling", version ="1.4.4"){ isTransitive = false }
+    compileOnly(group = "org.opensaml", name = "xmltooling", version ="1.4.4") { isTransitive = false }
 
-    compileOnly(group = "org.apache.poi", name = "poi-ooxml", version ="3.10-FINAL"){ isTransitive = true }
+    compileOnly(group = "org.apache.poi", name = "poi-ooxml", version ="3.10-FINAL") { isTransitive = false }
+    compileOnly(group = "org.apache.poi", name = "poi", version ="3.10-FINAL") { isTransitive = false }
 
+    compileOnly(group = "com.squareup.okhttp3", name = "okhttp", version ="4.9.0") { isTransitive = false }
+    compileOnly(group = "com.squareup.okio", name = "okio", version ="2.8.0") { isTransitive = false }
+
+    compileOnly(group = "cn.hutool", name = "hutool-all", version ="5.8.16") { isTransitive = false }
+
+    compileOnly(group = "org.thymeleaf", name = "thymeleaf-spring5", version ="3.0.15.RELEASE") { isTransitive = true }
+
+    compileOnly(group ="com.aliyun.oss", name = "aliyun-sdk-oss", version = "3.18.0")
+
+}
+
+tasks.withType<JavaCompile>() {
+    options.isWarnings = false
+    options.isDeprecation = false
+    options.isIncremental = true
+    options.isVerbose = false
+    options.compilerArgs.add("-Xlint:-deprecation")
+    options.compilerArgs.add("-Xlint:-removal")
+    options.compilerArgs.add("-Xlint:-unchecked")
 }

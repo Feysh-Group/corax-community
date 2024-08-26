@@ -85,9 +85,9 @@ object `secret-data-annotation` : AIAnalysisUnit() {
 
             atGet {
                 val accessPaths = if (ConfigCenter.isCollectionClassType(fieldType) || ConfigCenter.isOptionalClassType(fieldType)) {
-                    listOf(field.field(Elements))
+                    listOf(field.field(Elements), field)
                 } else if (ConfigCenter.isMapClassType(fieldType)) {
-                    listOf(field.field(MapValues))
+                    listOf(field.field(MapValues), field)
                 } else {
                     listOf(field)
                 }

@@ -23,6 +23,7 @@ package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.
 
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
+import com.feysh.corax.config.api.report.Region
 import com.feysh.corax.config.api.utils.superClasses
 import com.feysh.corax.config.api.utils.superInterfaces
 import com.feysh.corax.config.api.utils.typename
@@ -40,6 +41,7 @@ import com.feysh.corax.config.community.checkers.frameworks.xml.XmlParser
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.utils.columnNumber
 import com.feysh.corax.config.general.utils.lineNumber
+import com.feysh.corax.config.general.utils.region
 import kotlinx.serialization.Serializable
 import soot.SootMethod
 import soot.Type
@@ -190,7 +192,8 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     }
 
     context (builder@ISootMethodDecl.CheckBuilder<Any>)
-    private fun checkSink(statement: MyBatisTransform.Statement, sinParam: ExpressionEvaluator.Value, method: SootMethod, sink: ILocalT<*>) {
+    private fun checkSink(statement: MyBatisTransform.Statement, sinParam: ExpressionEvaluator.Value, method: SootMethod, sink: ILocalT<*>, sinkSootType: Type) {
+        val sinkType = sinkSootType.typename?.removeSuffix("java.lang.")
         val xmlNode = statement.xNode.node
         val phantomBoundSql = statement.phantomBoundSql
         check(
@@ -198,24 +201,23 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
             SqliChecker.SqlInjection
         ) {
             this.args["type"] = "Mybatis Xml Mapper SQL Query"
-            this.args["msg"] = "The injection point: `$sinParam` at sql: `${phantomBoundSql.sql}`"
+            this.args["msg"] = "The injection point: $sinkType type parameter `$sinParam` at sql: `${phantomBoundSql.sql}`"
 
             appendPathEvent(
                 message = mapOf(
-                    Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
-                    Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`"
+                    Language.EN to "In the MyBatis Mapper Interface, there is a controllable dynamic concatenation of the $sinkType type parameter `$sinParam` that is vulnerable to external malicious control.",
+                    Language.ZH to "MyBatis Mapper Interface 中存在外部恶意控制的动态拼接参数: `$sinParam`, 参数类型为: $sinkType"
                 ),
                 loc = method
             )
 
             appendPathEvent(
                 message = mapOf(
-                    Language.EN to "In the MyBatis Mapper XML, there is a controllable dynamic concatenation of the parameter `$sinParam` that is vulnerable to external malicious control.",
-                    Language.ZH to "MyBatis Mapper Xml 中存在外部恶意控制的动态拼接参数: `$sinParam`"
+                    Language.EN to "In the MyBatis Mapper XML, there is a controllable dynamic concatenation of the $sinkType type parameter `$sinParam` that is vulnerable to external malicious control.",
+                    Language.ZH to "MyBatis Mapper Xml 中存在外部恶意控制的动态拼接参数: `$sinParam`, 参数类型为: $sinkType"
                 ),
                 loc = statement.resource,
-                line = xmlNode.lineNumber,
-                column = xmlNode.columnNumber
+                region = xmlNode.region ?: Region.ERROR,
             )
         }
     }
@@ -233,7 +235,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
                 if (method.parameterCount == 1) {
                     val pt = method.getParameterType(0)
                     if (TraverseExpr.isStringType(pt.typename)){
-                        checkSink(statement, bindingValue, method, p0)
+                        checkSink(statement, bindingValue, method, p0, sinkSootType = pt)
                     }
                 }
                 continue
@@ -244,7 +246,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
                     .traverseExpr(bindingValue)
                 if (sinks != null) {
                     for (sink in sinks) {
-                        checkSink(statement, bindingValue, method, sink.value)
+                        checkSink(statement, bindingValue, method, sink.value, sinkSootType = sink.type)
                     }
                 }
             } else {
@@ -299,8 +301,7 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
                         Language.ZH to "MyBatis Mapper Xml 中存在动态拼接参数: $sqlInjectParameters"
                     ),
                     loc = xmlResource,
-                    line = xmlNode.lineNumber,
-                    column = xmlNode.columnNumber
+                    region = xmlNode.region ?: Region.ERROR,
                 )
             }
         }

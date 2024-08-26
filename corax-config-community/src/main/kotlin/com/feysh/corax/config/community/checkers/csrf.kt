@@ -21,7 +21,11 @@ package com.feysh.corax.config.community.checkers
 
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
+import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.community.CsrfChecker
+import com.feysh.corax.config.general.utils.isInstanceOf
+import soot.RefType
+import soot.Scene
 import soot.tagkit.AnnotationArrayElem
 import soot.tagkit.AnnotationElem
 import soot.tagkit.AnnotationEnumElem
@@ -30,14 +34,19 @@ import soot.tagkit.AnnotationEnumElem
 object csrf : PreAnalysisUnit() {
     context (PreAnalysisApi)
     override suspend fun config() {
+        val csrfConfigurerType: RefType? = Scene.v().getRefTypeUnsafe("org.springframework.security.config.annotation.web.configurers.CsrfConfigurer")
         atAnyInvoke {
             /*
              * security.and().csrf().disable(); // $CWE-352
              * invokevirtual Method org/springframework/security/config/annotation/web/builders/HttpSecurity.csrf:()Lorg/springframework/security/config/annotation/web/configurers/CsrfConfigurer;
              * invokevirtual Method org/springframework/security/config/annotation/web/configurers/CsrfConfigurer.disable:()Lorg/springframework/security/config/annotation/web/HttpSecurityBuilder;
              */
-            if (callee.declaringClass.name == "org.springframework.security.config.annotation.web.configurers.CsrfConfigurer" && callee.name == "disable") {
-                report(CsrfChecker.SpringCsrfProtectionDisabled)
+            val declaredReceiverType = declaredReceiverType ?: return@atAnyInvoke
+            if (declaredReceiverType.typename?.endsWith("CsrfConfigurer") == true ||
+                (csrfConfigurerType != null && declaredReceiverType.isInstanceOf(csrfConfigurerType))) {
+                if (callee.name == "disable") {
+                    report(CsrfChecker.SpringCsrfProtectionDisabled)
+                }
             }
         }
 

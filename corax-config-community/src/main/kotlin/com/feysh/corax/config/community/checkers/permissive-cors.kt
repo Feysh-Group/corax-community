@@ -76,15 +76,20 @@ object `permissive-cors` : AIAnalysisUnit() {
     }
 
 
-    object `any-url-request`: PreAnalysisUnit(){
+    object `any-url-request` : PreAnalysisUnit() {
         context (PreAnalysisApi)
         override suspend fun config() {
             atAnyMethod {
-                val mapping = visibilityAnnotationTag?.annotations?.filter { it.type in JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES } ?: return@atAnyMethod
-                for (m in mapping){
-                    val valueElement = m.elems.filterIsInstance<AnnotationArrayElem>().filter { element -> element.name == "value" }
-                    for (value in valueElement){
-                        val anyUrlRequest = value.values.filterIsInstance<AnnotationStringElem>().any { e -> e.value == "*" }
+                val targetAnnotations = JavaeeFrameworkConfigs.option.REQUEST_MAPPING_ANNOTATION_TYPES + "Lorg/springframework/web/bind/annotation/CrossOrigin;"
+                val mapping =
+                    visibilityAnnotationTag?.annotations?.filter { it.type in targetAnnotations }
+                        ?: return@atAnyMethod
+                for (m in mapping) {
+                    val valueElement = m.elems.filterIsInstance<AnnotationArrayElem>()
+                        .filter { element -> element.name == "value" || element.name == "origins" }
+                    for (value in valueElement) {
+                        val anyUrlRequest =
+                            value.values.filterIsInstance<AnnotationStringElem>().any { e -> e.value == "*" }
                         if (!anyUrlRequest) continue
                         report(PermissiveCorsChecker.PermissiveCors)
                     }

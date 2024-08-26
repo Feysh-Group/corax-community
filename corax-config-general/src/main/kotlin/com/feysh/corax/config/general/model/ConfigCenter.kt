@@ -19,19 +19,30 @@
 
 package com.feysh.corax.config.general.model
 
+import com.feysh.corax.cache.AnalysisCache
 import com.feysh.corax.config.api.CheckerUnit
 import com.feysh.corax.config.api.SAOptions
 import com.feysh.corax.config.api.utils.ClassCommons
+import com.feysh.corax.config.api.utils.activeBodyOrNull
+import com.feysh.corax.config.api.utils.typename
+import com.feysh.corax.config.api.utils.visibilityAnnotationTag
 import com.feysh.corax.config.general.model.taint.TaintRule
 import com.feysh.corax.config.general.rule.GroupedMethodsManager
 import com.feysh.corax.config.general.rule.MethodAccessPath
+import com.feysh.corax.config.general.rule.RuleManager.Companion.jsonFormat
 import com.feysh.corax.config.general.utils.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
 import mu.KotlinLogging
 import soot.*
+import soot.tagkit.AnnotationTag
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.function.Predicate
+import kotlin.io.path.inputStream
 import kotlin.io.path.name
 import kotlin.io.path.pathString
 
@@ -80,6 +91,12 @@ object ConfigCenter : CheckerUnit() {
             "javax.ws.rs.core.MultiValueMap",
         )
 
+
+        val junitSrcAnySubPath: Set<String> = setOf("src/test")
+
+        val junitPackages = setOf("org.junit")
+
+        val mockPackages = setOf("org.mockito")
     }
 
     var option: Options = Options()
@@ -135,6 +152,47 @@ object ConfigCenter : CheckerUnit() {
         return true
     }
 
+    fun isJunitTestClass(declaringClass: SootClass): Boolean {
+        val src = AnalysisCache.G.class2SourceFile(declaringClass)?.pathString?.replace('\\', '/')
+        if (src != null && option.junitSrcAnySubPath.any { src.contains(it.replace('\\', '/')) }) {
+            return true
+        }
+
+        val junitPackages = option.junitPackages
+        val anyMethodAnnotatedJunitType = declaringClass.methods.firstOrNull { method ->
+            method.annotationTypeMatchFirstOrNull{ type -> junitPackages.any { type.contains(it) } } != null
+        }
+        if (anyMethodAnnotatedJunitType != null)
+            return true
+
+        return false
+    }
+
+    fun hasAnyMockInBody(sootMethod: SootMethod): Boolean {
+        val body = sootMethod.activeBodyOrNull ?: return false
+        val mockPackages = option.mockPackages
+        return body.locals.any { local ->
+            val type = local.type.typename ?: return@any false
+            mockPackages.any { type.contains(it) }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun <T> loadConfigs(serializer: KSerializer<T>, filter: (file: Path) -> Boolean): Map<Path, T> {
+        val matchedFiles =
+            walkFiles(getConfigDirectories(), filter)
+
+        return matchedFiles.associateWith { path ->
+            path.inputStream().use {
+                jsonFormat.decodeFromStream(serializer, it)
+            }
+        }
+    }
 
     private val logger = KotlinLogging.logger {}
+}
+
+fun SootMethod.annotationTypeMatchFirstOrNull(predicate: (type: String) -> Boolean): AnnotationTag? {
+    val visibilityAnnotationTag = visibilityAnnotationTag ?: return null
+    return visibilityAnnotationTag.annotations?.firstOrNull { predicate(classTypeToSootTypeDesc(it.type)) }
 }

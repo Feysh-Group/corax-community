@@ -19,14 +19,24 @@
 
 package com.feysh.corax.config.general.utils
 
+import com.feysh.corax.config.api.ISourceFileCheckPoint
+import com.feysh.corax.config.api.report.Region
 import mu.KotlinLogging
+import org.sonar.api.batch.fs.InputFile
+import org.sonar.api.batch.fs.internal.DefaultInputFile
+import net.sf.saxon.s9api.Processor
+import net.sf.saxon.s9api.XdmNode
 import org.sonarsource.analyzer.commons.xml.XmlFile
 import org.sonarsource.analyzer.commons.xml.XmlTextRange
 import org.w3c.dom.Document
 import org.w3c.dom.Node
+import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.nio.file.Path
+import kotlin.io.path.inputStream
 import kotlin.jvm.optionals.getOrNull
 
 object PositionalXMLReader {
@@ -39,8 +49,21 @@ object PositionalXMLReader {
         return try {
             readXML(file)
         } catch (e: Exception) {
-            logger.warn { "Exception while reading xml document: $file. e: ${e.message}" }
-            logger.debug(e) { "Exception while reading xml document: $file. e: ${e.message}" }
+            logger.warn { "Exception while reading xml document with orgW3c: $file. e: ${e.message}" }
+            logger.debug(e) { "Exception while reading xml document with orgW3c: $file. e: ${e.message}" }
+            null
+        }
+    }
+
+    fun readSaxonXml(processor: Processor, file: Path): XdmNode? {
+        return try {
+            file.inputStream().use {
+                val source = InputSource(it)
+                createSaxonDocument(processor, source)
+            }
+        } catch (e: Exception) {
+            logger.warn { "Exception while reading xml document with Saxon: $file. e: ${e.message}" }
+            logger.debug(e) { "Exception while reading xml document with Saxon: $file. e: ${e.message}" }
             null
         }
     }
@@ -56,14 +79,26 @@ object PositionalXMLReader {
         }
     }
 
+
+    @Throws(SAXException::class)
+    fun readXML(file: InputFile): XmlFile? {
+        return try {
+            SNFactory.readPositionalXML(file)
+        } catch (e: Exception) {
+            logger.warn { "Exception while reading xml document: ${file.uri()}. e: ${e.message}" }
+            logger.debug(e) { "Exception while reading xml document: ${file.uri()}. e: ${e.message}" }
+            null
+        }
+    }
+
     @Throws(IOException::class, SAXException::class)
     fun readXML(file: Path): Document {
-        return SonarFactory.readPositionalXML(file).namespaceUnawareDocument
+        return SNFactory.readPositionalXML(file).namespaceUnawareDocument
     }
 
     @Throws(SAXException::class)
     fun readXML(xml: String): Document {
-        return SonarFactory.readPositionalXML(xml).namespaceUnawareDocument
+        return SNFactory.readPositionalXML(xml).namespaceUnawareDocument
     }
 
 //    fun readXML(`is`: InputStream?): Document {
@@ -153,3 +188,6 @@ val Node.lineNumber: Int get() = range?.startLine ?: -1
 val Node.columnNumber: Int get() = range?.startColumn ?: -1
 val Node.endLineNumber: Int get() = range?.endLine ?: -1
 val Node.endColumnNumber: Int get() = range?.endColumn ?: -1
+
+val Node.region: Region? get() = Region(lineNumber, columnNumber, endLineNumber, endColumnNumber).takeIfValid
+val XdmNode.region: Region? get() = Region(lineNumber, columnNumber, -1, -1).takeIfValid

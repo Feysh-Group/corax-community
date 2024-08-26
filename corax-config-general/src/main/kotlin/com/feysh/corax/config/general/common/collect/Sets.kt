@@ -21,6 +21,8 @@
 
 package com.feysh.corax.config.general.common.collect
 
+import com.google.common.collect.Sets
+
 object Sets {
     inline fun <E> newHybridSet(): MutableSet<E> {
         return HashSet()
@@ -28,5 +30,9 @@ object Sets {
 
     inline fun <E> newSet(): MutableSet<E> {
         return HashSet()
+    }
+
+    inline fun <E> newConcurrentHashSet(): MutableSet<E> {
+        return Sets.newConcurrentHashSet()
     }
 }

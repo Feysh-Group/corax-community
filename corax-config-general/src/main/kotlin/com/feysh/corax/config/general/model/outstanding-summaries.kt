@@ -48,6 +48,7 @@ object `outstanding-summaries` : AIAnalysisUnit() {
                 if (ConfigCenter.isCollectionClassType(thisType) || ConfigCenter.isOptionalClassType(thisType)) {
                     modelNoArg {
                         `return`.taint += `this`.field(Elements).taint
+                        `return`.taint += `this`.taint
                     }
                 } else if (ConfigCenter.isMapClassType(sootMethod.declaringClass.type)) {
                     modelNoArg {

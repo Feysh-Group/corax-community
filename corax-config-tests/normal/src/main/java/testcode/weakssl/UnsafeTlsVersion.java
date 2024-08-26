@@ -2,6 +2,7 @@ package testcode.weakssl;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
@@ -121,5 +122,13 @@ public class UnsafeTlsVersion {
     SSLEngine engine = SSLContext.getDefault().createSSLEngine();
     engine.setEnabledProtocols(protocols);
     return engine;
+  }
+
+  public void testProperties() {
+      System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");           // $SslContext
+      System.setProperty("https.protocols", "TLSv1");                           // $SslContext
+      System.setProperty("https.protocols", "TLSv1.2");                         // !$SslContext
+      new Properties().setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // $SslContext
+      new Properties().setProperty("https.protocols", "TLSv1.3");               // !$SslContext
   }
 }

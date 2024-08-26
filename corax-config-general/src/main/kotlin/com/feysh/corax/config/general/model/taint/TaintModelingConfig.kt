@@ -66,6 +66,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
         )
 
         val sanitizerTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
+            "ctrl" to setOf(GeneralTaintTypes.ControlData),
             "crlf" to setOf(GeneralTaintTypes.CONTAINS_CRLF),
             "path-traversal" to setOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, GeneralTaintTypes.ZIP_ENTRY_NAME),
             "unlimited-file-extension" to setOf(GeneralTaintTypes.UNLIMITED_FILE_EXTENSION),
@@ -219,9 +220,4 @@ object TaintModelingConfig : AIAnalysisUnit() {
             override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath) { visit(this@api, this@bdr, acp) }
         })
     }
-}
-
-
-abstract class XX() {
-    abstract fun applySourceSink(): IApplySourceSink
 }

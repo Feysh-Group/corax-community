@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 
 @Suppress("PropertyName")
-object JavaeeFrameworkConfigs: CheckerUnit() {
+object JavaeeFrameworkConfigs : CheckerUnit() {
     @Serializable
     class Options : SAOptions {
         val REQUEST_MAPPING_ANNOTATION_TYPES_SPRING = setOf(
@@ -60,5 +60,6 @@ object JavaeeFrameworkConfigs: CheckerUnit() {
 
         val REQUEST_MAPPING_ANNOTATION_TYPES get() = REQUEST_MAPPING_ANNOTATION_TYPES_SPRING + REQUEST_MAPPING_ANNOTATION_JAVAX_WS_RS
     }
+
     var option: Options = Options()
 }

@@ -21,8 +21,10 @@
 
 package com.feysh.corax.config.general.common.collect
 
+import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
+import java.util.concurrent.ConcurrentMap
 
 typealias MultiMap<K, V> = Multimap<K, V>
 typealias Supplier<T> = com.google.common.base.Supplier<T>
@@ -53,5 +55,9 @@ object Maps {
 
     fun <K, V> newMultiMap(): MultiMap<K, V> {
         return newMultiMap(newMap(), Sets::newHybridSet)
+    }
+
+    fun <K, V> newConcurrentMap(): ConcurrentMap<K, V> {
+        return Maps.newConcurrentMap()
     }
 }

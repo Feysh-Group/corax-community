@@ -242,8 +242,8 @@ set -- \
 
 params=""
 printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" | sed 's~[^-[:alnum:]+,./:=@_]~\&~g' | while IFS= read -r line; do
-  params+=" $line"
+  params="${params} $line"
 done
-eval "set -- $params" "$@"
+eval "set -- ${params}" "$@"
 
 exec "$JAVACMD" "$@"

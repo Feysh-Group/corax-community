@@ -90,6 +90,7 @@ private val normalSource: MutableSet<GeneralTaintTypes> = mutableSetOf(
     GeneralTaintTypes.CONTAINS_REDIRECTION_INJECT,
     GeneralTaintTypes.CONTAINS_OGNL_INJECT,
     GeneralTaintTypes.UNLIMITED_FILE_EXTENSION,
+    GeneralTaintTypes.CONTAINS_LDAP_INJECT,
 )
 
 val internetSource: MutableSet<GeneralTaintTypes> =

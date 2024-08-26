@@ -19,17 +19,12 @@
 
 package com.feysh.corax.config.community.checkers
 
-import com.feysh.corax.config.api.*                           
+import com.feysh.corax.config.api.*
 import com.feysh.corax.config.community.*
-import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.checkers.*
-import com.feysh.corax.config.general.checkers.analysis.JsonExtVisitor
-import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider.versionCondCheck
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
 import kotlinx.serialization.*
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 
 
 @Suppress("ClassName")
@@ -54,7 +49,7 @@ object `taint-checker` : AIAnalysisUnit() {
 
             "template-injection" to CustomSinkDataForCheck(control, reportType = TemplateIChecker.TemplateInjection),
             "request-forgery" to CustomSinkDataForCheck(control, reportType = SsrfChecker.RequestForgery),
-            "ldap-injection" to CustomSinkDataForCheck(control, reportType = LdapiChecker.LdapInjection),
+            "ldap-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_LDAP_INJECT, reportType = LdapiChecker.LdapInjection),
             "url-redirection" to CustomSinkDataForCheck(control, reportType = OpenRedirectChecker.UnvalidatedRedirect),
             "response-splitting" to CustomSinkDataForCheck(control, reportType = HttpRespSplitChecker.HttpResponseSplitting),
             "xpath-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_XPATH_INJECT, reportType = XpathiChecker.XpathInjection),

@@ -22,6 +22,7 @@ package com.feysh.corax.config.community.checkers
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
+import com.feysh.corax.config.api.baseimpl.matchStaticMethod
 import com.feysh.corax.config.community.WeakSslChecker
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig
@@ -60,6 +61,23 @@ object `weak-ssl` {
                 }
                 check(isRisk, WeakSslChecker.SslContext)
             }
+
+
+            listOf(
+                matchStaticMethod(System::setProperty),
+                matchStaticMethod(Properties::setProperty),
+            ).forEach {
+                method(it).model {
+                    val (key, value) = p0 to p1
+                    val isRisk = options.riskAlgorithm.fold(literal(false)) { acc, algorithm ->
+                        val lower = value.getString().toLowerCase()
+                        acc or lower.contains(algorithm.lowercase(Locale.getDefault()) + ",") or lower.endsWith(algorithm.lowercase(Locale.getDefault()))
+                    }
+                    check(key.getString().stringEquals("https.protocols") and isRisk, WeakSslChecker.SslContext)
+                    check(key.getString().stringEquals("jdk.tls.client.protocols") and isRisk, WeakSslChecker.SslContext)
+                }
+            }
+
         }
     }
 }
