@@ -16,7 +16,7 @@
 |                  | Corax Community Edition | Corax Commercial Edition |
 |------------------|:-----------------------:|:------------------------:|
 | Language Support |          Java           | JSP, Java, C/C++, Python, Go, and over ten more |
-| Default Rules    |            27           |  Java(100+)/All languages(1000+) |
+| Default Rules    |            27           |  Java(~300)/All languages(1000+) |
 | Java Analysis Capability - Path Sensitivity |           ✔           |            ✔             |
 | Java Analysis Capability - Taint Analysis  |           ✔           |            ✔             |
 | Java Analysis Capability - IFDS            |           ✔           |            ✔             |
