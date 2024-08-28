@@ -230,7 +230,7 @@ object LibVersionProvider : PreAnalysisUnit() {
         return versionCondCheck(condName, versionCondition)
     }
 
-    fun versionCondCheck(condName: String, versionCondition: VersionConditions): Boolean {
+    fun versionCondCheck(condName: String?, versionCondition: VersionConditions): Boolean {
         val cmpResults = compareTo(versionCondition.libraryDescriptor)
         val checkRes = cmpResults.mapValues { versionCondition.op.check(it.value) }
         val boolRes = checkRes.values
@@ -246,7 +246,7 @@ object LibVersionProvider : PreAnalysisUnit() {
                 anyTrue
             }
         }.also { result ->
-            if (parseConditionCache.put(condName, result) == null) {
+            if (condName != null && parseConditionCache.put(condName, result) == null) {
                 logger.info {
                     val versionInfoMsg = "Condition evaluate result: cond: \"$condName\" = $result with ${versionCondition.compareMode} compare mode."
                     val versionDetailedMsg = if (cmpResults.isEmpty()) "" else {
@@ -302,6 +302,16 @@ object LibVersionProvider : PreAnalysisUnit() {
         }
     }
 
+    private fun heuristicAddLibrary() {
+        // for old log4j lib ( < 1.2.17 )
+        val oldLog4jLib = MavenRepositoryLibraryDescriptor(artifactId = "log4j", version = "1.3")
+        getLibraryDescriptor(null, oldLog4jLib.artifactId).forEach {
+            if (it.libraryDescriptor.compareToVersion(oldLog4jLib) < 0) {
+                add(it.copy(libraryDescriptor = it.libraryDescriptor.copy(groupId = "org.apache.logging.log4j", artifactId = "log4j-core")))
+            }
+        }
+    }
+
     context (PreAnalysisApi)
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun config() {
@@ -344,6 +354,7 @@ object LibVersionProvider : PreAnalysisUnit() {
             parser.await()
             parser2.await()
             collectJarLibs.await()
+            heuristicAddLibrary()
             collectExistsDependency()
             val out = outputPath.resolve("project-env").also { FileUtils.forceMkdir(it.toFile()) }
             out.resolve("versions.txt").outputStream().use { outputStream ->

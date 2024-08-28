@@ -478,7 +478,9 @@
   {"kind":"hardcode:credential:other","signature":"<org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder$ClientBuilder: org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder$ClientBuilder secret(java.lang.String)>","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
 
 
-  {"kind":"cipher:sink-algorithm","signature":"javax.crypto.Cipher: javax.crypto.Cipher getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:sink-algorithm","signature":"javax.crypto.Cipher: javax.crypto.Cipher getInstance(String algorithm,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:sink-algorithm","signature":"java.security.KeyFactory: KeyFactory getInstance(String algorithm,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
+  {"kind":"cipher:sink-algorithm","signature":"sun.security.jca.GetInstance.getServices: Iterator getInstance(String type, String algorithm)","subtypes":true,"arg":"Argument[1]","provenance":"false","ext":""},
 
   {"kind":"cipher:transformation","signature":"javax.crypto.Cipher: javax.crypto.Cipher getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},
   {"kind":"cipher:transformation","signature":"javax.crypto.KeyGenerator: javax.crypto.KeyGenerator getInstance(String,**)","subtypes":true,"arg":"Argument[0]","provenance":"false","ext":""},

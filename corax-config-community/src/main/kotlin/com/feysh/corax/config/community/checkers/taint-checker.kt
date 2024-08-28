@@ -51,7 +51,7 @@ object `taint-checker` : AIAnalysisUnit() {
             "request-forgery" to CustomSinkDataForCheck(control, reportType = SsrfChecker.RequestForgery),
             "ldap-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_LDAP_INJECT, reportType = LdapiChecker.LdapInjection),
             "url-redirection" to CustomSinkDataForCheck(control, reportType = OpenRedirectChecker.UnvalidatedRedirect),
-            "response-splitting" to CustomSinkDataForCheck(control, reportType = HttpRespSplitChecker.HttpResponseSplitting),
+            "response-splitting" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_CRLF, reportType = HttpRespSplitChecker.HttpResponseSplitting),
             "xpath-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_XPATH_INJECT, reportType = XpathiChecker.XpathInjection),
             "command-injection" to CustomSinkDataForCheck(control + GeneralTaintTypes.CONTAINS_COMMAND_INJECT, reportType = CmdiChecker.CommandInjection),
 
