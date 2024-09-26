@@ -25,28 +25,21 @@ import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
 import com.feysh.corax.config.api.report.Region
 import com.feysh.corax.config.api.utils.superClasses
-import com.feysh.corax.config.api.utils.superInterfaces
 import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.community.SqliChecker
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.IbatisParamNameResolver
-import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.xml.MybatisConfiguration
-import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.builder.xml.XMLConfigBuilder
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.checkers.internetControl
 import mu.KotlinLogging
 import org.apache.ibatis.scripting.xmltags.DynamicContext
 import soot.Scene
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.type.TypeAliasRegistry
-import com.feysh.corax.config.community.checkers.frameworks.xml.XmlParser
 import com.feysh.corax.config.general.model.ConfigCenter
-import com.feysh.corax.config.general.utils.columnNumber
-import com.feysh.corax.config.general.utils.lineNumber
 import com.feysh.corax.config.general.utils.region
+import kotlinx.coroutines.future.await
 import kotlinx.serialization.Serializable
 import soot.SootMethod
 import soot.Type
-import java.nio.file.Path
-
 
 
 /**
@@ -159,7 +152,6 @@ private class TraverseExpr(
     }
 }
 
-
 object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
     @Serializable
     class Options : SAOptions {
@@ -171,25 +163,6 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
 
     private val logger = KotlinLogging.logger {}
 
-    data class MybatisParseResult(
-        val mybatisEntries: PreAnalysisApi.Result<MybatisEntry>,
-        val mybatisConfiguration: PreAnalysisApi.Result<MybatisConfiguration>,
-    )
-
-    private fun checkMybatisSqlInjection(mybatisEntry: MybatisEntry, visit: (at: SootMethod, statement: MyBatisTransform.Statement) -> Unit) {
-        for (statement in mybatisEntry.methodSqlList) {
-            val id = statement.id ?: continue
-            val sqlInjectParameters = statement.translator.sqlInjectParameters
-            if (sqlInjectParameters.isEmpty()) {
-                continue
-            }
-            val mapperClass = Scene.v().getSootClassUnsafe(statement.namespace, false) ?: continue
-            val mapperMethods = (mapperClass.superClasses + mapperClass.superInterfaces).flatMap { it.methods.filter { m -> m.name == id } }.toList()
-            for (method in mapperMethods) {
-                visit(method, statement)
-            }
-        }
-    }
 
     context (builder@ISootMethodDecl.CheckBuilder<Any>)
     private fun checkSink(statement: MyBatisTransform.Statement, sinParam: ExpressionEvaluator.Value, method: SootMethod, sink: ILocalT<*>, sinkSootType: Type) {
@@ -255,90 +228,49 @@ object `mybatis-sql-injection-checker` : AIAnalysisUnit() {
         }
     }
 
-    context (PreAnalysisApi)
-    private suspend fun parseMybatisMapperAndConfig(): MybatisParseResult {
-
-        val mybatisConfiguration = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
-            val configuration = XmlParser.parseMybatisConfiguration(Scene.v(), path) ?: return@atAnySourceFile null
-            configuration
-        }.nonNull()
-
-        val myBatisSqlFragments = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
-            val config = XMLConfigBuilder.createConfiguration()
-            if (XmlParser.parseMyBatisSqlFragments(path, config)) {
-                path to config
-            } else {
-                null
-            }
-        }.nonNull()
-
-        val configurationMerge = myBatisSqlFragments.await().fold(XMLConfigBuilder.createConfiguration()) { acc, element ->
-            acc.also { it.sqlFragments.putAll(element.second.sqlFragments) }
-        }
-
-        val mybatisEntries = atAnySourceFile(extension = "xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
-            val configuration = XMLConfigBuilder.createConfiguration().also { it.sqlFragments.putAll(configurationMerge.sqlFragments) }
-            XmlParser.parseMybatisMapper(path, configuration)
-        }
-
-        return MybatisParseResult(mybatisEntries.nonNull(), mybatisConfiguration)
-    }
-
-    context (PreAnalysisApi)
-    private fun reportOnlyMybatisSqlInjectionSinkInMapperXml(entry: MybatisEntry) {
-        checkMybatisSqlInjection(entry) { method, statement ->
-            // Just make a hint for security engineer! :)
-            val xmlNode = statement.xNode.node
-            val sqlInjectParameters = statement.translator.sqlInjectParameters
-            val phantomBoundSql = statement.phantomBoundSql
-            val xmlResource = statement.resource
-            report(SqliChecker.MybatisSqlInjectionSinkHint, method) {
-                this.args["numSinks"] = sqlInjectParameters.size
-                this.args["boundSql"] = phantomBoundSql.sql
-                appendPathEvent(
-                    message = mapOf(
-                        Language.EN to "In the MyBatis Mapper XML, there is a dynamic concatenation of the parameter: $sqlInjectParameters",
-                        Language.ZH to "MyBatis Mapper Xml 中存在动态拼接参数: $sqlInjectParameters"
-                    ),
-                    loc = xmlResource,
-                    region = xmlNode.region ?: Region.ERROR,
-                )
-            }
-        }
-    }
 
     context (AIAnalysisApi)
     override suspend fun config() {
-        val mybatisInfo = with(preAnalysis) { parseMybatisMapperAndConfig() }
-        val mybatisEntries = mybatisInfo.mybatisEntries.await().toSet()
 
-        val typeAliasRegistry = TypeAliasRegistry()
-        val configurationFiles: MutableSet<Path> = mutableSetOf()
-        for (config in mybatisInfo.mybatisConfiguration.await()) {
-            typeAliasRegistry.meet(config.typeAliasRegistry)
-            configurationFiles.add(config.resource)
-        }
+        val mybatisParseResult = MybatisParser().parse(preAnalysis).await()
 
-        for ((_, entries) in mybatisEntries.groupBy { it.namespace }) {
-            for (entry in entries) {
-
-                if (option.reportSqlInjectionSinksAtMapperInterfaceMethod) {
-                    with(preAnalysis) {
-                        reportOnlyMybatisSqlInjectionSinkInMapperXml(entry)
-                    }
+        mybatisParseResult.visit(object :MybatisParser.Result.Visitor {
+            context(MybatisParser.Result)
+            override fun MybatisParser.Result.MybatisSqlStmt.visit() {
+                val sqlInjectParameters = statement.translator.sqlInjectParameters
+                if (sqlInjectParameters.isEmpty()) {
+                    return
                 }
 
-                checkMybatisSqlInjection(entry) { method: SootMethod, statement ->
-                    toDecl(method) dependsOn toDecl(entry.resource) // for incremental analysis
-                    listOf(toDecl(method)) dependsOn configurationFiles.mapTo(mutableSetOf()) { toDecl(it) } // for incremental analysis
-
-                    method(matchSoot(method.signature)).sootDecl.forEach {
-                        it.modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCaller }) {
-                            checkMybatisStatement(statement, typeAliasRegistry)
+                if (option.reportSqlInjectionSinksAtMapperInterfaceMethod) {
+                    // reportOnlyMybatisSqlInjectionSinkInMapperXml
+                    with(preAnalysis) {
+                        report(SqliChecker.MybatisSqlInjectionSinkHint, method) {
+                            this.args["numSinks"] = sqlInjectParameters.size
+                            this.args["boundSql"] = phantomBoundSql.sql
+                            appendPathEvent(
+                                message = mapOf(
+                                    Language.EN to "In the MyBatis Mapper XML, there is a dynamic concatenation of the parameter: $sqlInjectParameters",
+                                    Language.ZH to "MyBatis Mapper Xml 中存在动态拼接参数: $sqlInjectParameters"
+                                ),
+                                loc = xmlResource,
+                                region = xmlNode.region ?: Region.ERROR,
+                            )
                         }
                     }
                 }
+
+
+                toDecl(method) dependsOn toDecl(entry.resource) // for incremental analysis
+                listOf(toDecl(method)) dependsOn configurationFiles.mapTo(mutableSetOf()) { toDecl(it) } // for incremental analysis
+
+                method(matchSoot(method.signature)).sootDecl.forEach {
+                    it.modelNoArg(config = { at = MethodConfig.CheckCall.PrevCallInCaller }) {
+                        checkMybatisStatement(statement, typeAliasRegistry)
+                    }
+                }
             }
-        }
+
+        })
     }
 }

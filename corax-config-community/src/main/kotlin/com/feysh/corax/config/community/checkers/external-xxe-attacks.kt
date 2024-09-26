@@ -16,7 +16,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 package com.feysh.corax.config.community.checkers
 
 import com.feysh.corax.config.api.*
@@ -25,6 +24,7 @@ import com.feysh.corax.config.community.XxeChecker
 import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.checkers.internetControl
 import com.feysh.corax.config.general.checkers.localControl
+import com.feysh.corax.config.general.utils.appendPathEvents
 
 @Suppress("ClassName", "unused", "HttpUrlsUsage")
 object `external-xxe-attacks` : AIAnalysisUnit() {
@@ -40,7 +40,9 @@ object `external-xxe-attacks` : AIAnalysisUnit() {
 
     context (AIAnalysisApi)
     override suspend fun config() {
-        if (LibVersionProvider.isEnable("{\"@active:condition:version\":\"risk-org.apache.poi-ooxml-CVE-2019-12415\"}")) { // "poi-ooxml: 4.1.1"
+        val checkResult =
+            LibVersionProvider.getVersionCheckResult("{\"@active:condition:version\":\"risk-org.apache.poi-ooxml-CVE-2019-12415\"}")
+        if (checkResult?.predicateResult == true) { // "poi-ooxml: 4.1.1"
             listOf(
                 matchSimpleSig("org.apache.poi.xssf.extractor.XSSFExportToXml: * exportToXML(OutputStream os, String encoding, boolean validate)") to 2,
                 matchSimpleSig("org.apache.poi.xssf.extractor.XSSFExportToXml: * exportToXML(OutputStream os, boolean validate)") to 1,
@@ -49,9 +51,11 @@ object `external-xxe-attacks` : AIAnalysisUnit() {
                     val validate = parameter(validateParamIndex) ?: return@modelNoArg
                     check(`this`.taint.containsAll(taintOf(internetControl)) and validate.getBoolean(), XxeChecker.XxeRemote) {
                         args["type"] = "XSSFExportToXml(CVE-2019-12415)"
+
                     }
                     check(`this`.taint.containsAll(taintOf(localControl)) and validate.getBoolean(), XxeChecker.XxeLocal) {
                         args["type"] = "XSSFExportToXml(CVE-2019-12415)"
+                        appendPathEvents(checkResult)
                     }
                 }
             }

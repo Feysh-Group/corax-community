@@ -22,9 +22,12 @@ import com.feysh.corax.commons.compareToNullable
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.api.SAOptions
+import com.feysh.corax.config.api.report.Region
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider.SootFieldWithRegion
 import com.feysh.corax.config.general.common.collect.Maps
 import com.feysh.corax.config.general.common.collect.Sets
 import com.feysh.corax.config.general.utils.MavenParser
+import com.feysh.corax.config.general.utils.isFileScheme
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -32,12 +35,15 @@ import kotlinx.serialization.json.*
 import mu.KotlinLogging
 import org.apache.commons.io.FileUtils
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion
+import org.apache.maven.model.Dependency
+import org.apache.maven.model.InputLocation
 import org.apache.maven.model.Model
 import soot.Scene
 import soot.SootField
 import soot.SootMethod
 import soot.jimple.*
 import soot.tagkit.ConstantValueTag
+import soot.tagkit.Host
 import java.io.IOException
 import java.nio.file.Path
 import java.util.*
@@ -72,43 +78,110 @@ data class MavenRepositoryLibraryDescriptor(val groupId: String? = null, val art
     }
 }
 
-@Serializable
-data class ExistsDependency(val location: String, val libraryDescriptor: MavenRepositoryLibraryDescriptor) {
+abstract class ExistsDependency {
+    abstract val location: String
+    open val shortLocation: String
+        get() = location
+    abstract val libraryDescriptor: MavenRepositoryLibraryDescriptor
+    abstract val sootLoc: Pair<Host, Region?>?
+    abstract val fileLoc: Pair<Path, Region?>?
+    abstract val region: Region?
     override fun toString(): String {
         return "$libraryDescriptor(at $location)"
     }
+    fun toConsoleString(): String {
+        return "$libraryDescriptor(at $location:${region?.startLine}:${region?.startColumn})"
+    }
+    fun toSortString(): String {
+        return "$libraryDescriptor(at $shortLocation:${region?.startLine}:${region?.startColumn})"
+    }
+    @Serializable
+    data class SerializeClass(val location: String, val libraryDescriptor: MavenRepositoryLibraryDescriptor)
+    val fileView: SerializeClass get() = SerializeClass(location, libraryDescriptor)
+
+    abstract fun isFromNormalFile(): Boolean
+}
+
+val InputLocation.region: Region get() {
+    return Region(startLine = lineNumber, startColumn = columnNumber, endLine = -1, endColumn = -1)
+}
+
+data class DependencyFromMavenPom(
+    val pom: Path,
+    override val shortLocation: String,
+    val dependency: Dependency,
+    override val libraryDescriptor: MavenRepositoryLibraryDescriptor
+): ExistsDependency() {
+    val uri = pom.toUri()
+    override val region: Region get() = dependency.getLocation("version")?.region ?: Region.ERROR
+    override val location: String get() = uri.toString()
+    override val sootLoc: Pair<Host, Region?>? get() = null
+    override val fileLoc: Pair<Path, Region> get() = pom to region
+    override fun toString(): String = super.toConsoleString()
+    override fun isFromNormalFile(): Boolean = uri.isFileScheme
+}
+
+data class DependencyFromPomProperties(
+    val properties: Path,
+    override val libraryDescriptor: MavenRepositoryLibraryDescriptor
+): ExistsDependency() {
+    val uri = properties.toUri()
+    override val region: Region get() = Region(0, 0, 0, 0)
+    override val location: String get() = uri.toString()
+    override val sootLoc: Pair<Host, Region?>? get() = null
+    override val fileLoc: Pair<Path, Region> get() = properties to region
+    override fun toString(): String = super.toConsoleString()
+    override fun isFromNormalFile(): Boolean = uri.isFileScheme
+}
+
+data class DependencyFromJarName(
+    val jar: Path,
+    override val shortLocation: String,
+    override val libraryDescriptor: MavenRepositoryLibraryDescriptor
+): ExistsDependency() {
+    val uri = jar.toUri()
+    override val region: Region? get() = null
+    override val location: String get() = uri.toString()
+    override val sootLoc: Pair<Host, Region?>? get() = null
+    override val fileLoc: Pair<Path, Region?>? get() = jar to region
+    override fun toString(): String = super.toString()
+    override fun isFromNormalFile(): Boolean = uri.isFileScheme
+}
+
+data class DependencyFromClassField(
+    val classField: LibVersionInVersionClassField,
+    val sootFieldWithRegion: SootFieldWithRegion,
+    override val libraryDescriptor: MavenRepositoryLibraryDescriptor
+): ExistsDependency() {
+    override val region: Region get() = sootFieldWithRegion.region
+    override val location: String get() = sootFieldWithRegion.sootField.signature
+    override val sootLoc: Pair<Host, Region> get() = sootFieldWithRegion.sootField to region
+    override val fileLoc: Pair<Path, Region?>? get() = null
+    override fun toString(): String = super.toConsoleString()
+    override fun isFromNormalFile(): Boolean = true
 }
 
 @Serializable
-data class LibVersionInVersionClassField(val groupId: String, val artifactId: String, val className: String, val methodName: String, val fieldName: String)
+data class LibVersionInVersionClassField(val groupId: String, val artifactId: String, val className: String, val methodName: String, val fieldName: String) {
 
-object LibVersionProvider : PreAnalysisUnit() {
-
-    private val logger = KotlinLogging.logger {}
-
-    private val libraryDescriptors: ConcurrentMap<String, MutableSet<ExistsDependency>> = ConcurrentHashMap()
-
-    private val xmlPathAndModelMap: ConcurrentMap<Path, Model?> = ConcurrentHashMap()
-
-    private val allProperties = Maps.newMultiMap<String, String>(Collections.synchronizedMap(Maps.newHybridMap())) {
-        Collections.synchronizedSet(Sets.newHybridSet())
-    }
-
-    private fun findFieldAssignedStringConstantValue(sm: SootMethod): Map<SootField, Constant>? {
+    private fun findFieldAssignedStringConstantValue(sm: SootMethod): Map<SootFieldWithRegion, Constant>? {
         val body = if (sm.hasActiveBody()) sm.activeBody else return null
-        val r = mutableMapOf<SootField, Constant>()
+        val r = mutableMapOf<SootFieldWithRegion, Constant>()
         for (u in body.units) {
             if (u is AssignStmt) {
                 val rightStr = u.rightOp as? StringConstant ?: return null
                 if (u.containsFieldRef() && u.fieldRef is FieldRef && u.leftOpBox == u.fieldRefBox) {
                     val ifr = u.fieldRef
+                    val fieldRegion = Region(u) ?: Region.ERROR
                     if (ifr is StaticFieldRef) {
                         if (ifr.field.declaringClass == sm.declaringClass) {
-                            r[ifr.field] = rightStr
+                            val sootFieldWithRegion = SootFieldWithRegion(ifr.field, fieldRegion)
+                            r[sootFieldWithRegion] = rightStr
                         }
                     } else if (ifr is InstanceFieldRef) {
                         if (ifr.base.equivTo(body.thisLocal)) {
-                            r[ifr.field] = rightStr
+                            val sootFieldWithRegion = SootFieldWithRegion(ifr.field, fieldRegion)
+                            r[sootFieldWithRegion] = rightStr
                         }
                     }
                 }
@@ -117,12 +190,13 @@ object LibVersionProvider : PreAnalysisUnit() {
         return r
     }
 
-    private fun findFieldAssignedStringConstantValue(className: String, methodName: String): Map<SootField, Constant>? {
+    private fun findFieldAssignedStringConstantValue(className: String, methodName: String): Map<SootFieldWithRegion, Constant>? {
         val sc = Scene.v().getSootClassUnsafe(className, false) ?: return null
-        val r = mutableMapOf<SootField, Constant>()
+        val r = mutableMapOf<SootFieldWithRegion, Constant>()
         for (f in sc.fields) {
             f.tags.filterIsInstance<ConstantValueTag>().firstOrNull()?.constant?.let {
-                r[f] = it
+                val sootFieldWithRegion = SootFieldWithRegion(f, Region.ERROR)
+                r[sootFieldWithRegion] = it
             }
         }
         val sm: SootMethod = sc.getMethodByNameUnsafe(methodName) ?: return r
@@ -130,10 +204,24 @@ object LibVersionProvider : PreAnalysisUnit() {
     }
 
 
-    private fun getFieldAssignedStringConstantValue(className: String, methodName: String, filedName: String): Constant? {
-        return findFieldAssignedStringConstantValue(className = className, methodName = methodName)?.mapKeys { it.key.name.lowercase() }?.get(filedName.lowercase())
+    fun getFieldAssignedStringConstantValue(className: String, methodName: String, filedName: String): Map<SootFieldWithRegion, Constant> {
+        val found = findFieldAssignedStringConstantValue(className = className, methodName = methodName) ?: return emptyMap()
+        val lowercaseName = filedName.lowercase()
+        return found.filter { it.key.sootField.name.lowercase() == lowercaseName }
     }
+}
 
+object LibVersionProvider : PreAnalysisUnit() {
+
+    private val logger = KotlinLogging.logger {}
+
+    private val libraryDescriptors: ConcurrentMap<String, MutableSet<ExistsDependency>> = ConcurrentHashMap()
+
+    private val xmlPathAndModelMap: ConcurrentMap<Pair<Path, String>, Model?> = ConcurrentHashMap()
+
+    private val allProperties = Maps.newMultiMap<String, String>(Collections.synchronizedMap(Maps.newHybridMap())) {
+        Collections.synchronizedSet(Sets.newHybridSet())
+    }
 
     @Serializable
     data class VersionConditions(
@@ -194,61 +282,67 @@ object LibVersionProvider : PreAnalysisUnit() {
         )
 
         val jarFilePattern =
-            "^(?<artifactId>[a-zA-Z0-9_\\-\\.]+)-(?<version>[0-9]+(?:\\.[0-9]+)*(?:-[a-zA-Z0-9_\\-\\.]+)?)\\.jar\$"
+            "^(?<artifactId>[a-zA-Z0-9_\\-\\.]+)-(?<version>[0-9]+(?:\\.[0-9]+)*(?:-|\\.[a-zA-Z0-9_\\-\\.]+)?)\\.jar\$"
     }
 
     private var option: Options = Options()
 
     // logic and
-    fun isEnable(conditionString: String): Boolean {
+    fun getVersionCheckResult(conditionString: String): VersionCheckResult? {
         if (conditionString.isEmpty())
-            return true
+            return null
 
-        var result = true
+        var versionCheckResult: VersionCheckResult? = null
         object : JsonExtVisitor() {
             override fun visitObject(key: String, value: JsonPrimitive) {
-                if (!result) return
+                if (versionCheckResult != null) return
                 when (key) {
                     "@active:condition:version" -> {
-                        if (versionCondCheck(value.jsonPrimitive.content) == false) {
-                            result = false
+                        val versionCondCheck = versionCondCheck(value.jsonPrimitive.content)
+                        if (versionCondCheck != null) {
+                            versionCheckResult = versionCondCheck
                         }
                     }
                 }
             }
         }.visitAll(json = conditionString)
 
-        return result
+        return versionCheckResult
     }
 
-    private val parseConditionCache = mutableMapOf<String, Any>()
+    private val parseConditionCache = mutableMapOf<String, Boolean>()
 
-    fun versionCondCheck(condName: String): Boolean? {
+    data class VersionCheckResult(
+        val condition: VersionConditions,
+        val predicateResult: Boolean,
+        val dependencies: Set<ExistsDependency>,
+    )
+
+    fun versionCondCheck(condName: String): VersionCheckResult? {
         val versionCondition = option.versionConditions[condName] ?: let {
             logger.error { "condition name `$condName` is not exists." }; return null
         }
         return versionCondCheck(condName, versionCondition)
     }
 
-    fun versionCondCheck(condName: String?, versionCondition: VersionConditions): Boolean {
+    fun versionCondCheck(condName: String?, versionCondition: VersionConditions): VersionCheckResult {
         val cmpResults = compareTo(versionCondition.libraryDescriptor)
         val checkRes = cmpResults.mapValues { versionCondition.op.check(it.value) }
-        val boolRes = checkRes.values
         val mode = versionCondition.compareMode
         return if (cmpResults.isEmpty()) {
-            mode == VersionConditions.Mode.MayOrUnknown
+            VersionCheckResult(versionCondition, mode == VersionConditions.Mode.MayOrUnknown, emptySet())
         } else {
-            val anyFalse = boolRes.any { !it }
-            val anyTrue = boolRes.any { it }
+            val anyFalse = checkRes.filter { !it.value }.mapTo(mutableSetOf()) { it.key }
+            val anyTrue = checkRes.filter { it.value }.mapTo(mutableSetOf()) { it.key }
             if (mode == VersionConditions.Mode.Must) {
-                !anyFalse
+                VersionCheckResult(versionCondition, anyFalse.isEmpty(), anyTrue)
             } else {
-                anyTrue
+                VersionCheckResult(versionCondition, anyTrue.isNotEmpty(), anyTrue)
             }
-        }.also { result ->
-            if (condName != null && parseConditionCache.put(condName, result) == null) {
+        }.also { r ->
+            if (condName != null && parseConditionCache.put(condName, r.predicateResult) == null) {
                 logger.info {
-                    val versionInfoMsg = "Condition evaluate result: cond: \"$condName\" = $result with ${versionCondition.compareMode} compare mode."
+                    val versionInfoMsg = "Condition evaluate result: cond: \"$condName\" = ${r.predicateResult} with ${versionCondition.compareMode} compare mode."
                     val versionDetailedMsg = if (cmpResults.isEmpty()) "" else {
                         "\n" + checkRes.toList().joinToString(postfix = "\n", separator = "\n") {
                             "\t${it.first} ${versionCondition.op.code} ${versionCondition.libraryDescriptor.version} = ${it.second}"
@@ -303,28 +397,27 @@ object LibVersionProvider : PreAnalysisUnit() {
     }
 
     private fun heuristicAddLibrary() {
-        // for old log4j lib ( < 1.2.17 )
-        val oldLog4jLib = MavenRepositoryLibraryDescriptor(artifactId = "log4j", version = "1.3")
-        getLibraryDescriptor(null, oldLog4jLib.artifactId).forEach {
-            if (it.libraryDescriptor.compareToVersion(oldLog4jLib) < 0) {
-                add(it.copy(libraryDescriptor = it.libraryDescriptor.copy(groupId = "org.apache.logging.log4j", artifactId = "log4j-core")))
-            }
-        }
     }
+
+    class SootFieldWithRegion(val sootField: SootField, val region: Region)
 
     context (PreAnalysisApi)
     @OptIn(ExperimentalSerializationApi::class)
     override suspend fun config() {
         assert(option.versionConditions.none { it.key.contains(":") })
         for (it in option.libVersionInVersionClassFields) {
-            val version = getFieldAssignedStringConstantValue(className = it.className, methodName = it.methodName, filedName = it.fieldName) ?: continue
-            val versionString = (version as? StringConstant)?.value ?: continue
-            add(ExistsDependency(it.toString(), MavenRepositoryLibraryDescriptor(groupId = it.groupId, artifactId = it.artifactId, version = versionString)))
+            val infos = it.getFieldAssignedStringConstantValue(className = it.className, methodName = it.methodName, filedName = it.fieldName)
+            if (infos.isEmpty()) continue
+            for (info in infos) {
+                val constant: Constant = info.value
+                val versionString = (constant as? StringConstant)?.value ?: continue
+                add(DependencyFromClassField(it, info.key, MavenRepositoryLibraryDescriptor(groupId = it.groupId, artifactId = it.artifactId, version = versionString)))
+            }
         }
 
         val parser = atAnySourceFile(filename = "pom.properties", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
             val descriptor = parsePomProperties(path) ?: return@atAnySourceFile
-            add(ExistsDependency(path.toUri().toString(), descriptor))
+            add(DependencyFromPomProperties(path, descriptor))
         }
 
         val parser2 = atAnySourceFile(filename = "pom.xml", config = { incrementalAnalyze = false; ignoreProjectConfigProcessFilter = true }) {
@@ -333,7 +426,7 @@ object LibVersionProvider : PreAnalysisUnit() {
                 return@atAnySourceFile
             }
             val model = MavenParser(path).parse() ?: return@atAnySourceFile
-            xmlPathAndModelMap[path] = model
+            xmlPathAndModelMap[path to relativePath.relativePath] = model
             mergeProperties(model)
         }
 
@@ -347,7 +440,7 @@ object LibVersionProvider : PreAnalysisUnit() {
             val artifactId = matchResult.groups["artifactId"]?.value ?: return@atAnySourceFile
             val version = matchResult.groups["version"]?.value ?: return@atAnySourceFile
             val libraryDescriptor = MavenRepositoryLibraryDescriptor(artifactId = artifactId, version = version)
-            add(ExistsDependency(path.toUri().toString(), libraryDescriptor))
+            add(DependencyFromJarName(path, shortLocation = relativePath.relativePath, libraryDescriptor))
         }
 
         runInScene {
@@ -362,7 +455,7 @@ object LibVersionProvider : PreAnalysisUnit() {
                     val groupId = it.libraryDescriptor.groupId
                     val artifactId = it.libraryDescriptor.artifactId
                     if (groupId != null) "$groupId.$artifactId" else artifactId
-                }
+                }.mapValues { entry -> entry.value.map { it.fileView } }
                 jsonFormat.encodeToStream(map, outputStream)
             }
         }
@@ -371,9 +464,7 @@ object LibVersionProvider : PreAnalysisUnit() {
     private fun collectExistsDependency() {
         for (entry in xmlPathAndModelMap.entries) {
             val (xmlPath, model) = entry
-            generateMavenRepositoryLibraryDescriptors(model).forEach {
-                add(ExistsDependency(xmlPath.toUri().toString(), it))
-            }
+            generateMavenRepositoryLibraryDescriptors(xmlPath.first, xmlPath.second, model)
         }
     }
 
@@ -386,14 +477,14 @@ object LibVersionProvider : PreAnalysisUnit() {
         return setOf(version)
     }
 
-    private fun generateMavenRepositoryLibraryDescriptors(model: Model?): MutableList<MavenRepositoryLibraryDescriptor> {
+    private fun generateMavenRepositoryLibraryDescriptors(xmlPath: Path, xmlRelativePath: String, model: Model?): MutableList<MavenRepositoryLibraryDescriptor> {
         val mavenRepositoryLibraryDescriptors = mutableListOf<MavenRepositoryLibraryDescriptor>()
         model?.dependencies?.forEach { dependency->
             val version = dependency.version ?: return@forEach
             val trueVersion = getTrueVersion(version)
             trueVersion.forEach {
                 val descriptor = MavenRepositoryLibraryDescriptor(dependency.groupId, dependency.artifactId, it)
-                mavenRepositoryLibraryDescriptors.add(descriptor)
+                add(DependencyFromMavenPom(xmlPath, shortLocation = xmlRelativePath, dependency = dependency, descriptor))
             }
         }
         return mavenRepositoryLibraryDescriptors

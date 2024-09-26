@@ -25,6 +25,7 @@ import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.checkers.analysis.JsonExtVisitor
 import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider.VersionCheckResult
 import com.feysh.corax.config.general.checkers.fileIoSource
 import com.feysh.corax.config.general.checkers.internetSource
 import com.feysh.corax.config.general.checkers.userInputSource
@@ -32,13 +33,11 @@ import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.processor.*
 import com.feysh.corax.config.general.model.taint.TaintModelingConfig.IApplySourceSink
 import com.feysh.corax.config.general.rule.*
+import com.feysh.corax.config.general.utils.appendPathEvents
 import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 import java.util.*
-import kotlin.collections.LinkedHashSet
 
 object TaintModelingConfig : AIAnalysisUnit() {
 
@@ -84,7 +83,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     var option: Options = Options()
 
     context (AIAnalysisApi)
-    open fun applyMethodAccessPathConfig(methodAndAcp: IMethodAccessPath, apply: IApplySourceSink) {
+    open fun applyMethodAccessPathConfig(methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult? = null, apply: IApplySourceSink) {
         if (methodAndAcp is ISelectable && !methodAndAcp.enable)
             return
         if (methodAndAcp.arg.isEmpty()) {
@@ -99,7 +98,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
                     val accessPaths =
                         RuleArgumentParser.parseArg2AccessPaths(methodAndAcp.arg, shouldFillingPath = true)
                     for (acp in accessPaths) {
-                        apply.visitAccessPath(acp, methodAndAcp)
+                        apply.visitAccessPath(acp, methodAndAcp, versionCheckResult)
                     }
                 } catch (e: Exception) {
                     error.error("${e.message ?: e.toString()} in $methodAndAcp")
@@ -111,17 +110,17 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
     fun interface IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath)
+        fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?)
     }
 
      open class SimpleApplySink(
         val check: Collection<ITaintType>,
         val excludes: Collection<ITaintType>,
         val report: CheckType,
-        val env: BugMessage.Env.() -> Unit = { }
+        val env: BugMessage.Env.(rule: IMethodAccessPath) -> Unit = { }
     ) : IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath) {
+        override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?) {
             val vulnerableBoolExpr = if (excludes.isEmpty()) {
                 acp.taint.containsAll(taintOf(check))
             } else {
@@ -138,7 +137,11 @@ object TaintModelingConfig : AIAnalysisUnit() {
                 }
             }.visitAll(methodAndAcp.ext)
             val env = this.env
-            check(vulnerableBoolExpr, report, env = { args.putAll(envArgs); env() })
+            check(vulnerableBoolExpr, report, env = {
+                args.putAll(envArgs)
+                env(methodAndAcp)
+                versionCheckResult?.let { appendPathEvents(it) }
+            })
         }
     }
 
@@ -147,7 +150,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applySourceRule(sourceRule: TaintRule.Source, append: Set<ITaintType>) {
         if (!sourceRule.enable)
             return
-        applyMethodAccessPathConfig(sourceRule) { acp, _ ->
+        applyMethodAccessPathConfig(sourceRule) { acp, _, _ ->
             acp.taint += taintOf(append) // must plusAssign
         }
     }
@@ -193,8 +196,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     context (AIAnalysisApi)
     fun applyJsonExtSinks(kind: String,
                           ruleManager: GroupedMethodsManager<out IMethodAccessPathGrouped>,
-                          apply: IApplySourceSink,
-                          filter: (rule: IMethodSignature) -> Boolean = { LibVersionProvider.isEnable(it.ext) }
+                          apply: IApplySourceSink
     ) {
         val sinkRules = ruleManager.getRulesByGroupKinds(kind)
         val info = "${this.javaClass.simpleName}: ${sinkRules.size} rules defined in JSON have been found based on kinds: $kind"
@@ -204,8 +206,11 @@ object TaintModelingConfig : AIAnalysisUnit() {
             logger.debug { info }
         }
         for (sinkRule in sinkRules) {
-            if (!filter(sinkRule)) continue
-            applyMethodAccessPathConfig(sinkRule, apply)
+            val checkResult = LibVersionProvider.getVersionCheckResult(sinkRule.ext)
+            if (checkResult?.predicateResult == false) {
+                continue
+            }
+            applyMethodAccessPathConfig(sinkRule, checkResult, apply)
         }
     }
 
@@ -213,11 +218,13 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applyJsonExtSinksDefault(
         kind: String,
         rules: GroupedMethodsManager<out IMethodAccessPathGrouped> = ConfigCenter.methodAccessPathDataBase,
-        visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>) -> Unit
+        visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>, versionCheckResult: VersionCheckResult?) -> Unit
     ) {
         applyJsonExtSinks(kind, rules, object : IApplySourceSink {
             context(api@AIAnalysisApi, bdr@ISootMethodDecl.CheckBuilder<Any>)
-            override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath) { visit(this@api, this@bdr, acp) }
+            override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?) {
+                visit(this@api, this@bdr, acp, versionCheckResult)
+            }
         })
     }
 }

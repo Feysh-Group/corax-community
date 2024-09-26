@@ -20,21 +20,23 @@
 package com.feysh.corax.config.general.utils
 
 import mu.KotlinLogging
+import org.apache.maven.model.InputSource
 import org.apache.maven.model.Model
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.apache.maven.model.io.xpp3.MavenXpp3ReaderEx
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 
 class MavenParser(val path: Path) {
     private val logger = KotlinLogging.logger {}
     fun parse(): Model? {
-        var model: Model? = null
-        try {
-            model = MavenXpp3Reader().read(path.inputStream())
-        } catch (e: Exception) {
-            logger.error { "There is an error when parsing the file: $path, e: ${e.message}" }
-            logger.debug(e) { "There is an error when parsing the file: $path" }
+        path.inputStream().use {
+            try {
+                return MavenXpp3ReaderEx().read(it, InputSource())
+            } catch (e: Exception) {
+                logger.error { "There is an error when parsing the file: $path, e: ${e.message}" }
+                logger.debug(e) { "There is an error when parsing the file: $path" }
+            }
         }
-        return model
+        return null
     }
 }

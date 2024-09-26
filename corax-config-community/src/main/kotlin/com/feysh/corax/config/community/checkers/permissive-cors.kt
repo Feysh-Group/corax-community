@@ -53,9 +53,9 @@ object `permissive-cors` : AIAnalysisUnit() {
             method(m).modelNoArg {
 
                 `this`.attr[accessControlAllowOrigin] = `this`.attr[accessControlAllowOrigin].getBoolean() or (
-                    p0.getString().toLowerCase().stringEquals(literal("access-control-allow-origin")) and
-                        p1.taint.containsAll(taintOf(internetControl))
-                )
+                        p0.getString().toLowerCase().stringEquals(literal("access-control-allow-origin")) and
+                                p1.taint.containsAll(taintOf(internetControl))
+                        )
 
                 // Holds if `header` sets `Access-Control-Allow-Credentials` to `true`. This ensures fair chances of exploitability.
                 check(

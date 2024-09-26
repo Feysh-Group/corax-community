@@ -26,9 +26,9 @@ version = semVer ?: "dev"
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.9.10"
-    kotlin("kapt") version "1.9.10"
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("jvm") version "2.0.20"
+    kotlin("kapt") version "2.0.20"
+    kotlin("plugin.serialization") version "2.0.20"
     `maven-publish`
     // Gradle Properties Plugin - read more: https://github.com/stevesaliman/gradle-properties-plugin
     id("net.saliman.properties") version "1.5.2"
@@ -42,7 +42,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-serialization:1.9.10")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:2.0.20")
     }
 }
 
@@ -77,7 +77,6 @@ allprojects {
             kotlinOptions {
                 jvmTarget = "17"
                 freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-Xallow-result-return-type",
                     "-Xsam-conversions=class",
                     "-Xcontext-receivers"
                 )
@@ -88,7 +87,6 @@ allprojects {
         compileTestKotlin {
             kotlinOptions {
                 freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-Xallow-result-return-type",
                     "-Xsam-conversions=class",
                     "-Xcontext-receivers"
                 )

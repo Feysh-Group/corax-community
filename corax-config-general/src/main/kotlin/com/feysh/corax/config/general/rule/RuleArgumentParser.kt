@@ -199,7 +199,7 @@ object RuleArgumentParser {
                         )
                     }
                     if (range.isEmpty())
-                        return@run null
+                        return@run
                     return parseRange(range) ?: return@run
                 }
 

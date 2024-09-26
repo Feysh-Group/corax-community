@@ -21,22 +21,26 @@
 
 package com.feysh.corax.config.general.utils
 
+import com.feysh.corax.config.api.BugMessage.Env
 import com.feysh.corax.config.api.IMethodMatch
+import com.feysh.corax.config.api.Language
 import com.feysh.corax.config.api.baseimpl.RawSignatureMatch
 import com.feysh.corax.config.api.baseimpl.SootSignatureMatch
 import com.feysh.corax.config.api.baseimpl.matchSimpleSig
 import com.feysh.corax.config.api.baseimpl.matchSoot
+import com.feysh.corax.config.api.report.Region
 import com.feysh.corax.config.api.utils.typename
+import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
 import com.feysh.corax.config.general.model.taint.TaintRule
 import com.feysh.corax.config.general.rule.IMethodAccessPath
 import com.feysh.corax.config.general.rule.IMethodSignature
 import com.google.common.base.Optional
 import mu.KotlinLogging
-import org.xml.sax.*
 import soot.*
 import soot.asm.AsmUtil
 import java.io.File
 import java.io.IOException
+import java.net.URI
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -240,3 +244,45 @@ fun walkFiles(jsonDirs: List<Path>, filter: (file: Path) -> Boolean): List<Path>
  *
  */
 fun classTypeToSootTypeDesc(ty: String): String = AsmUtil.toJimpleDesc(ty, Optional.fromNullable(null)).first().typename!!
+
+inline val URI.isFileScheme: Boolean get() = scheme == "file"
+
+fun Env.appendPathEvents(versionCheckResult: LibVersionProvider.VersionCheckResult) {
+    val groupedDependencies = versionCheckResult.dependencies.sortedBy { it.toSortString() }
+        .groupBy { it.libraryDescriptor.toString() }
+    groupedDependencies.forEach { (libraryDescriptor, dependencies) ->
+        val condition = versionCheckResult.condition
+        val conditionMessage = "$libraryDescriptor ${condition.op.code} ${condition.libraryDescriptor.version}"
+        val locationMessage = dependencies.joinToString { it.shortLocation }
+
+        val message = mapOf(
+            Language.EN to "Vulnerability library version condition: $conditionMessage, location: $locationMessage",
+            Language.ZH to "漏洞库版本判断条件: $conditionMessage , 位置: $locationMessage"
+        )
+
+        val fileLoc = dependencies.firstNotNullOfOrNull { dependency ->
+            dependency.fileLoc.takeIf { dependency.isFromNormalFile() && it?.second?.valid == true }
+        } ?: dependencies.firstNotNullOfOrNull { it.fileLoc }
+        if (fileLoc != null) {
+            appendPathEvent(
+                message = message,
+                loc = fileLoc.first,
+                region = fileLoc.second?.takeIfValid ?: Region.ERROR,
+            )
+        }
+        val sootLoc = dependencies.firstNotNullOfOrNull { dependency ->
+            dependency.sootLoc.takeIf { dependency.isFromNormalFile() && it?.second?.valid == true }
+        } ?: dependencies.firstNotNullOfOrNull { it.sootLoc }
+        if (sootLoc != null) {
+            appendPathEvent(
+                message = message,
+                loc = sootLoc.first,
+                region = sootLoc.second?.takeIfValid,
+            )
+        }
+    }
+}
+
+val <E> List<E>.removeAdjacentDuplicates: List<E>
+    get() = if (this.isEmpty()) this else (this.zipWithNext().filter { it.first != it.second }
+        .map { it.first } + this.last())

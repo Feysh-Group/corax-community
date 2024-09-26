@@ -55,9 +55,9 @@ object `weak-ssl` {
 
         context (AIAnalysisApi)
         override suspend fun config() {
-            TaintModelingConfig.applyJsonExtSinksDefault("weak-ssl:algorithm") {
+            TaintModelingConfig.applyJsonExtSinksDefault("weak-ssl:algorithm") { acp, checkResult ->
                 val isRisk = options.riskAlgorithm.fold(literal(false)) { acc, algorithm ->
-                    acc or it.getString().toLowerCase().stringEquals(algorithm.lowercase(Locale.getDefault()))
+                    acc or acp.getString().toLowerCase().stringEquals(algorithm.lowercase(Locale.getDefault()))
                 }
                 check(isRisk, WeakSslChecker.SslContext)
             }

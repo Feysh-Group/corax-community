@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.feysh.corax.config.commercial.language.classes
+package com.feysh.corax.config.community.language.classes
 
 /**
  * Provides names of special classes.

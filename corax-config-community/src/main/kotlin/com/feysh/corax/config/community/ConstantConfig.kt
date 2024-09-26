@@ -17,7 +17,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.feysh.corax.config.commercial
+package com.feysh.corax.config.community
 
 import com.feysh.corax.config.api.rules.ProcessRule
 import com.feysh.corax.config.api.rules.ProcessRulesType

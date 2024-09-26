@@ -48,7 +48,6 @@ object `endpoint-path-printer` : PreAnalysisUnit() {
         prettyPrint = true
     }
 
-
     data class UsefulMethodInfo(val sootMethod: SootMethod, val beans: List<Pair<Int, Type>>, val webMappingPaths: Map<String, List<String>>) {
 
         @Serializable
@@ -120,6 +119,7 @@ object `endpoint-path-printer` : PreAnalysisUnit() {
             }
             UsefulMethodInfo(sootMethod, beans, mappingPaths)
         }
+
         runInScene {
             dump(paths.nonNull().await())
         }

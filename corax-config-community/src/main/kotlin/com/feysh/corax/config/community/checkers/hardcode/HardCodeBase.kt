@@ -44,7 +44,12 @@ abstract class HardCodeBase : AIAnalysisUnit() {
                 continue
             }
 
-            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase, { acp, _ -> check(ConstantPropagate.isConst(acp), sink.reportType) })
+            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.methodAccessPathDataBase) { acp, _, _ ->
+                check(
+                    ConstantPropagate.isConst(acp),
+                    sink.reportType
+                )
+            }
         }
     }
 }

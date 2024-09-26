@@ -29,8 +29,8 @@ object `insecure-cipher` : AIAnalysisUnit() {
 
     context (AIAnalysisApi)
     override suspend fun config() {
-        TaintModelingConfig.applyJsonExtSinksDefault("cipher:transformation") {
-            val transformationLower = it.getString().toLowerCase()
+        TaintModelingConfig.applyJsonExtSinksDefault("cipher:transformation") { acp, checkResult ->
+            val transformationLower = acp.getString().toLowerCase()
 
             check(
                 transformationLower.stringEquals("des") or transformationLower.startsWith("des/"),
@@ -44,8 +44,8 @@ object `insecure-cipher` : AIAnalysisUnit() {
         }
 
 
-        TaintModelingConfig.applyJsonExtSinksDefault("cipher:sink-algorithm") {
-            val algo = it.getString().toLowerCase()
+        TaintModelingConfig.applyJsonExtSinksDefault("cipher:sink-algorithm") { acp, checkResult ->
+            val algo = acp.getString().toLowerCase()
 
             check(
                 algo.stringEquals("aes") or

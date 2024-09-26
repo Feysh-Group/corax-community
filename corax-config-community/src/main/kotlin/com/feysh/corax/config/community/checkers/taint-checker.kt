@@ -97,9 +97,13 @@ object `taint-checker` : AIAnalysisUnit() {
             if (!sink.enable) {
                 continue
             }
-            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.taintRulesManager.sinks, TaintModelingConfig.SimpleApplySink(sink.checkTaintTypes, sink.taintTypeExcludes, sink.reportType) {
-                args.putAll(sink.msgArgs)
-            })
+
+            TaintModelingConfig.applyJsonExtSinks(kind, ConfigCenter.taintRulesManager.sinks,
+                TaintModelingConfig.SimpleApplySink(sink.checkTaintTypes, sink.taintTypeExcludes, sink.reportType) {
+                    args.putAll(sink.msgArgs)
+                }
+            )
+
         }
     }
 }
