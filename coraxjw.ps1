@@ -4,6 +4,8 @@
 # Install with PowerShell.exe
 #   Set-ExecutionPolicy Bypass -Scope Process -Force; .\coraxjw.ps1
 
+# 注：本脚本安全透明, 只联网下载(仅初次使用)不上传, 不会破环环境, 本软件支持一键卸载
+# Note: This script is safe and transparent, only downloads (if need) and does not upload, will not break the environment, and supports one-click uninstallation
 
 ##  CoraxJava - a Java Static Analysis Framework
 ##  Copyright (C) 2024.  Feysh-Tech Group
