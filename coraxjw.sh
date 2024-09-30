@@ -37,7 +37,7 @@ JDK_TARGET_DIR="${HOME}/.local/share"
 CORAX_TARGET_DIR="${HOME}/.local/corax"
 JVM_VERSION=jdk-17.0.3.1
 
-OSS_URL_CORAX_JAVA_CLI_COMMUNITY="https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1726372777&Signature=GvVNEMg2qKvJzefpizr2JxvIY0A%3D"
+OSS_URL_CORAX_JAVA_CLI_COMMUNITY="https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1758781045&Signature=E7FO2SYWcI5cOMdR%2FBCFSHsTB50%3D"
 OSS_URL_JDK_DARWIN_X64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-x64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865870&Signature=pSaX7XqiEO%2BuZ5NsF0AsnkvKTB0%3D"
 OSS_URL_JDK_DARWIN_AARCH64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_macos-aarch64_bin.tar.gz?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865859&Signature=M41W3NYVzNfVR8wLpmOoiGTYxWo%3D"
 OSS_URL_JDK_WIN_X64="http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"

@@ -38,7 +38,7 @@ $APP_NAME = "CoraxJava"
 $APP_BASE_NAME = $MyInvocation.MyCommand.Name
 $DEFAULT_JVM_OPTS = ""
 
-$OSS_URL_CORAX_JAVA_CLI_COMMUNITY = "https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1726372777&Signature=GvVNEMg2qKvJzefpizr2JxvIY0A%3D"
+$OSS_URL_CORAX_JAVA_CLI_COMMUNITY = "https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1758781045&Signature=E7FO2SYWcI5cOMdR%2FBCFSHsTB50%3D"
 $OSS_URL_JDK_WIN_X64 = "http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"
 
 $uninstall=0
@@ -47,7 +47,7 @@ $BUILD_DIR = $env:TEMP + "\corax_temp"
 
 function _is_china {
     $ipInfo = (Invoke-WebRequest -Uri "http://myip.ipip.net").Content
-    $r=($ipInfo.Contains("`u{4E2D}`u{56FD}"))
+    $r=($ipInfo.Contains("`u{4E2D}`u{56FD}") -or $ipInfo.Contains("ÖÐ¹ú"))
     return $r
 }
 
