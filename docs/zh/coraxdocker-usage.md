@@ -6,7 +6,7 @@ docker 方式的扫描**目前**仅适用于尝新，不建议用于快速体验
 
 ```bash
 $ cd corax-community // 必须 在本项目根目录 corax-community 下构建 Docker 镜像
-$ docker build --network=host -t corax-community .
+$ sudo docker build --network=host -t corax-community .
 ```
 构建期间会自动下载 github repo release 中的 `corax-java-cli-community-x.x.zip` 然后解压到 `/corax-community` 目录下，构建完成后生成快捷方式为 `/corax-community/corax-cli.jar`
 
