@@ -29,7 +29,7 @@
 #
 ################################################################################
 
-CORAX_VERSION=2.14.2
+CORAX_VERSION=2.16.2
 CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
