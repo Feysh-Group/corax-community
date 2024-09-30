@@ -205,12 +205,11 @@ set -- \
         org.gradle.wrapper.GradleWrapperMain \
         "$@"
 
-# # Dead code
-# # Stop when "xargs" is not available.
-# if ! command -v xargs >/dev/null 2>&1
-# then
-#     die "xargs is not available"
-# fi
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
 
 # Use "xargs" to parse quoted args.
 #
@@ -231,19 +230,11 @@ set -- \
 # an unmatched quote.
 #
 
-# Dead code
-# eval "set -- $(
-#         printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
-#         xargs -n1 |
-#         sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
-#         tr '\n' ' '
-#     )" '"$@"'
-
-
-params=""
-printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" | sed 's~[^-[:alnum:]+,./:=@_]~\&~g' | while IFS= read -r line; do
-  params="${params} $line"
-done
-eval "set -- ${params}" "$@"
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
 
 exec "$JAVACMD" "$@"
