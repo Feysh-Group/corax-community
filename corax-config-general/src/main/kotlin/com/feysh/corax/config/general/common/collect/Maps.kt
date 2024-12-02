@@ -24,6 +24,7 @@ package com.feysh.corax.config.general.common.collect
 import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
+import com.google.common.collect.SetMultimap
 import java.util.concurrent.ConcurrentMap
 
 typealias MultiMap<K, V> = Multimap<K, V>
@@ -35,6 +36,14 @@ inline fun <K, V> MultiMap<K, V>.forEachCollection(action: (K, Collection<V>) ->
         action(k, c)
     }
 }
+
+inline fun <K, V> SetMultimap<K, V>.forEachSet(action: (K, Set<V>) -> Unit) {
+    for (k in this.keys()) {
+        val c = get(k)
+        action(k, c)
+    }
+}
+
 
 
 object Maps {
@@ -55,6 +64,18 @@ object Maps {
 
     fun <K, V> newMultiMap(): MultiMap<K, V> {
         return newMultiMap(newMap(), Sets::newHybridSet)
+    }
+
+    inline fun <K, V> newSetMultiMap(map: Map<K, Collection<V>>, setFactory: Supplier<Set<V>>): SetMultimap<K, V> {
+        return Multimaps.newSetMultimap(map, setFactory)
+    }
+
+    inline fun <K, V> newSetMultiMap(map: Map<K, Collection<V>>): SetMultimap<K, V> {
+        return newSetMultiMap(map, Sets::newHybridSet)
+    }
+
+    fun <K, V> newSetMultiMap(): SetMultimap<K, V> {
+        return newSetMultiMap(newMap(), Sets::newHybridSet)
     }
 
     fun <K, V> newConcurrentMap(): ConcurrentMap<K, V> {

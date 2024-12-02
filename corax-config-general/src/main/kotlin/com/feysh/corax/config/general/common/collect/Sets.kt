@@ -22,10 +22,16 @@
 package com.feysh.corax.config.general.common.collect
 
 import com.google.common.collect.Sets
+import kotlinx.collections.immutable.PersistentSet
+import kotlinx.collections.immutable.persistentHashSetOf
 
 object Sets {
     inline fun <E> newHybridSet(): MutableSet<E> {
         return HashSet()
+    }
+
+    inline fun <E> newPersistentHashSetBuilder(): PersistentSet.Builder<E> {
+        return persistentHashSetOf<E>().builder()
     }
 
     inline fun <E> newSet(): MutableSet<E> {

@@ -1,0 +1,1 @@
+Detected an unrestricted file upload, which allows users to upload files to the web server.

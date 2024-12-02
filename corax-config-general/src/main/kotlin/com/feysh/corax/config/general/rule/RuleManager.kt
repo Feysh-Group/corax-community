@@ -25,16 +25,13 @@ import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
-import kotlin.io.path.absolute
 import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.io.path.reader
@@ -93,6 +90,17 @@ open class RuleManager<T> (val rules: List<T>){
         val jsonRules = rules.mapTo(linkedSetOf()) { jsonFormat.encodeToString(serializer, it) }
         out.outputStream().writer(Charsets.UTF_8).use {
             it.write(jsonRules.joinToString(separator = ",\n", prefix = "[", postfix = "]"))
+        }
+    }
+}
+
+open class GroupedVersionConditionsManager<T : IVersionConditionsGrouped>(versionConditionsList: List<T>) :
+    RuleManager<T>(versionConditionsList) {
+
+    companion object {
+        fun <T: IVersionConditionsGrouped> load(files: List<Path>, serializer: KSerializer<T>): GroupedVersionConditionsManager<T> {
+            val methods = RuleManager.load(files, serializer)
+            return GroupedVersionConditionsManager(methods.rules)
         }
     }
 }

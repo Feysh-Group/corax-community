@@ -1,0 +1,1 @@
+When handling local XML data, failing to properly restrict the loading of entities allows attackers to exploit malicious entity loading of local files, leading to sensitive data leaks and system compromise. To fix this issue, you should disable or restrict local entity loading and ensure that only trusted XML data sources are allowed.

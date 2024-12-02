@@ -1,0 +1,30 @@
+[
+    {
+        "key": "default-fastjson",
+        "bugMessage": "危险的fastjson库引用",
+        "libraryCoordinate": {
+            "groupId": "com.alibaba",
+            "artifactId": "fastjson"
+        },
+        "compareMode": "May",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "1.2.83"
+        }
+    },
+    {
+        "key": "default-log4j-injection",
+        "bugMessage": null,
+        "libraryCoordinate": {
+            "groupId": "org.apache.logging.log4j",
+            "artifactId": "log4j-core"
+        },
+        "compareMode": "May",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "2.16.0"
+        }
+    }
+]

@@ -25,13 +25,11 @@ import com.feysh.corax.config.api.*
 import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.checkers.analysis.JsonExtVisitor
 import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider
-import com.feysh.corax.config.general.checkers.analysis.LibVersionProvider.VersionCheckResult
 import com.feysh.corax.config.general.checkers.fileIoSource
 import com.feysh.corax.config.general.checkers.internetSource
 import com.feysh.corax.config.general.checkers.userInputSource
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.processor.*
-import com.feysh.corax.config.general.model.taint.TaintModelingConfig.IApplySourceSink
 import com.feysh.corax.config.general.rule.*
 import com.feysh.corax.config.general.utils.appendPathEvents
 import com.feysh.corax.config.general.utils.methodMatch
@@ -61,11 +59,13 @@ object TaintModelingConfig : AIAnalysisUnit() {
             "android-external-storage-dir" to setOf(GeneralTaintTypes.EXTERNAL_STORAGE),
             "device" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
             "sensitive" to setOf(GeneralTaintTypes.CONTAINS_SENSITIVE_DATA),
-            "zip-entry" to (internetSource - GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL) + setOf(GeneralTaintTypes.ZIP_ENTRY_NAME)
+            "zip-entry" to (internetSource - GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL) + setOf(GeneralTaintTypes.ZIP_ENTRY_NAME),
+            "upload" to setOf(GeneralTaintTypes.FILE_UPLOAD_SOURCE),
+            "servlet-output-stream" to setOf(GeneralTaintTypes.SERVLET_OUTPUT_STREAM),
         )
 
         val sanitizerTaintTypesMap: Map<String, Set<ITaintType>> = mapOf(
-            "ctrl" to setOf(GeneralTaintTypes.ControlData),
+            "ctrl" to setOf(GeneralTaintTypes.Untrusted),
             "crlf" to setOf(GeneralTaintTypes.CONTAINS_CRLF),
             "path-traversal" to setOf(GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL, GeneralTaintTypes.ZIP_ENTRY_NAME),
             "unlimited-file-extension" to setOf(GeneralTaintTypes.UNLIMITED_FILE_EXTENSION),
@@ -83,7 +83,7 @@ object TaintModelingConfig : AIAnalysisUnit() {
     var option: Options = Options()
 
     context (AIAnalysisApi)
-    open fun applyMethodAccessPathConfig(methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult? = null, apply: IApplySourceSink) {
+    open fun applyMethodAccessPathConfig(methodAndAcp: IMethodAccessPath, versionCheckResult: LibVersionProvider.VersionCheckResult? = null, apply: IApplySourceSink) {
         if (methodAndAcp is ISelectable && !methodAndAcp.enable)
             return
         if (methodAndAcp.arg.isEmpty()) {
@@ -110,17 +110,18 @@ object TaintModelingConfig : AIAnalysisUnit() {
 
     fun interface IApplySourceSink {
         context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?)
+        fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: LibVersionProvider.VersionCheckResult?)
     }
 
      open class SimpleApplySink(
         val check: Collection<ITaintType>,
         val excludes: Collection<ITaintType>,
         val report: CheckType,
+        val checkExpr: context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)(e: IBoolExpr) -> IBoolExpr = { it },
         val env: BugMessage.Env.(rule: IMethodAccessPath) -> Unit = { }
     ) : IApplySourceSink {
-        context (AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>)
-        override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?) {
+        context (api@AIAnalysisApi, bdr@ISootMethodDecl.CheckBuilder<Any>)
+        override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: LibVersionProvider.VersionCheckResult?) {
             val vulnerableBoolExpr = if (excludes.isEmpty()) {
                 acp.taint.containsAll(taintOf(check))
             } else {
@@ -137,7 +138,8 @@ object TaintModelingConfig : AIAnalysisUnit() {
                 }
             }.visitAll(methodAndAcp.ext)
             val env = this.env
-            check(vulnerableBoolExpr, report, env = {
+            val checkBoolExpr = checkExpr(this@api, this@bdr, vulnerableBoolExpr)
+            check(checkBoolExpr, report, env = {
                 args.putAll(envArgs)
                 env(methodAndAcp)
                 versionCheckResult?.let { appendPathEvents(it) }
@@ -218,11 +220,11 @@ object TaintModelingConfig : AIAnalysisUnit() {
     fun applyJsonExtSinksDefault(
         kind: String,
         rules: GroupedMethodsManager<out IMethodAccessPathGrouped> = ConfigCenter.methodAccessPathDataBase,
-        visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>, versionCheckResult: VersionCheckResult?) -> Unit
+        visit: context(AIAnalysisApi, ISootMethodDecl.CheckBuilder<Any>) (acp: ILocalT<*>, versionCheckResult: LibVersionProvider.VersionCheckResult?) -> Unit
     ) {
         applyJsonExtSinks(kind, rules, object : IApplySourceSink {
             context(api@AIAnalysisApi, bdr@ISootMethodDecl.CheckBuilder<Any>)
-            override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: VersionCheckResult?) {
+            override fun visitAccessPath(acp: ILocalT<*>, methodAndAcp: IMethodAccessPath, versionCheckResult: LibVersionProvider.VersionCheckResult?) {
                 visit(this@api, this@bdr, acp, versionCheckResult)
             }
         })

@@ -54,7 +54,7 @@ object TaintRule {
         @Required val from: String,
         override val provenance: String,
         override val ext: String,
-    ) : IMethodSignature, ISelectable
+    ) : IMethodSignature, ISelectable, IRuleExt
 
     @Serializable
     data class Sink(

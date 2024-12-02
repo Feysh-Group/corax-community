@@ -60,10 +60,10 @@ object `weak-hash` : AIAnalysisUnit() {
                 val algorithm = p0.getString()
                 val algorithmLower = algorithm.toLowerCase()
                 check(isShaHash(algorithmLower), WeakHashChecker.WeakMessageDigestSha1)
-                check(p0.taint.containsAll(taintOf(GeneralTaintTypes.ControlData)), WeakHashChecker.WeakMessageDigestSha1)
+                check(p0.taint.containsAll(taintOf(GeneralTaintTypes.Untrusted)), WeakHashChecker.WeakMessageDigestSha1)
 
                 check(isMdHash(algorithmLower), WeakHashChecker.WeakMessageDigestMd5)
-                check(p0.taint.containsAll(taintOf(GeneralTaintTypes.ControlData)), WeakHashChecker.WeakMessageDigestMd5)
+                check(p0.taint.containsAll(taintOf(GeneralTaintTypes.Untrusted)), WeakHashChecker.WeakMessageDigestMd5)
             }
         }
 

@@ -1,0 +1,79 @@
+[
+    {
+        "key": "risk-fastjson",
+        "libraryCoordinate": {
+            "groupId": "com.alibaba",
+            "artifactId": "fastjson"
+        },
+        "compareMode": "Must",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "1.2.83"
+        }
+    },
+    {
+        "key": "risk-jackson",
+        "libraryCoordinate": {
+            "groupId": "com.fasterxml.jackson.core",
+            "artifactId": "jackson-databind"
+        },
+        "compareMode": "Must",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "2.13.4.2"
+        }
+    },
+    {
+        "key": "risk-log4j-injection",
+        "libraryCoordinate": {
+            "groupId": "org.apache.logging.log4j",
+            "artifactId": "log4j-core"
+        },
+        "compareMode": "Must",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "2.16.0"
+        }
+    },
+    {
+        "key": "risk-org.apache.poi-ooxml-CVE-2019-12415",
+        "libraryCoordinate": {
+            "groupId": "org.apache.poi",
+            "artifactId": "poi-ooxml"
+        },
+        "compareMode": "May",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "4.1.1"
+        }
+    },
+    {
+        "key": "risk-org.apache.poi-ooxml-CVE-2014-3529",
+        "libraryCoordinate": {
+            "groupId": "org.apache.poi",
+            "artifactId": "poi-ooxml"
+        },
+        "compareMode": "May",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "3.10.1"
+        }
+    },
+    {
+        "key": "risk-spring-web-CVE-2016-1000027",
+        "libraryCoordinate": {
+            "artifactId": "spring-web"
+        },
+        "compareMode": "Must",
+        "lowerbound": null,
+        "upperbound": {
+            "op": "LT",
+            "version": "6.0.0"
+        }
+    }
+]

@@ -1,0 +1,1 @@
+When handling external XML data, failing to properly restrict the loading of entities allows attackers to exploit remote entity loading to access malicious content, potentially leading to sensitive data leaks and system compromise. To address this issue, you should disable or restrict remote entity loading and ensure that only trusted XML data sources are allowed.

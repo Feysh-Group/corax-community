@@ -128,17 +128,22 @@ class ConfigValidate {
             ruleDirectories.add("rules")
             ruleDirectories.add("../corax-config-general/rules")
         }
+
+        fun failedText(kind: String, actual: Int): String {
+            return "The number is too small ($kind size: $actual) to meet the assertion. Please adjust the limitation here accordingly or ensure that there are no omissions."
+        }
+
         println(ConfigCenter.taintRulesManager)
         with(ConfigCenter.taintRulesManager) {
-            fun failedText(kind: String, actual: Int): String {
-                return "The number is too small ($kind size: $actual) to meet the assertion. Please adjust the limitation here accordingly or ensure that there are no omissions."
-            }
             sources.validate()
             summaries.validate()
             sinks.validate()
             assert(sources.size >= 429){ failedText("sources", sources.size) }
             assert(summaries.size >= 9447){ failedText("summaries", summaries.size) }
             assert(sinks.size >= 30){ failedText("sinks", sinks.size) }
+        }
+        with(ConfigCenter.versionRuleManager) {
+            assert(riskVersionConditionsGrouped.size >= 6) { failedText("versions", riskVersionConditionsGrouped.size) }
         }
         ConfigCenter.methodAccessPathDataBase.validate()
         val aiCheckerImpl = AIAnalysisValidator()

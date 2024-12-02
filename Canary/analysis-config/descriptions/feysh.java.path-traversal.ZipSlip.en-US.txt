@@ -1,0 +1,1 @@
+Extracting files from a malicious archive without validating that the destination file path is within the destination directory can cause files outside the destination directory to be overwritten.

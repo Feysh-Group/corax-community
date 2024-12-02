@@ -54,20 +54,18 @@ open class XmlVisitor {
         if (childNodes.length == 0) {
             return
         }
-        if (childNodes.length != 1) {
-            return
-        }
-        val childNode: Node = childNodes.item(0)
         val nodeName = node.nodeName ?: return
-        when (childNode.nodeType) {
-            Node.TEXT_NODE -> {
-                visitAttrNameAndValue(node, nodeName, childNode.textContent)
-            }
+        for (i in 0 until childNodes.length) {
+            val childNode: Node = childNodes.item(i)
+            when (childNode.nodeType) {
+                Node.TEXT_NODE -> {
+                    visitAttrNameAndValue(node, nodeName, childNode.textContent)
+                }
 
-            Node.COMMENT_NODE -> {
-                visitAttrNameAndValue(node, nodeName, childNode.textContent)
+                Node.COMMENT_NODE -> {
+                    visitAttrNameAndValue(node, nodeName, childNode.textContent)
+                }
             }
         }
-
     }
 }

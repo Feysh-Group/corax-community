@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <session-config>
+      <cookie-config>
+        <http-only>false</http-only> <!-- Noncompliant {{<http-only> tag should be set to true.}} -->
+   <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+      </cookie-config>
+    </session-config>
+
+    <session-config>
+      <cookie-config></cookie-config> <!-- Noncompliant {{<http-only> tag is missing and should be set to true.}} -->
+ <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+    </session-config>
+
+    <session-config>
+      <cookie-config>
+        <http-only>true</http-only> <!-- Compliant -->
+      </cookie-config>
+    </session-config>
+
+    <session-config>
+      <session-timeout>40000</session-timeout>
+    </session-config>
+
+</web-app>

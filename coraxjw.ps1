@@ -25,7 +25,7 @@
 ##  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
 
-$CORAX_VERSION = "2.16.2"
+$CORAX_VERSION = "2.20"
 $CORAX_JAVA_ARTIFACT_NAME = "corax-java-cli-community-$CORAX_VERSION"
 $CORAX_JAVA_ARTIFACT_ZIP = "$CORAX_JAVA_ARTIFACT_NAME.zip"
 $CORAX_JAVA_CLI_NAME = "corax-cli-community-${CORAX_VERSION}.jar"
@@ -36,7 +36,7 @@ $JVM_VERSION = "jdk-17.0.3.1"
 $app_path = $MyInvocation.MyCommand.Path
 $APP_NAME = "CoraxJava"
 $APP_BASE_NAME = $MyInvocation.MyCommand.Name
-$DEFAULT_JVM_OPTS = ""
+$DEFAULT_JVM_OPTS = "-XX:+ExitOnOutOfMemoryError"
 
 $OSS_URL_CORAX_JAVA_CLI_COMMUNITY = "https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1758781045&Signature=E7FO2SYWcI5cOMdR%2FBCFSHsTB50%3D"
 $OSS_URL_JDK_WIN_X64 = "http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"

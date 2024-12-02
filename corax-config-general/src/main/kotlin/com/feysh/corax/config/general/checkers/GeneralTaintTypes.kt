@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("GeneralTaintTypes")
 enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
-    ControlData("use to annotate the data content can be controlled"),
+    Untrusted("use to annotate the data content can be controlled"),
 
     InternetData("use to annotate data returned by an HTTP request"),
     UserInputData("use to annotate all data that is controllable by the user making a request"),
@@ -73,6 +73,8 @@ enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
     DATABASE_INFORMATION,
     PHONE_INFORMATION,
 
+    FILE_UPLOAD_SOURCE,
+    SERVLET_OUTPUT_STREAM
     ;
 
     override fun toString(): String = name
@@ -80,7 +82,7 @@ enum class GeneralTaintTypes(val desc: String? = null) : ITaintType {
 
 
 private val normalSource: MutableSet<GeneralTaintTypes> = mutableSetOf(
-    GeneralTaintTypes.ControlData,
+    GeneralTaintTypes.Untrusted,
     GeneralTaintTypes.CONTAINS_CRLF,
     GeneralTaintTypes.CONTAINS_PATH_TRAVERSAL,
     GeneralTaintTypes.CONTAINS_SQL_INJECT,
@@ -100,7 +102,7 @@ val fileIoSource: MutableSet<GeneralTaintTypes> =
 val userInputSource: MutableSet<GeneralTaintTypes> =
     (normalSource + GeneralTaintTypes.UserInputData).toMutableSet()
 
-val internetControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.InternetData, GeneralTaintTypes.ControlData)
-val localControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.UserInputData, GeneralTaintTypes.ControlData)
-val fileIoControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.FileStreamData, GeneralTaintTypes.ControlData)
-val control: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.ControlData)
+val internetControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.InternetData, GeneralTaintTypes.Untrusted)
+val localControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.UserInputData, GeneralTaintTypes.Untrusted)
+val fileIoControl: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.FileStreamData, GeneralTaintTypes.Untrusted)
+val untrusted: MutableSet<GeneralTaintTypes> = mutableSetOf(GeneralTaintTypes.Untrusted)

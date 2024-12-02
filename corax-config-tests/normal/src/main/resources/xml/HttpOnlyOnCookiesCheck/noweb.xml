@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<whatever>
+  <some-parent>
+    <session-config>
+      <cookie-config>
+        <http-only>false</http-only> <!-- Compliant not in web-xml -->
+      </cookie-config>
+    </session-config>
+  </some-parent>
+</whatever>

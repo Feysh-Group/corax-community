@@ -21,6 +21,7 @@ package com.feysh.corax.config.community.standard
 
 import com.feysh.corax.config.api.IRule
 import com.feysh.corax.config.api.IStandard
+import com.feysh.corax.config.builtin.standard.BuiltinCWERules
 import com.feysh.corax.config.builtin.standard.BuiltinGeneralStandard
 
 
@@ -31,6 +32,8 @@ enum class FeyshRules(
     PredictRandom("feysh.java.predict-random", CWERules.CWE330.desc),
     Sqli("feysh.java.sqli", CWERules.CWE89.desc),
     InsecureCookie("feysh.java.insecure-cookie", CWERules.CWE614.desc),
+    CookiePersistent("feysh.java.cookie-persistent", CWERules.CWE539.desc),
+    OverlyBroadCookieAttribute("feysh.java.overly-broad-cookie-attribute", ""),
     HttponlyCookie("feysh.java.httponly-cookie", CWERules.CWE1004.desc),
     PathTraversal("feysh.java.path-traversal", CWERules.CWE22.desc),
     Cmdi("feysh.java.cmdi", CWERules.CWE78.desc),
@@ -50,12 +53,14 @@ enum class FeyshRules(
     Xss("feysh.java.xss", CWERules.CWE79.desc),
     OpenRedirect("feysh.java.open-redirect", CWERules.CWE601.desc),
     Deserialization("feysh.java.deserialization", CWERules.CWE502.desc),
+    CustomCheck("feysh.java.custom", "customize check"),
     TrustBoundary("feysh.java.trust-boundary", CWERules.CWE501.desc),
     SensitiveDataExpose("feysh.java.sensitive-data-expose", CWERules.CWE200.desc),
     Ssrf("feysh.java.ssrf", CWERules.CWE918.desc),
     PermissiveCors("feysh.java.permissive-cors", CWERules.CWE942.desc),
     WeakSsl("feysh.java.weak-ssl", CWERules.CWE757.desc),
-    IncompleteModelOfEndpointFeatures("feysh.java.incomplete-model", CWERules.CWE347.desc),
+
+    InfoLeakage("feysh.java.leakage",CWERules.CWE1295.desc),
     ImproperVerification("feysh.java.improper-verification", "cwe-926,cwe-940,cwe-347."),
     UnrestrictedFileUpload("feysh.java.file-upload", CWERules.CWE434.desc),
     ;

@@ -21,6 +21,8 @@
 
 package com.feysh.corax.config.general.utils
 
+import com.feysh.corax.cache.AnalysisCache
+import com.feysh.corax.cache.analysis.ResolveAbstractDispatchKey
 import com.feysh.corax.config.api.BugMessage.Env
 import com.feysh.corax.config.api.IMethodMatch
 import com.feysh.corax.config.api.Language
@@ -95,6 +97,9 @@ inline val charSequenceType: RefType get() = Scene.v().getRefType("java.lang.Cha
 inline val Type.isStringType: Boolean
     get() = this.typename.let { name -> name == "java.lang.String" || name == "java.lang.CharSequence" }
 
+inline val Type.isObjectType: Boolean
+    get() = this.typename.let { name -> name == "java.lang.Object" }
+
 inline val Type.isVoidType: Boolean get() = this is VoidType || (this is RefType && this.className.substringAfterLast(".") == "Void")
 
 inline val Type.isByteArray: Boolean
@@ -126,6 +131,11 @@ fun Type.isInstanceOf(parent: Type): Boolean  {
         return hierarchy.canStoreType(this, parent)
     }
     return false
+}
+
+fun SootMethodInterface.isOverrideFrom(sourceMethodRef: SootMethodRef): Boolean {
+    val overrideMethods = AnalysisCache.G.get(ResolveAbstractDispatchKey(sourceMethodRef.declaringClass, sourceMethodRef))
+    return overrideMethods.mapTo(mutableSetOf()){ it.signature }.contains(this.signature)
 }
 
 object Utils {
@@ -251,8 +261,7 @@ fun Env.appendPathEvents(versionCheckResult: LibVersionProvider.VersionCheckResu
     val groupedDependencies = versionCheckResult.dependencies.sortedBy { it.toSortString() }
         .groupBy { it.libraryDescriptor.toString() }
     groupedDependencies.forEach { (libraryDescriptor, dependencies) ->
-        val condition = versionCheckResult.condition
-        val conditionMessage = "$libraryDescriptor ${condition.op.code} ${condition.libraryDescriptor.version}"
+        val conditionMessage = versionCheckResult.condition.toString()
         val locationMessage = dependencies.joinToString { it.shortLocation }
 
         val message = mapOf(

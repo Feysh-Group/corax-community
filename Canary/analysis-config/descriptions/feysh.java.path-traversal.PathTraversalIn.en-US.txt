@@ -1,0 +1,1 @@
+Reading from an untrusted path that can be controlled by an attacker, potentially introduce a path traversal vulnerability, could allow access to files from arbitrary file system locations.

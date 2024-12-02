@@ -32,12 +32,44 @@ import org.w3c.dom.Document
 import org.w3c.dom.Node
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
+import java.io.BufferedInputStream
 import java.io.IOException
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
+import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.inputStream
 import kotlin.jvm.optionals.getOrNull
+
+@Throws(IOException::class)
+fun InputStream.readInt16(): Int {
+    val b1: Int = read()
+    val b2: Int = read()
+    return (b2 and 0xFF) shl 8 or (b1 and 0xFF)
+}
+
+@Throws(IOException::class)
+fun BufferedInputStream.isBinaryXml(): Boolean {
+    mark(4)
+    val v: Int = readInt16() // version
+    val h: Int = readInt16() // header size
+    // Some APK Manifest.xml the version is 0
+    if (h == 0x0008) {
+        reset()
+        return true
+    } else {
+        reset()
+        return false
+    }
+}
+
+@Throws(IOException::class)
+fun Path.isBinaryXml(): Boolean {
+    BufferedInputStream(inputStream(), 32).use { stream ->
+        if (stream.isBinaryXml()) {
+            return true
+        }
+    }
+    return false
+}
 
 object PositionalXMLReader {
     val logger = KotlinLogging.logger {  }
@@ -92,8 +124,8 @@ object PositionalXMLReader {
     }
 
     @Throws(IOException::class, SAXException::class)
-    fun readXML(file: Path): Document {
-        return SNFactory.readPositionalXML(file).namespaceUnawareDocument
+    fun readXML(file: Path): Document? {
+        return SNFactory.readPositionalXML(file)?.namespaceUnawareDocument
     }
 
     @Throws(SAXException::class)

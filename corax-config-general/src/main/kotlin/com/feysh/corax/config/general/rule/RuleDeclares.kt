@@ -19,14 +19,20 @@
 
 package com.feysh.corax.config.general.rule
 
+import com.feysh.corax.config.general.utils.methodMatch
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import soot.Scene
+import soot.SootMethod
 
 
 interface IMethodSignature {
     val signature: String
     val subtypes: Boolean
+}
+
+interface IRuleExt {
     val provenance: String
     val ext: String
 }
@@ -41,12 +47,24 @@ interface IMethodGrouped : IMethodSignature {
     val group: String
 }
 
-interface IMethodAccessPath : IMethodSignature {
+interface IVersionConditionsGrouped {
+    @Required
+    @SerialName("key")
+    val key: String
+}
+
+interface IMethodAccessPath : IMethodSignature, IRuleExt {
     @Required
     val arg: String
 }
 
+interface IMultiMethodAccessPath : IMethodSignature, IRuleExt {
+    @Required
+    val args: List<String>
+}
+
 interface IMethodAccessPathGrouped: IMethodGrouped, IMethodAccessPath
+interface IMultiMethodAccessPathGrouped: IMethodGrouped, IMultiMethodAccessPath
 
 @Serializable
 data class MethodAccessPath(
@@ -61,5 +79,35 @@ data class MethodAccessPath(
     override val arg: String = "",
     override val provenance: String,
     override val ext: String
-) : IMethodAccessPathGrouped, ISelectable
+) : IMethodAccessPathGrouped, ISelectable, IRuleExt
 
+
+@Serializable
+data class MultiMethodAccessPath(
+    override val enable: Boolean = true,
+    @Required
+    @SerialName("kind")
+    override val group: String,
+    @Required
+    override val signature: String,
+    @Required
+    override val subtypes: Boolean,
+    override val args: List<String> = emptyList(),
+    override val provenance: String,
+    override val ext: String
+) : IMultiMethodAccessPathGrouped, ISelectable, IRuleExt
+
+
+@Serializable
+open class MethodSignature(
+    override val enable: Boolean = true,
+    @Required
+    override val signature: String,
+    @Required
+    override val subtypes: Boolean = true,
+    override val provenance: String = "",
+    override val ext: String = ""
+) : IMethodSignature, ISelectable, IRuleExt {
+    val matchesMethods: List<SootMethod> get() = matchesMethods(scene = Scene.v())
+    fun matchesMethods(scene: Scene): List<SootMethod> = this.takeIf { it.enable }?.methodMatch?.matched(scene = scene) ?: emptyList()
+}

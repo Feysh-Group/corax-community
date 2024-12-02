@@ -184,23 +184,23 @@ $ gradlew build
 │   │                                                      // 仅当修改后的主配置文件存在部分配置缺失或者一些配置无法对应到已有插件，
 │   ├── default-config.normalize.yml                       // 以及存在风格问题时，引擎将会自动进行修补和规范化主配置并输出到此文件
 │   ├── plugins                                            // 插件存放目录
-│   │   ├── feysh-config-community-plugin-2.16.2               // 第一次运行分析后，自动解压，按需删除
-│   │   ├── feysh-config-community-plugin-2.16.2.zip           // 编译产物，corax-config-community module 编译后生成的规则检查器插件
-│   │   ├── feysh-config-general-plugin-2.16.2                 // 第一次运行分析后，自动解压，按需删除
-│   │   └── feysh-config-general-plugin-2.16.2.zip             // 编译产物, corax-config-general module 编译后生成的规则检查器插件
+│   │   ├── feysh-config-community-plugin-2.20               // 第一次运行分析后，自动解压，按需删除
+│   │   ├── feysh-config-community-plugin-2.20.zip           // 编译产物，corax-config-community module 编译后生成的规则检查器插件
+│   │   ├── feysh-config-general-plugin-2.20                 // 第一次运行分析后，自动解压，按需删除
+│   │   └── feysh-config-general-plugin-2.20.zip             // 编译产物, corax-config-general module 编译后生成的规则检查器插件
 │   └── rules                                              // 规则检查器的一些静态数据，用户可以自定义进行配置
 │       ├── **.sources.json                                   // taint sources
 │       ├── **.summaries.json                                 // taint summaries,sanitizers
 │       ├── **.sinks.json                                     // taint sinks
 │       ├── **.access-path.json                               // method signature and sink data
 ```
-> 注意：`feysh-config-community-plugin-2.16.2.zip` 为 `corax-config-community` 模块编译后生成的规则检查器插件，主要包含了自定义规则检查器的实现，`feysh-config-general-plugin-2.16.2.zip` 为 `corax-config-general` 模块编译后生成的规则检查器插件，主要包含了一些通用的内建检查器模型，一般不需要修改。
+> 注意：`feysh-config-community-plugin-2.20.zip` 为 `corax-config-community` 模块编译后生成的规则检查器插件，主要包含了自定义规则检查器的实现，`feysh-config-general-plugin-2.20.zip` 为 `corax-config-general` 模块编译后生成的规则检查器插件，主要包含了一些通用的内建检查器模型，一般不需要修改。
 
 ### 参数配置
 
 ​        **第一步**：分析引擎需要载入 `CoraxJava规则检查器插件`（如：`analysis-config/plugins/feysh-config-*-plugin-*.*.*.zip`）及依赖的一些配置文件（如` analysis-config/rules`），所以需要准备好 `analysis-config` (规则配置文件夹) **：**
 
-  - 可以使用从 [release](https://github.com/Feysh-Group/corax-community/releases) 下载并解压zip得到已生成好的 `analysis-config`目录： `{corax-java-cli-community-2.16.2.zip解压位置}/analysis-config/`
+  - 可以使用从 [release](https://github.com/Feysh-Group/corax-community/releases) 下载并解压zip得到已生成好的 `analysis-config`目录： `{corax-java-cli-community-2.20.zip解压位置}/analysis-config/`
   - 或者使用[编译构建](#编译构建)步骤中生成的[build/analysis-config](build%2Fanalysis-config)目录：`./build/analysis-config/`
 
 
@@ -220,7 +220,7 @@ $ gradlew build
 - ​        设置分析目标所在路径，此处以本项目所包含的测试用例举例 `--auto-app-classes ./corax-config-tests`，此参数要求该路径或子目录下必须包含项目源码及编译后的字节码产物（class文件或 jar 包都可），
 
 - ​        指定配置的参数格式为 `--config (yaml文件名字.yml)@(规则配置文件夹)`，yml 文件名可以任意命名不必一定存在。`(规则配置文件夹)`就是前面所准备好的 `analysis-config` 的路径。例如
-  - `--config default-config.yml@{corax-java-cli-community-2.16.2.zip解压位置}/analysis-config/`
+  - `--config default-config.yml@{corax-java-cli-community-2.20.zip解压位置}/analysis-config/`
   - `--config default-config.yml@./build/analysis-config/`
   
   
@@ -228,12 +228,12 @@ $ gradlew build
   分析命令模板：
 
 ```bash
-$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes {项目根目录（包含源码和编译产物）} --config default-config.yml@{corax-java-cli-community-2.16.2.zip解压位置}/analysis-config/
+$ java -jar corax-cli-x.x.x.jar --verbosity info --output build/output --enable-data-flow true --target java --result-type sarif --auto-app-classes {项目根目录（包含源码和编译产物）} --config default-config.yml@{corax-java-cli-community-2.20.zip解压位置}/analysis-config/
 ```
 
 ​        **tips**: 如果项目根目录没有编译产物，可以再增加任意个数的 `--auto-app-classes` 参数指向编译产物所在的位置或文件夹
 
-​		执行此命令时，如果分析引擎无法在指定的 `{corax-java-cli-community-2.16.2.zip解压位置}/analysis-config/` 目录中找到名为`default-config.yml`的 yml 文件，将自动根据插件中的默认参数生成一个同名的默认yaml主要配置文件到规则配置文件夹：`{corax-java-cli-community-2.16.2.zip解压位置}/analysis-config/default-config.yml`，如果需要更改配置，请复制整个 `analysis-config` 文件夹到您的工作目录，并适当按照您的需求自定义修改配置，在下次的分析前指定参数 `--config 配置文件名.yml@新的规则配置文件夹` ，使其生效。
+​		执行此命令时，如果分析引擎无法在指定的 `{corax-java-cli-community-2.20.zip解压位置}/analysis-config/` 目录中找到名为`default-config.yml`的 yml 文件，将自动根据插件中的默认参数生成一个同名的默认yaml主要配置文件到规则配置文件夹：`{corax-java-cli-community-2.20.zip解压位置}/analysis-config/default-config.yml`，如果需要更改配置，请复制整个 `analysis-config` 文件夹到您的工作目录，并适当按照您的需求自定义修改配置，在下次的分析前指定参数 `--config 配置文件名.yml@新的规则配置文件夹` ，使其生效。
 
 
 

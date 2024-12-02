@@ -1,0 +1,1 @@
+Creating a file in an untrusted path that can be controlled by an attacker, may result in the creation of dangerous file types or lead to arbitrary file overwrite or forgery.

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+    <session-config>
+      <cookie-config>
+        <http-only>false</http-only>  <!-- Compliant not in http://xmlns.jcp.org/xml/ns/javaee namespace -->
+      </cookie-config>
+    </session-config>
+
+    <session-config>
+      <cookie-config>
+        <http-only>maybe</http-only>  <!-- Compliant not in http://xmlns.jcp.org/xml/ns/javaee namespace -->
+      </cookie-config>
+    </session-config>
+
+    <session-config>
+      <cookie-config />  <!-- Compliant not in http://xmlns.jcp.org/xml/ns/javaee namespace -->
+    </session-config>
+
+</web-app>

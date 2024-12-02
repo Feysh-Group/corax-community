@@ -22,6 +22,7 @@ package com.feysh.corax.config.community.checkers.jwt
 import com.feysh.corax.config.api.PreAnalysisApi
 import com.feysh.corax.config.api.PreAnalysisUnit
 import com.feysh.corax.config.api.baseimpl.matchSimpleSig
+import com.feysh.corax.config.api.utils.getSubclassesOrImplementersOf
 import com.feysh.corax.config.community.IncompleteModelOfEndpointFeatures
 import soot.RefType
 import soot.Scene
@@ -41,9 +42,9 @@ object MissingJWTSignatureCheck : PreAnalysisUnit() {
             val jwtHandlerSc = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandler",  false) ?: return@runInSceneAsync emptySet()
             val jwtHandlerAdapterSc: SootClass? = Scene.v().getSootClassUnsafe("io.jsonwebtoken.JwtHandlerAdapter", false)
             val missingSigCheckMethodNames = setOf("onClaimsJwt", "onPlaintextJwt")
-            val subs = Scene.v().orMakeFastHierarchy.let { h ->
-                h.getSubclassesOf(jwtHandlerSc) +
-                        (jwtHandlerAdapterSc?.let { h.getSubclassesOf(it) } ?: emptyList())
+            val subs = Scene.v().activeHierarchy.let { h ->
+                h.getSubclassesOrImplementersOf(jwtHandlerSc) +
+                        (jwtHandlerAdapterSc?.let { h.getSubclassesOrImplementersOf(it) } ?: emptyList())
             }
             for (subJwtHandler in subs) {
                 if (subJwtHandler == jwtHandlerAdapterSc) {

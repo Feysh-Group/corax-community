@@ -1,9 +1,13 @@
+val coroutinesVersion: String by rootProject
 val junit4Version: String by rootProject
 val kotlinVersion: String by project
 val mybatisApacheVersion: String by rootProject
+val mybatisPlusApacheVersion: String by rootProject
+val mybatisPlusSupportVersion: String by rootProject
 
 
 dependencies {
+    compileOnly(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = coroutinesVersion)
     compileOnly(group = "org.projectlombok", name = "lombok", version ="1.18.32")
     annotationProcessor(group = "org.projectlombok", name = "lombok", version ="1.18.32")
 
@@ -31,9 +35,9 @@ dependencies {
     compileOnly("org.springframework.security:spring-security-config:4.2.20.RELEASE"){ isTransitive = false }
 
     // https://mvnrepository.com/artifact/org.springframework/spring-webmvc
-    compileOnly("org.springframework:spring-webmvc:4.3.30.RELEASE"){ isTransitive = true }
+    compileOnly("org.springframework:spring-webmvc:5.3.0"){ isTransitive = true }
     // https://mvnrepository.com/artifact/org.springframework/org.springframework.web
-    compileOnly("org.springframework:spring-web:4.3.30.RELEASE"){ isTransitive = true }
+    compileOnly("org.springframework:spring-web:5.3.0"){ isTransitive = true }
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
     compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.8.0"){ isTransitive = false }
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
@@ -44,6 +48,8 @@ dependencies {
 
     compileOnly("javax.ws.rs:javax.ws.rs-api:2.0"){ isTransitive = false }
     compileOnly("javax:javaee-api:7.0"){ isTransitive = true }
+    compileOnly("org.apache.wink:wink-server:1.1.3-incubating")
+    compileOnly("com.sun.jersey.contribs:jersey-multipart:1.8")
 
     // https://mvnrepository.com/artifact/org.apache.tapestry/tapestry-core
     compileOnly("org.apache.tapestry:tapestry-core:5.8.2"){ isTransitive = false }
@@ -161,6 +167,15 @@ dependencies {
 
     compileOnly(group ="com.aliyun.oss", name = "aliyun-sdk-oss", version = "3.18.0")
 
+    compileOnly(group ="org.springframework", name = "spring-jdbc", version = "6.1.12")
+
+    compileOnly(group ="com.baomidou", name = "mybatis-plus-extension", version = mybatisPlusApacheVersion)
+    compileOnly(group ="com.baomidou", name = "mybatis-plus-core", version = mybatisPlusApacheVersion)
+    compileOnly(group ="com.baomidou", name = "mybatis-plus-spring", version = mybatisPlusApacheVersion)
+    compileOnly(group ="com.baomidou", name = "mybatis-plus-support", version = mybatisPlusSupportVersion)
+
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+    compileOnly(group ="com.alibaba", name = "fastjson", version = "1.2.83")
 }
 
 tasks.withType<JavaCompile>() {

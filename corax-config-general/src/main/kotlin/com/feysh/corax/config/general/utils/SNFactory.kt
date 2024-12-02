@@ -23,6 +23,7 @@ import com.feysh.corax.config.api.ISourceFileCheckPoint
 import org.sonar.api.batch.fs.InputFile
 import org.sonar.api.batch.fs.internal.*
 import org.sonarsource.analyzer.commons.xml.XmlFile
+import java.io.BufferedInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.math.BigInteger
@@ -33,17 +34,23 @@ import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Consumer
 import kotlin.io.path.absolute
+import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.reader
 
-val md5: MessageDigest by lazy { MessageDigest.getInstance("MD5")}
+val md5: MessageDigest get() = MessageDigest.getInstance("MD5")
 fun String.md5() :String = BigInteger(1, md5.digest(toByteArray())).toString(16).padStart(32, '0')
 
 object SNFactory {
     var batchId: AtomicInteger = AtomicInteger()
 
     @Throws(IOException::class)
-    fun createInputFile(p: ISourceFileCheckPoint, language: String? = null, charset: Charset = StandardCharsets.UTF_8, moduleKey: String = "dummy", type: InputFile.Type = InputFile.Type.MAIN): DefaultInputFile {
+    fun createInputFile(p: ISourceFileCheckPoint, language: String? = null, charset: Charset = StandardCharsets.UTF_8, moduleKey: String = "dummy", type: InputFile.Type = InputFile.Type.MAIN): DefaultInputFile? {
+        BufferedInputStream(p.path.inputStream()).use { stream ->
+            if (stream.isBinaryXml()) {
+                return null
+            }
+        }
         val relativePath = p.relativePath
 
         val indexedFile = DefaultIndexedFile(
@@ -75,8 +82,14 @@ object SNFactory {
 
 
     @Throws(IOException::class)
-    fun readPositionalXML(file: Path, charset: Charset = StandardCharsets.UTF_8): XmlFile {
-        return XmlFile.create(file.reader(charset = charset).use { it.readText() })
+    fun readPositionalXML(file: Path, charset: Charset = StandardCharsets.UTF_8): XmlFile? {
+        BufferedInputStream(file.inputStream()).use { stream ->
+            if (stream.isBinaryXml()) {
+                // TODO
+                return null
+            }
+           return XmlFile.create(stream.reader(charset = charset).readText())
+        }
     }
 
     @Throws(IOException::class)
@@ -90,7 +103,10 @@ object SNFactory {
     }
 
     @Throws(IOException::class)
-    fun readPositionalXML(`is`: InputStream, charset: Charset = StandardCharsets.UTF_8): XmlFile {
+    fun readPositionalXML(`is`: BufferedInputStream, charset: Charset = StandardCharsets.UTF_8): XmlFile? {
+        if (`is`.isBinaryXml()) {
+            return null
+        }
         return XmlFile.create(`is`.reader(charset = charset).use { it.readText() })
     }
 }

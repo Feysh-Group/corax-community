@@ -22,7 +22,10 @@ package com.feysh.corax.config.general.model.javaee
 import com.feysh.corax.config.api.*
 import com.feysh.corax.config.api.baseimpl.matchSoot
 import com.feysh.corax.config.api.utils.superClasses
+import com.feysh.corax.config.general.checkers.GeneralTaintTypes
 import com.feysh.corax.config.general.checkers.internetSource
+import com.feysh.corax.config.general.common.collect.Maps
+import com.feysh.corax.config.general.common.collect.MultiMap
 import com.feysh.corax.config.general.model.ConfigCenter
 import com.feysh.corax.config.general.model.type.HandlerTypeVisitorInTaint
 import com.feysh.corax.config.general.model.type.TypeHandler
@@ -61,7 +64,10 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
         val requestParameterTypePrefixBlackList = setOf(
             "java.", "javax."
         )
-
+        val sourceKindByParamType = mapOf(
+            "java.io.InputStream" to listOf(GeneralTaintTypes.FILE_UPLOAD_SOURCE),
+            "com.sun.jersey.core.header.FormDataContentDisposition" to listOf(GeneralTaintTypes.FILE_UPLOAD_SOURCE),
+        )
     }
 
     var option: Options = Options()
@@ -115,7 +121,11 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
 
     context (AIAnalysisApi)
     @Suppress("UNUSED_PARAMETER")
-    private fun taintWebRequestMappingHandlerParameters(framework: WebFramework, requestMappingHandler: SootMethod) {
+    private fun taintWebRequestMappingHandlerParameters(
+        framework: WebFramework,
+        requestMappingHandler: SootMethod,
+        sourceKindByParamType: MultiMap<Type, ITaintType>
+    ) {
         val hTypes = TypeHandler.getHandlerType(requestMappingHandler)
         for ((i, hType) in hTypes) {
             method(matchSoot(requestMappingHandler.signature))
@@ -130,7 +140,8 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
                                 return
                             }
                             // (TAINT IN): add taint source kinds
-                            accessPath.taint += taintOf(internetSource)
+                            val kinds = sourceKindByParamType.get(paramType)
+                            accessPath.taint += taintOf(internetSource + kinds)
                         }
 
                         override fun visit(v: ILocalT<*>, t: TypeHandler.PrimitiveType) {
@@ -242,8 +253,14 @@ object JavaeeAnnotationSource : AIAnalysisUnit() {
         // parse controllers from web framework and configure taint source for parameters of request mapping methods
         val requestMappingHandlers = with(preAnalysis) { parseWebControllerMappingMethods() }
 
+        val sourceKindByParamType = Maps.newMultiMap<Type, ITaintType>()
+        for ((type, sourceKind) in option.sourceKindByParamType) {
+            Scene.v().getRefTypeUnsafe(type)?.let {
+                sourceKindByParamType.putAll(it, sourceKind)
+            }
+        }
         for ((framework, requestMappingHandler) in requestMappingHandlers.await()) {
-            taintWebRequestMappingHandlerParameters(framework, requestMappingHandler)
+            taintWebRequestMappingHandlerParameters(framework, requestMappingHandler, sourceKindByParamType)
         }
 
 

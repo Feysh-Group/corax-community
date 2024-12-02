@@ -43,6 +43,7 @@ enum class CWERules(
     CWE90("cwe-90", "Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')"),
     CWE94("cwe-94", "Improper Control of Generation of Code ('Code Injection')"),
     CWE113("cwe-113","Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')"),
+    CWE114("cwe-114","Process Control"),
     CWE117("cwe-117", "Improper Output Neutralization for Logs"),
     CWE200("cwe-200", "Exposure of Sensitive Information to an Unauthorized Actor"),
     CWE321("cwe-321","Use of Hard-coded Cryptographic Key"),
@@ -60,6 +61,9 @@ enum class CWERules(
     CWE501("cwe-501", "Trust Boundary Violation"),
 
     CWE502("cwe-502", "Deserialization of Untrusted Data"),
+    CWE524("cwe-524", "Use of Cache Containing Sensitive Information"),
+    CWE532("cwe-532", "Insertion of Sensitive Information into Log File"),
+    CWE539("cwe-539", "Information Exposure Through Persistent Cookies"),
     CWE601("cwe-601","URL Redirection to Untrusted Site ('Open Redirect')"),
     CWE611("cwe-611","Improper Restriction of XML External Entity Reference"),
     CWE614("cwe-614","Sensitive Cookie in HTTPS Session Without 'Secure' Attribute"),
@@ -69,6 +73,8 @@ enum class CWERules(
     CWE918("cwe-918", "Server-Side Request Forgery (SSRF)"),
     CWE942("cwe-942", "Permissive Cross-domain Policy with Untrusted Domains"),
     CWE1004("cwe-1004", "Sensitive Cookie Without 'HttpOnly' Flag"),
+
+    CWE1295("cwe-1295", "Debug Messages Revealing Unnecessary Information"),
     CWE1336("cwe-1336","Improper Neutralization of Special Elements Used in a Template Engine"),
     ;
 

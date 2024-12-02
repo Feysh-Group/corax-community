@@ -1,0 +1,1 @@
+Log4j versions prior to 2.16.0 are subject to a remote code execution vulnerability via the ldap JNDI parser.

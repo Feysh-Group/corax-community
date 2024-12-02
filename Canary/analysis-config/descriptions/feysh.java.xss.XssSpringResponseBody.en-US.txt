@@ -1,0 +1,1 @@
+Insufficient validation and filtering of user inputs allow malicious scripts to be injected into web pages, compromising user data security. Without proper escaping, user-input content is directly displayed on the page, enabling attackers to execute malicious code.

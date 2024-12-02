@@ -1,0 +1,1 @@
+When implementing file download functionality, if the filename is user-controllable and the server does not perform security filtering before passing the file resource to the client, users can access any file on the server.

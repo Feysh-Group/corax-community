@@ -29,7 +29,7 @@
 #
 ################################################################################
 
-CORAX_VERSION=2.16.2
+CORAX_VERSION=2.20
 CORAX_JAVA_ARTIFACT_NAME="corax-java-cli-community-$CORAX_VERSION"
 CORAX_JAVA_ARTIFACT_ZIP="$CORAX_JAVA_ARTIFACT_NAME.zip"
 CORAX_JAVA_CLI_NAME="corax-cli-community-${CORAX_VERSION}.jar"
@@ -68,7 +68,7 @@ APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
 APP_NAME="CoraxJava"
 APP_BASE_NAME=${0##*/}
 
-DEFAULT_JVM_OPTS=''
+DEFAULT_JVM_OPTS='-XX:+ExitOnOutOfMemoryError'
 BUILD_DIR="/tmp/corax_temp"
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.

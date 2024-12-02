@@ -51,7 +51,7 @@ object `external-xxe-attacks` : AIAnalysisUnit() {
                     val validate = parameter(validateParamIndex) ?: return@modelNoArg
                     check(`this`.taint.containsAll(taintOf(internetControl)) and validate.getBoolean(), XxeChecker.XxeRemote) {
                         args["type"] = "XSSFExportToXml(CVE-2019-12415)"
-
+                        appendPathEvents(checkResult)
                     }
                     check(`this`.taint.containsAll(taintOf(localControl)) and validate.getBoolean(), XxeChecker.XxeLocal) {
                         args["type"] = "XSSFExportToXml(CVE-2019-12415)"

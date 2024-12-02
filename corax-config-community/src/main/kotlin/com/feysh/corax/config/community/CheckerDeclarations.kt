@@ -62,6 +62,14 @@ object SqliChecker : IChecker {
         )
         override val checker: IChecker = SqliChecker
     }
+
+    object IbatisSqlInjectionSinkHint : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "有风险的 Ibatis SQL 注入 sink 点: `${args["sink"]}`" },
+            Language.EN to msgGenerator { "The risk Ibatis SQL injection sink: `${args["sink"]}`" }
+        )
+        override val checker: IChecker = SqliChecker
+    }
 }
 
 object InsecureCookieChecker : IChecker {
@@ -78,19 +86,59 @@ object InsecureCookieChecker : IChecker {
         )
         override val checker: IChecker = InsecureCookieChecker
     }
+
+    object PropertiesInsecureCookie: CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "Cookie `${args["node"]}` 的 secure 标志被关闭" },
+            Language.EN to msgGenerator { "The secure flag for a cookie `${args["node"]}` is closed" }
+        )
+        override val checker: IChecker = InsecureCookieChecker
+    }
+}
+
+object CookiePersistentChecker : IChecker {
+    override val report: IRule = FeyshRules.CookiePersistent
+    override val standards: Set<IRule> = setOf(
+        CWERules.CWE539,
+//        CERTRules.,
+    )
+
+    object CookiePersistent : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "Cookie 设置将在 1 年或更长时间内过期" },
+            Language.EN to msgGenerator { "Cookie Set To Expire In 1 Year Or More" }
+        )
+        override val checker: IChecker = CookiePersistentChecker
+    }
+
+    object PropertiesCookiePersistent: CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "会话 Cookie `${args["node"]}` 被设置为持久性的" },
+            Language.EN to msgGenerator { "The session cookie `${args["node"]}` is set to be persistent" }
+        )
+        override val checker: IChecker = CookiePersistentChecker
+    }
 }
 
 object HttponlyCookieChecker : IChecker {
     override val report: IRule = FeyshRules.HttponlyCookie
     override val standards: Set<IRule> = setOf(
         CWERules.CWE1004,
-//      CERTRules.,
+//        CERTRules.,
     )
 
     object HttponlyCookie : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
             Language.ZH to msgGenerator { "浏览器中的恶意脚本可能获取不带 HttpOnly 标志的 Cookie" },
             Language.EN to msgGenerator { "Cookie without the HttpOnly flag could be read by a malicious script in the browser" }
+        )
+        override val checker: IChecker = HttponlyCookieChecker
+    }
+
+    object PropertiesHttpOnlyCookie : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "Cookie `${args["node"]}` 的 HttpOnly 属性被关闭" },
+            Language.EN to msgGenerator { "The HttpOnly attribute of the Cookie `${args["node"]}` is closed" }
         )
         override val checker: IChecker = HttponlyCookieChecker
     }
@@ -103,13 +151,46 @@ object PathTraversalChecker : IChecker {
         CERTRules.FIO16_J,
     )
 
-    object PathTraversalIn : CheckType() {
+    object PathTraversal : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "此 API `$callee` 读取的可能是由用户输入指定的文件" },
-            Language.EN to msgGenerator { "This API `$callee` reads a file whose location might be specified by user input" }
+            Language.ZH to msgGenerator { "访问(读写删)一个可被攻击者控制的不可信路径, 可能存在路径穿越漏洞." },
+            Language.EN to msgGenerator { "Accessing (read,create,delete) an untrusted path that can be controlled by an attacker, potentially introduce a path traversal vulnerability." }
         )
         override val checker: IChecker = PathTraversalChecker
     }
+
+
+    object PathTraversalIn : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "从可被攻击者控制的不可信路径进行 “读取”, 可能存在路径穿越漏洞." },
+            Language.EN to msgGenerator { "Reading from an untrusted path that can be controlled by an attacker, potentially introduce a path traversal vulnerability." }
+        )
+        override val checker: IChecker = PathTraversalChecker
+    }
+    object ArbitraryFileLeak: CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "从可被攻击者控制的不可信路径进行 “文件外传”, 可能造成任意文件泄露." },
+            Language.EN to msgGenerator { "Transmitting files from an untrusted path that can be controlled by an attacker, potentially introduce an arbitrary file disclosure vulnerability" }
+        )
+        override val checker: IChecker = PathTraversalChecker
+    }
+
+
+    object PathTraversalOut : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "“创建文件” 到一个可被攻击者控制的不可信路径, 可能会创建危险类型文件或造成任意文件覆盖和伪造." },
+            Language.EN to msgGenerator { "Creating a file in an untrusted path that can be controlled by an attacker, may result in the creation of dangerous file types or lead to arbitrary file overwrite or forgery." }
+        )
+        override val checker: IChecker = PathTraversalChecker
+    }
+    object ArbitraryFileReceive : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "“接收文件并创建文件” 到一个可被攻击者控制的不可信路径, 可能会创建危险类型文件或造成任意文件覆盖和伪造." },
+            Language.EN to msgGenerator { "Receiving and create files to an untrusted path that can be controlled by an attacker, may result in the creation of dangerous file types or lead to arbitrary file overwrite or forgery." }
+        )
+        override val checker: IChecker = PathTraversalChecker
+    }
+
     object ZipSlip : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
             Language.ZH to msgGenerator { "此处的方法 `$callee` 可能产生 zipSlip 漏洞" },
@@ -128,8 +209,8 @@ object UnrestrictedFileUploadChecker : IChecker {
 
     object UnrestrictedFileUpload : CheckType() {
         override val bugMessage: Map<Language, BugMessage> = mapOf(
-            Language.ZH to msgGenerator { "此 API `$callee` 可能上传了一个来自用户的危险类型文件" },
-            Language.EN to msgGenerator { "This API `$callee` upload a file whose type might be dangerous from user" }
+            Language.ZH to msgGenerator { "可能上传来自可被攻击者控制的危险类型后缀的文件" },
+            Language.EN to msgGenerator { "Possible to upload a file from a dangerous type suffix that can be controlled by an attacker" }
         )
         override val checker: IChecker = UnrestrictedFileUploadChecker
     }
@@ -329,6 +410,16 @@ object CodeInjectionChecker : IChecker {
         )
         override val checker: IChecker = CodeInjectionChecker
     }
+
+    object ProcessControl : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "此处可能导致恶意代码库被加载。" },
+            Language.EN to msgGenerator { "This may result in a malicious code library being loaded." }
+        )
+
+        override val standards: Set<IRule> = setOf(CWERules.CWE114)
+        override val checker: IChecker = CodeInjectionChecker
+    }
 }
 object TemplateIChecker : IChecker {
     override val report: IRule = FeyshRules.Templatei
@@ -441,6 +532,13 @@ object XssChecker : IChecker {
         override val checker: IChecker = XssChecker
     }
 
+    object CookieStoredXSS : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "使用不可信数据创建 Cookie 可能容易受到 XSS 攻击" },
+            Language.EN to msgGenerator { "Creating cookies with untrusted data can be vulnerable to XSS attacks" }
+        )
+        override val checker: IChecker = XssChecker
+    }
 }
 
 
@@ -461,6 +559,28 @@ object OpenRedirectChecker : IChecker {
     }
 
 }
+
+object CustomizeChecker : IChecker {
+    override val report: IRule = FeyshRules.CustomCheck
+    override val standards: Set<IRule> = setOf()
+
+    object VulnerableDependency : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "自定义三方库版本检测: ${args["bugMessage"]}" },
+            Language.EN to msgGenerator { "Customize library version check: ${args["bugMessage"]}" }
+        )
+        override val checker: IChecker = CustomizeChecker
+    }
+
+    object TargetMethodInvoke : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "调用目标方法: `$callee`" },
+            Language.EN to msgGenerator { "Invoke target method: `$callee`" }
+        )
+        override val checker: IChecker = CustomizeChecker
+    }
+}
+
 object DeserializationChecker : IChecker {
     override val report: IRule = FeyshRules.Deserialization
     override val standards: Set<IRule> = setOf(
@@ -515,6 +635,7 @@ object SensitiveDataExposeChecker : IChecker {
     override val report: IRule = FeyshRules.SensitiveDataExpose
     override val standards: Set<IRule> = setOf(
         CWERules.CWE200,
+        CWERules.CWE524,
 //        CERTRules.,
         // TODO
     )
@@ -618,3 +739,58 @@ object WeakSslChecker : IChecker {
     }
 }
 
+
+object InfoLeakChecker : IChecker {
+    override val report: IRule = FeyshRules.InfoLeakage
+    override val standards: Set<IRule> = setOf(
+        CWERules.CWE1295,
+        CWERules.CWE532,
+    )
+
+    object DebugLogFileLeak : CheckType() {
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "信息通过调试日志文件泄露，节点 `${args["node"]}` 的级别过高。" },
+            Language.EN to msgGenerator { "Information Leakage through Debug Log Files, The level of node `${args["node"]}` is too high. " }
+        )
+        override val checker: IChecker = InfoLeakChecker
+    }
+
+}
+object OverlyBroadCookieAttributeChecker : IChecker {
+    override val report: IRule = FeyshRules.OverlyBroadCookieAttribute
+    override val standards: Set<IRule> = setOf()
+
+    object OverlyBroadDomain: CheckType() {
+        override val checker: IChecker = OverlyBroadCookieAttributeChecker
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "这个 Cookie 的域设置得过于宽泛" },
+            Language.EN to msgGenerator { "This cookie's domain is set overly broad" }
+        )
+    }
+
+    object OverlyBroadPath: CheckType() {
+        override val checker: IChecker = OverlyBroadCookieAttributeChecker
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "这个 Cookie 的路径设置得过于宽泛" },
+            Language.EN to msgGenerator { "This cookie's path is set overly broad" }
+        )
+    }
+
+    object PropertiesOverlyBroadDomain: CheckType() {
+        override val checker: IChecker = OverlyBroadCookieAttributeChecker
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "会话 Cookie `${args["node"]}` 的域设置得过于宽泛" },
+            Language.EN to msgGenerator { "The session cookie's domain `${args["node"]}` is set overly broad" }
+        )
+    }
+
+    object PropertiesOverlyBroadPath: CheckType() {
+        override val checker: IChecker = OverlyBroadCookieAttributeChecker
+        override val bugMessage: Map<Language, BugMessage> = mapOf(
+            Language.ZH to msgGenerator { "会话 Cookie `${args["node"]}` 的路径设置得过于宽泛" },
+            Language.EN to msgGenerator { "The session cookie's path `${args["node"]}` is set overly broad" }
+        )
+
+    }
+
+}

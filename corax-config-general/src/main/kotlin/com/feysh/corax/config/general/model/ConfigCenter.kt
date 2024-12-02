@@ -27,8 +27,10 @@ import com.feysh.corax.config.api.utils.activeBodyOrNull
 import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.api.utils.visibilityAnnotationTag
 import com.feysh.corax.config.general.model.taint.TaintRule
+import com.feysh.corax.config.general.model.version.VersionRule
 import com.feysh.corax.config.general.rule.GroupedMethodsManager
 import com.feysh.corax.config.general.rule.MethodAccessPath
+import com.feysh.corax.config.general.rule.MultiMethodAccessPath
 import com.feysh.corax.config.general.rule.RuleManager.Companion.jsonFormat
 import com.feysh.corax.config.general.utils.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -41,7 +43,6 @@ import soot.*
 import soot.tagkit.AnnotationTag
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.function.Predicate
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 import kotlin.io.path.pathString
@@ -141,9 +142,23 @@ object ConfigCenter : CheckerUnit() {
         TaintRule.TaintRulesManager.loadJsons(sourcesJsonFiles, summariesJsonFiles, sinksJsonFiles)
     }
 
+    val versionRuleManager by lazy {
+        val jsonDirs = getConfigDirectories()
+        val riskVersionJsonFiles = walkFiles(jsonDirs) { file -> file.name.endsWith("versions.json") && !file.name.startsWith("custom") }
+        val customVersionJsonFiles = walkFiles(jsonDirs) { file -> file.name.endsWith("versions.json") && file.name.startsWith("custom") }
+        logger.info { "riskVersionsJsonFiles: $riskVersionJsonFiles" }
+        logger.info { "customVersionsJsonFiles: $customVersionJsonFiles" }
+        VersionRule.VersionRuleManager.loadJson(riskVersionJsonFiles, customVersionJsonFiles)
+    }
+
     val methodAccessPathDataBase: GroupedMethodsManager<MethodAccessPath> by lazy {
-        val sourcesJsonFiles = walkFiles(getConfigDirectories()){ file -> file.name.endsWith("access-path.json") }
-        GroupedMethodsManager.load(sourcesJsonFiles, serializer = serializer())
+        val jsonFiles = walkFiles(getConfigDirectories()){ file -> file.name.endsWith(".access-path.json") }
+        GroupedMethodsManager.load(jsonFiles, serializer = serializer())
+    }
+
+    val methodMultiAccessPathDataBase: GroupedMethodsManager<MultiMethodAccessPath> by lazy {
+        val jsonFiles = walkFiles(getConfigDirectories()){ file -> file.name.endsWith(".multi-access-path.json") }
+        GroupedMethodsManager.load(jsonFiles, serializer = serializer())
     }
 
     fun isEnableTaintFlowType(type: Type): Boolean {

@@ -42,4 +42,27 @@
         </set>
         where dept_id in (${ancestors})
     </update>
+
+    <select id="nonAtomic" resultMap="User">
+        select * from users order by id asc limit 1;
+        update sys_dept set status = '0' where dept_id in (1,2);
+    </select>
+
+    <select id="readOnly" resultMap="User">
+        select * from users order by id asc limit 1;
+        select * from users order by id desc;
+        select * from users;
+    </select>
+
+    <update id="oneUpdate" parameterType="SysDept">
+        update sys_dept set status = '0' where dept_id in (1,2);
+    </update>
+
+    <delete id="oneDelete" parameterType="SysDept">
+        delete from sys_dept where dept_id in (1,2);
+    </delete>
+
+    <insert id="oneInsert" parameterType="SysDept">
+        insert into sys_dept(dept_id, dept_name) values (1, 'test');
+    </insert>
 </mapper>

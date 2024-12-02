@@ -55,7 +55,14 @@ object JavaeeFrameworkConfigs : CheckerUnit() {
 
         val REQUEST_PARAM_ANNOTATION_TYPES_JAVAX_WS_RS = setOf(
             "Ljavax/ws/rs/QueryParam;",
-            "Ljavax/ws/rs/PathParam;"
+            "Ljavax/ws/rs/PathParam;",
+            "Lcom/sun/jersey/multipart/FormDataParam"
+        )
+
+        val CONTROLLER_ANNOTATION_TYPES_SPRING = setOf(
+            "org.springframework.stereotype.Controller",
+            "org.springframework.web.bind.annotation.RestController",
+            "org.springframework.web.bind.annotation.Controller"
         )
 
         val REQUEST_MAPPING_ANNOTATION_TYPES get() = REQUEST_MAPPING_ANNOTATION_TYPES_SPRING + REQUEST_MAPPING_ANNOTATION_JAVAX_WS_RS

@@ -1,0 +1,57 @@
+[
+  "arbitrary-file-access {",
+  {"kind":"content-write:flow","signature":"java.nio.file.Files: long copy(*, OutputStream out, **)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"java.io.Writer: * write(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.lang.Appendable: * append(*, **)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * format(Locale,String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[1,2]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * format(String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[0,1]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * print(**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * printf(String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[0,1]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * printf(Locale,String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[1,2]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * println(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * append(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * write(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * writeln(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintStream: * writeBytes(byte[] buf)","subtypes":true,"args":["Argument[this]", "Argument[0].ArrayElement"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * format(Locale,String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[1,2]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * format(String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[0,1]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * print(**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * printf(String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[0,1]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * printf(Locale,String,Object[])","subtypes":true,"args":["Argument[this]", "Argument[1,2]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * println(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * append(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.PrintWriter: * write(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+
+
+  {"kind":"content-write:flow","signature":"java.io.OutputStream: void write(byte[] b,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"java.io.OutputStream: void write(int b,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"javax.servlet.ServletOutputStream: * print(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"javax.servlet.ServletOutputStream: * println(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"javax.servlet.ServletOutputStream: * write(*,**)","subtypes":true,"args":["Argument[this]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"org.apache.poi.util.IOUtils: * copy(InputStream inp, OutputStream out,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  {"kind":"content-write:flow","signature":"org.apache.commons.io.IOUtils: * writeLines(Collection,String,OutputStream,**)","subtypes":true,"args":["Argument[2]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.apache.commons.io.IOUtils: * writeChunked(byte[],OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.apache.commons.io.IOUtils: * write(byte[],OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.apache.commons.io.IOUtils: * copyLarge(*,OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.apache.commons.io.IOUtils: * copy(*,OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"kotlin.io.ByteStreamsKt: * copyTo(*,OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"com.google.common.io.ByteStreams: * copy(*,OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"com.google.common.io.ByteSource: * copyTo(OutputStream,**)","subtypes":true,"args":["Argument[0]", "Argument[this]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.StreamUtils: * copy(*, OutputStream out, **)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.StreamUtils: * copy(*, OutputStream out, **)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.StreamUtils: * copy(String in, Charset charset, OutputStream out, **)","subtypes":true,"args":["Argument[2]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.FileCopyUtils: * copy(*,OutputStream,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.FileCopyUtils: * copy(*,File,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.FileCopyUtils: * copy(*,Writer,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+  {"kind":"content-write:flow","signature":"org.springframework.util.FileCopyUtils: * copy(*,Writer,**)","subtypes":true,"args":["Argument[1]", "Argument[0]"],"provenance":"manual","ext":""},
+
+  "}",
+  
+  "EOF"
+]

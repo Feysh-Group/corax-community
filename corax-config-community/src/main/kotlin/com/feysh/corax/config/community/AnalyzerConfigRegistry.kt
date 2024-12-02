@@ -51,7 +51,9 @@ class AnalyzerConfigRegistry(wrapper: PluginWrapper) : Plugin(wrapper) {
             it += com.feysh.corax.config.general.model.`outstanding-summaries`
             it += com.feysh.corax.config.general.model.`main-method-source`
             it += com.feysh.corax.config.general.model.`secret-data-annotation`
+	        it += com.feysh.corax.config.general.model.`stream-summaries`
 
+            it += com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.ibatis.`ibatis-sql-injection-checker`
             it += com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis.`mybatis-sql-injection-checker`
             it += com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.IbatisAnnotationSQLSinks
             it += com.feysh.corax.config.community.checkers.frameworks.spring.ResponseBodyCheck
@@ -74,6 +76,10 @@ class AnalyzerConfigRegistry(wrapper: PluginWrapper) : Plugin(wrapper) {
             it += com.feysh.corax.config.community.checkers.`permissive-cors`
             it += com.feysh.corax.config.community.checkers.`permissive-cors`.`any-url-request`
             it += com.feysh.corax.config.community.checkers.deserialize.`deserialize-insecure-call`
+            it += com.feysh.corax.config.community.checkers.custom.`vulnerable-dependency`
+	        it += com.feysh.corax.config.community.checkers.`arbitrary-file-access`
+            it += com.feysh.corax.config.community.checkers.`xss-servlet`
+            it += com.feysh.corax.config.community.checkers.properties.`properties-check`
         }
 
         override val sootConfig: ISootInitializeHandler = DefaultSootConfiguration

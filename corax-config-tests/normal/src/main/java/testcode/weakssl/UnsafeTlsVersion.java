@@ -1,5 +1,7 @@
 package testcode.weakssl;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
@@ -125,10 +127,17 @@ public class UnsafeTlsVersion {
   }
 
   public void testProperties() {
-      System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");           // $SslContext
-      System.setProperty("https.protocols", "TLSv1");                           // $SslContext
-      System.setProperty("https.protocols", "TLSv1.2");                         // !$SslContext
-      new Properties().setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // $SslContext
-      new Properties().setProperty("https.protocols", "TLSv1.3");               // !$SslContext
+    System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");           // $SslContext
+    System.setProperty("https.protocols", "TLSv1");                           // $SslContext
+    System.setProperty("https.protocols", "TLSv1.2");                         // !$SslContext
+    new Properties().setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2"); // $SslContext
+    new Properties().setProperty("https.protocols", "TLSv1.3");               // !$SslContext
+    new Properties().setProperty("jdk.tls.client.protocols", "TLSv1.1");      // $SslContext
+    new Properties().setProperty("jdk.tls.client.protocols", "TLSv1.3");      // !$SslContext
+  }
+
+  // DefaultHttpClient with default constructor is not compatible with TLS 1.2
+  public void testDefaultHttpClient() {
+    DefaultHttpClient client = new DefaultHttpClient();                       // !$SslContext
   }
 }

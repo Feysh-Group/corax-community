@@ -156,7 +156,10 @@ open class MyBatisMapperXmlHandler : BasedXmlHandler() {
                     val includeParser = XMLIncludeTransformer(configuration, builderAssistant)
                     includeParser.applyIncludes(it.node)
                 } catch (e: Exception) {
-                    logger.warn(e) { e.message }
+                    logger.warn(e) { "Failed to apply include at method name: $methodName in mybatis mapper file: $resource" }
+                    continue
+                } catch (e: StackOverflowError) {
+                    logger.error { "StackOverflowError: Failed to apply include at method name: $methodName in mybatis mapper file: $resource . Please check and fix the xml recursive include field" }
                     continue
                 }
 

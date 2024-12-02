@@ -35,4 +35,10 @@ public interface UserMapper {
      * @param dept 部门
      */
     public void updateDeptStatus(SysDept dept); // cwe-89
+
+    void readOnly();
+    void oneUpdate();
+    void oneDelete();
+    void oneInsert();
+    void nonAtomic();
 }

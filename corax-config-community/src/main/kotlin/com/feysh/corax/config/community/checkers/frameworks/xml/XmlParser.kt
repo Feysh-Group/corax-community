@@ -25,6 +25,7 @@ import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.m
 import com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.mybatis.MybatisEntry
 import com.feysh.corax.config.general.utils.SAX_FACTORY
 import com.feysh.corax.config.general.utils.createDocumentBuilder
+import com.feysh.corax.config.general.utils.isBinaryXml
 import mu.KotlinLogging
 import org.apache.ibatis.session.Configuration
 import org.springframework.beans.factory.config.BeanDefinition
@@ -41,7 +42,7 @@ import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.ext.DefaultHandler2
 import soot.Scene
-import java.io.InputStream
+import java.io.BufferedInputStream
 import java.nio.file.Path
 import javax.xml.parsers.ParserConfigurationException
 import kotlin.io.path.inputStream
@@ -114,7 +115,10 @@ data class XmlParser(
 
         @Throws(ParserConfigurationException::class, SAXException::class)
         fun <T: DefaultHandler2> parse(dispatcher: T, filePath: Path): T {
-            filePath.inputStream().use { inputSource ->
+            BufferedInputStream(filePath.inputStream()).use { inputSource ->
+                if (inputSource.isBinaryXml()) {
+                    return dispatcher
+                }
                 val parser = SAX_FACTORY.newSAXParser()
 
                 // 1. first detect xml handler

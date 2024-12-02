@@ -19,6 +19,7 @@
 
 package com.feysh.corax.config.community.checkers.frameworks.persistence.ibatis.type
 
+import com.feysh.corax.config.api.utils.getSubclassesOrImplementersOf
 import com.feysh.corax.config.api.utils.sootTypeName
 import com.feysh.corax.config.api.utils.typename
 import com.feysh.corax.config.community.language.soot.annotation.*
@@ -110,13 +111,8 @@ class TypeAliasRegistry {
     }
 
     fun registerAliases(packageName: String, superType: SootClass) {
-        val fastHierarchy = Scene.v().orMakeFastHierarchy
-        val subClasses = if (superType.isInterface) {
-            fastHierarchy.getAllImplementersOfInterface(superType)
-        } else{
-            // maybe abstract class
-            fastHierarchy.getSubclassesOf(superType)
-        }
+        val hierarchy = Scene.v().activeHierarchy
+        val subClasses = hierarchy.getSubclassesOrImplementersOf(superType)
         for (type in subClasses) {
             if (!type.name.startsWith(packageName)) {
                 continue
