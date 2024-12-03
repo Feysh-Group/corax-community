@@ -36,9 +36,9 @@ $JVM_VERSION = "jdk-17.0.3.1"
 $app_path = $MyInvocation.MyCommand.Path
 $APP_NAME = "CoraxJava"
 $APP_BASE_NAME = $MyInvocation.MyCommand.Name
-$DEFAULT_JVM_OPTS = "-XX:+ExitOnOutOfMemoryError"
+$DEFAULT_JVM_OPTS = "'-XX:+ExitOnOutOfMemoryError'"
 
-$OSS_URL_CORAX_JAVA_CLI_COMMUNITY = "https://release.feysh.com/corax/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1758781045&Signature=E7FO2SYWcI5cOMdR%2FBCFSHsTB50%3D"
+$OSS_URL_CORAX_JAVA_CLI_COMMUNITY = "https://release.feysh.com/corax-java-group/corax-java-cli-community-$CORAX_VERSION.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=1764732690&Signature=oxmJHTFa3J6rCC6Q%2FaUOnnMPM00%3D"
 $OSS_URL_JDK_WIN_X64 = "http://release.feysh.com/corax-java-group/jdk-17.0.3.1_windows-x64_bin.zip?OSSAccessKeyId=LTAI5tKF4FQ2CGnhMA7oU58p&Expires=2023865879&Signature=mnWSUQlW8Mwme%2FCIuvaWD27bNjE%3D"
 
 $uninstall=0
@@ -281,13 +281,13 @@ function _delegate_corax_run() {
     if ([string]::IsNullOrEmpty($DEFAULT_JVM_OPTS)) {
         $_DEFAULT_JVM_OPTS=@()
     } else {
-        $_DEFAULT_JVM_OPTS=iex "echo $DEFAULT_JVM_OPTS"
+        $_DEFAULT_JVM_OPTS=((iex "echo $DEFAULT_JVM_OPTS") -split '\r?\n')
     }
 
     if ([string]::IsNullOrEmpty($JAVA_OPTS)) {
         $_JAVA_OPTS=@()
     } else {
-        $_JAVA_OPTS=iex "echo $JAVA_OPTS"
+        $_JAVA_OPTS=((iex "echo $JAVA_OPTS") -split '\r?\n')
     }
 
     # »ª∫Û÷¥–– java √¸¡Ó
